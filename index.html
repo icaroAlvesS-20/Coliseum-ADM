@@ -940,6 +940,8 @@
         // API Functions
         async function fetchAPI(endpoint, options = {}) {
             try {
+                console.log(`🌐 API Request: ${endpoint}`);
+                
                 const response = await fetch(`${API_BASE_URL}${endpoint}`, {
                     headers: {
                         'Content-Type': 'application/json',
@@ -953,42 +955,81 @@
                 }
                 
                 return await response.json();
+                
             } catch (error) {
-                console.error('API Error:', error);
-                showAlert('Erro ao conectar com a API: ' + error.message, 'error');
+                console.error('❌ API Error:', error);
+                
+                // Mostra instruções específicas para CORS
+                if (error.message.includes('Failed to fetch') || error.name === 'TypeError') {
+                    showAlert(`
+                    🚨 ERRO DE CONEXÃO
+                    
+                    Não foi possível conectar com a API.
+                    
+                    📋 Possíveis causas:
+                    • API offline
+                    • Problema de CORS
+                    • API precisa ser atualizada
+                    
+                    🔧 Solução:
+                    1. Atualize o CORS no server.js
+                    2. Faça deploy no Render
+                    3. Aguarde alguns minutos
+                    `, 'error');
+                } else {
+                    showAlert('Erro: ' + error.message, 'error');
+                }
+                
                 throw error;
             }
         }
 
         // Data Loading Functions
-        async function loadDashboardData() {
+         async function loadDashboardData() {
             try {
-                // Show loading
                 document.getElementById('ranking-loading').style.display = 'flex';
                 
-                // Load ranking for dashboard
+                console.log('🔄 Tentando carregar dados...');
+                
+                // Primeiro testa se a API está respondendo
+                const healthCheck = await fetch(`${API_BASE_URL}/api/health`);
+                if (!healthCheck.ok) {
+                    throw new Error('API não está respondendo');
+                }
+                
+                // Se passou, carrega os dados
                 const ranking = await fetchAPI('/api/ranking');
                 displayRanking(ranking.slice(0, 10));
                 
-                // Calculate stats
+                // Calcula estatísticas
                 const totalUsers = ranking.length;
                 const totalPoints = ranking.reduce((sum, user) => sum + user.pontuacao, 0);
                 const totalChallenges = ranking.reduce((sum, user) => sum + user.desafiosCompletados, 0);
                 const series = [...new Set(ranking.map(user => user.serie))].length;
                 
-                // Update stats cards
+                // Atualiza cards
                 document.getElementById('total-users').textContent = totalUsers;
                 document.getElementById('total-points').textContent = totalPoints;
                 document.getElementById('total-challenges').textContent = totalChallenges;
                 document.getElementById('total-series').textContent = series;
                 
+                console.log('✅ Dados carregados com sucesso!');
+                
             } catch (error) {
-                console.error('Error loading dashboard:', error);
+                console.error('❌ Erro ao carregar dashboard:', error);
+                
+                // Mostra estado offline
+                document.getElementById('total-users').textContent = '?';
+                document.getElementById('total-points').textContent = '?';
+                document.getElementById('total-challenges').textContent = '?';
+                document.getElementById('total-series').textContent = '?';
+                
             } finally {
                 document.getElementById('ranking-loading').style.display = 'none';
             }
         }
 
+        // ✅ RESTANTE DO SE
         async function loadUsers() {
             try {
                 document.getElementById('users-loading').style.display = 'flex';
