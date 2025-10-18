@@ -1148,43 +1148,40 @@
             displayUsers(filteredUsers);
         }
 
-        function editUser(userId) {
-            const user = users.find(u => u.id == userId);
-            if (!user) return;
-            
-            document.getElementById('edit-user-id').value = user.id;
-            document.getElementById('edit-user-name').value = user.nome;
-            document.getElementById('edit-user-ra').value = user.ra;
-            document.getElementById('edit-user-serie').value = user.serie;
-            document.getElementById('edit-user-pontuacao').value = user.pontuacao;
-            document.getElementById('edit-user-desafios').value = user.desafiosCompletados;
-            
-            document.getElementById('edit-user-modal').style.display = 'flex';
-        }
+       function editUser(userId) {
+    const user = users.find(u => u.id == userId);
+    if (!user) {
+        console.error('❌ Usuário não encontrado:', userId);
+        return;
+    }
+    
+    console.log('✏️ Editando usuário:', user);
+    
+    // Preenche o formulário
+    document.getElementById('edit-user-id').value = user.id;
+    document.getElementById('edit-user-name').value = user.nome;
+    document.getElementById('edit-user-ra').value = user.ra;
+    document.getElementById('edit-user-serie').value = user.serie;
+    document.getElementById('edit-user-pontuacao').value = user.pontuacao;
+    document.getElementById('edit-user-desafios').value = user.desafiosCompletados;
+    
+    // Mostra o modal
+    document.getElementById('edit-user-modal').style.display = 'flex';
+}
 
-       async function saveUser() {
+      async function saveUser() {
     const userId = document.getElementById('edit-user-id').value;
     const userData = {
         pontuacao: parseInt(document.getElementById('edit-user-pontuacao').value),
         desafiosCompletados: parseInt(document.getElementById('edit-user-desafios').value)
     };
     
-    // Validação dos dados
-    if (isNaN(userData.pontuacao) || isNaN(userData.desafiosCompletados)) {
-        showAlert('❌ Por favor, insira valores numéricos válidos', 'error');
-        return;
-    }
-    
-    if (userData.pontuacao < 0 || userData.desafiosCompletados < 0) {
-        showAlert('❌ Valores não podem ser negativos', 'error');
-        return;
-    }
+    console.log('💾 Salvando usuário:', userId, userData);
     
     try {
         showGlobalLoading(true);
         
-        console.log('🔄 Atualizando usuário:', userId, userData);
-        
+        // ✅ REQUISIÇÃO CORRIGIDA
         const response = await fetch(`${API_BASE_URL}/api/usuarios/${userId}`, {
             method: 'PUT',
             headers: {
@@ -1193,84 +1190,38 @@
             body: JSON.stringify(userData)
         });
         
+        console.log('📡 Status da resposta:', response.status);
+        
         if (!response.ok) {
-            throw new Error(`Erro HTTP! status: ${response.status}`);
+            const errorText = await response.text();
+            throw new Error(`Erro ${response.status}: ${errorText}`);
         }
         
         const result = await response.json();
         console.log('✅ Resposta da API:', result);
         
-        // ✅ ATUALIZA OS DADOS LOCAIS IMEDIATAMENTE
+        // ✅ ATUALIZA OS DADOS LOCAIS
         const userIndex = users.findIndex(u => u.id == userId);
         if (userIndex !== -1) {
             users[userIndex].pontuacao = userData.pontuacao;
             users[userIndex].desafiosCompletados = userData.desafiosCompletados;
-            console.log('✅ Dados locais atualizados:', users[userIndex]);
+            console.log('📊 Dados locais atualizados:', users[userIndex]);
         }
         
         showAlert('✅ Usuário atualizado com sucesso!', 'success');
         document.getElementById('edit-user-modal').style.display = 'none';
         
         // ✅ ATUALIZA A VISUALIZAÇÃO
-        if (currentTab === 'dashboard') {
-            loadDashboardData(); // Recarrega tudo
-        } else if (currentTab === 'users') {
-            displayUsers(users); // Atualiza apenas a tabela
-        } else if (currentTab === 'ranking') {
-            loadFullRanking(); // Recarrega o ranking
-        }
+        if (currentTab === 'dashboard') loadDashboardData();
+        if (currentTab === 'users') displayUsers(users);
+        if (currentTab === 'ranking') loadFullRanking();
         
     } catch (error) {
-        console.error('❌ Erro ao atualizar usuário:', error);
-        showAlert('❌ Erro ao atualizar usuário: ' + error.message, 'error');
+        console.error('❌ Erro ao salvar usuário:', error);
+        showAlert('❌ Erro ao salvar: ' + error.message, 'error');
     } finally {
         showGlobalLoading(false);
     }
-}
-
-        // CORREÇÃO DA FUNÇÃO DELETE USER
-      async function deleteUser(userId) {
-    const user = users.find(u => u.id == userId);
-    if (!user) return;
-    
-    showConfirmation(`Tem certeza que deseja excluir o usuário "${user.nome}" (RA: ${user.ra})?`, async function() {
-        try {
-            showGlobalLoading(true);
-            
-            const response = await fetch(`${API_BASE_URL}/api/usuarios/${userId}`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-            
-            if (!response.ok) {
-                if (response.status === 404) {
-                    throw new Error('Endpoint de exclusão não encontrado. A API precisa ser atualizada.');
-                }
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            
-            const result = await response.json();
-            
-            showAlert(`Usuário "${user.nome}" excluído com sucesso!`, 'success');
-            
-            // Recarrega os dados
-            if (currentTab === 'dashboard') loadDashboardData();
-            if (currentTab === 'users') loadUsers();
-            if (currentTab === 'ranking') loadFullRanking();
-            
-        } catch (error) {
-            console.error('Erro ao excluir usuário:', error);
-            if (error.message.includes('404') || error.message.includes('não encontrado')) {
-                showAlert('❌ Funcionalidade de exclusão indisponível. Atualize a API no Render com o endpoint DELETE /api/usuarios/:id', 'error');
-            } else {
-                showAlert('Erro ao excluir usuário: ' + error.message, 'error');
-            }
-        } finally {
-            showGlobalLoading(false);
-        }
-    });
 }
 
         // System Functions
