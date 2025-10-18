@@ -1121,31 +1121,71 @@
             document.getElementById('edit-user-modal').style.display = 'flex';
         }
 
-        async function saveUser() {
-            const userId = document.getElementById('edit-user-id').value;
-            const userData = {
-                pontuacao: parseInt(document.getElementById('edit-user-pontuacao').value),
-                desafiosCompletados: parseInt(document.getElementById('edit-user-desafios').value)
-            };
-            
-            try {
-                await fetchAPI(`/api/usuarios/${userId}`, {
-                    method: 'PUT',
-                    body: JSON.stringify(userData)
-                });
-                
-                showAlert('Usuário atualizado com sucesso!', 'success');
-                document.getElementById('edit-user-modal').style.display = 'none';
-                
-                // Reload data
-                if (currentTab === 'dashboard') loadDashboardData();
-                if (currentTab === 'users') loadUsers();
-                if (currentTab === 'ranking') loadFullRanking();
-                
-            } catch (error) {
-                showAlert('Erro ao atualizar usuário: ' + error.message, 'error');
-            }
+       async function saveUser() {
+    const userId = document.getElementById('edit-user-id').value;
+    const userData = {
+        pontuacao: parseInt(document.getElementById('edit-user-pontuacao').value),
+        desafiosCompletados: parseInt(document.getElementById('edit-user-desafios').value)
+    };
+    
+    // Validação dos dados
+    if (isNaN(userData.pontuacao) || isNaN(userData.desafiosCompletados)) {
+        showAlert('❌ Por favor, insira valores numéricos válidos', 'error');
+        return;
+    }
+    
+    if (userData.pontuacao < 0 || userData.desafiosCompletados < 0) {
+        showAlert('❌ Valores não podem ser negativos', 'error');
+        return;
+    }
+    
+    try {
+        showGlobalLoading(true);
+        
+        console.log('🔄 Atualizando usuário:', userId, userData);
+        
+        const response = await fetch(`${API_BASE_URL}/api/usuarios/${userId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(userData)
+        });
+        
+        if (!response.ok) {
+            throw new Error(`Erro HTTP! status: ${response.status}`);
         }
+        
+        const result = await response.json();
+        console.log('✅ Resposta da API:', result);
+        
+        // ✅ ATUALIZA OS DADOS LOCAIS IMEDIATAMENTE
+        const userIndex = users.findIndex(u => u.id == userId);
+        if (userIndex !== -1) {
+            users[userIndex].pontuacao = userData.pontuacao;
+            users[userIndex].desafiosCompletados = userData.desafiosCompletados;
+            console.log('✅ Dados locais atualizados:', users[userIndex]);
+        }
+        
+        showAlert('✅ Usuário atualizado com sucesso!', 'success');
+        document.getElementById('edit-user-modal').style.display = 'none';
+        
+        // ✅ ATUALIZA A VISUALIZAÇÃO
+        if (currentTab === 'dashboard') {
+            loadDashboardData(); // Recarrega tudo
+        } else if (currentTab === 'users') {
+            displayUsers(users); // Atualiza apenas a tabela
+        } else if (currentTab === 'ranking') {
+            loadFullRanking(); // Recarrega o ranking
+        }
+        
+    } catch (error) {
+        console.error('❌ Erro ao atualizar usuário:', error);
+        showAlert('❌ Erro ao atualizar usuário: ' + error.message, 'error');
+    } finally {
+        showGlobalLoading(false);
+    }
+}
 
         // CORREÇÃO DA FUNÇÃO DELETE USER
       async function deleteUser(userId) {
