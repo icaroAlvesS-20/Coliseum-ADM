@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Coliseum API</title>
-    <meta name="description" content="Sistema administrativo para gerenciar usuários e vídeos do Coliseum">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -30,7 +29,7 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
             border: 1px solid #555;
             width: 100%;
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
         }
 
@@ -39,6 +38,7 @@
             margin-bottom: 35px;
         }
 
+        /* CONTAINER DO CÍRCULO COM IMAGEM DENTRO */
         .logo-container {
             width: 110px;
             height: 110px;
@@ -53,6 +53,7 @@
             padding: 8px;
         }
 
+        /* IMAGEM DENTRO DO CÍRCULO */
         .logo-emoji {
             font-size: 60px;
             display: flex;
@@ -70,6 +71,7 @@
             margin: 0;
         }
 
+        /* Tabs Navigation */
         .tabs {
             display: flex;
             border-bottom: 2px solid #555;
@@ -103,6 +105,7 @@
             display: block;
         }
 
+        /* Cards */
         .cards-container {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -155,6 +158,7 @@
             font-size: 0.9rem;
         }
 
+        /* Tables */
         .table-container {
             background: linear-gradient(145deg, #383838, #282828);
             border-radius: 15px;
@@ -233,7 +237,6 @@
         .badge.primary { background: rgba(67, 97, 238, 0.2); color: #4361ee; }
         .badge.success { background: rgba(76, 201, 240, 0.2); color: #4cc9f0; }
         .badge.warning { background: rgba(255, 207, 0, 0.2); color: #ffcf00; }
-        .badge.danger { background: rgba(247, 37, 133, 0.2); color: #f72585; }
 
         .actions {
             display: flex;
@@ -334,11 +337,6 @@
             font-size: 15px;
         }
 
-        textarea.form-control {
-            min-height: 100px;
-            resize: vertical;
-        }
-
         .form-row {
             display: flex;
             gap: 15px;
@@ -346,69 +344,6 @@
 
         .form-row .form-group {
             flex: 1;
-        }
-
-        /* Video Grid */
-        .videos-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .video-card {
-            background: linear-gradient(145deg, #383838, #282828);
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-            border: 1px solid #555;
-            transition: all 0.3s ease;
-        }
-
-        .video-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
-        }
-
-        .video-thumbnail {
-            width: 100%;
-            height: 160px;
-            background: #1a1a1a;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #ffcf00;
-            font-size: 3rem;
-            border: 2px solid #555;
-        }
-
-        .video-info h4 {
-            color: #ffcf00;
-            margin-bottom: 8px;
-            font-size: 1.1rem;
-        }
-
-        .video-info p {
-            color: #aaa;
-            font-size: 0.9rem;
-            margin-bottom: 10px;
-            line-height: 1.4;
-        }
-
-        .video-meta {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 1px solid #444;
-        }
-
-        .video-actions {
-            display: flex;
-            gap: 8px;
         }
 
         /* Modal */
@@ -430,14 +365,10 @@
             background: linear-gradient(145deg, #383838, #282828);
             border-radius: 20px;
             width: 90%;
-            max-width: 600px;
+            max-width: 500px;
             box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
             border: 1px solid #555;
             overflow: hidden;
-        }
-
-        .modal-large {
-            max-width: 800px;
         }
 
         .modal-header {
@@ -470,8 +401,6 @@
 
         .modal-body {
             padding: 25px;
-            max-height: 70vh;
-            overflow-y: auto;
         }
 
         .modal-footer {
@@ -565,45 +494,7 @@
             margin-bottom: 20px;
         }
 
-        /* File Upload */
-        .file-upload {
-            border: 2px dashed #555;
-            border-radius: 12px;
-            padding: 30px;
-            text-align: center;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-        .file-upload:hover {
-            border-color: #ffcf00;
-            background: rgba(255, 207, 0, 0.05);
-        }
-
-        .file-upload i {
-            font-size: 3rem;
-            color: #ffcf00;
-            margin-bottom: 15px;
-        }
-
-        .file-upload p {
-            color: #aaa;
-            margin-bottom: 10px;
-        }
-
-        .file-input {
-            display: none;
-        }
-
-        /* Video Preview */
-        .video-preview {
-            width: 100%;
-            max-height: 200px;
-            border-radius: 10px;
-            margin-top: 15px;
-            display: none;
-        }
-
+        /* RESPONSIVIDADE */
         @media (max-width: 768px) {
             body {
                 padding: 15px;
@@ -639,10 +530,6 @@
             }
             
             .cards-container {
-                grid-template-columns: 1fr;
-            }
-            
-            .videos-grid {
                 grid-template-columns: 1fr;
             }
             
@@ -723,7 +610,6 @@
         <div class="tabs">
             <div class="tab active" data-tab="dashboard">Dashboard</div>
             <div class="tab" data-tab="users">Gerenciar Usuários</div>
-            <div class="tab" data-tab="videos">Gerenciar Vídeos</div>
             <div class="tab" data-tab="ranking">Ranking Completo</div>
             <div class="tab" data-tab="settings">Configurações</div>
         </div>
@@ -770,11 +656,11 @@
                 <div class="card">
                     <div class="card-header">
                         <div>
-                            <div class="card-value" id="total-videos">0</div>
-                            <div class="card-label">Vídeos Cadastrados</div>
+                            <div class="card-value" id="total-series">0</div>
+                            <div class="card-label">Séries Diferentes</div>
                         </div>
                         <div class="card-icon">
-                            <i class="fas fa-video"></i>
+                            <i class="fas fa-graduation-cap"></i>
                         </div>
                     </div>
                 </div>
@@ -834,83 +720,6 @@
                         <!-- Users data will be loaded here -->
                     </tbody>
                 </table>
-            </div>
-        </div>
-
-        <!-- Videos Tab -->
-        <div id="videos" class="tab-content">
-            <div class="form-container">
-                <h3>Adicionar Novo Vídeo</h3>
-                <form id="add-video-form">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="video-title">Título do Vídeo</label>
-                            <input type="text" id="video-title" class="form-control" placeholder="Digite o título do vídeo" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="video-category">Categoria</label>
-                            <select id="video-category" class="form-control" required>
-                                <option value="">Selecione uma categoria</option>
-                                <option value="aula">Aula</option>
-                                <option value="exercicio">Exercício</option>
-                                <option value="desafio">Desafio</option>
-                                <option value="tutorial">Tutorial</option>
-                                <option value="extra">Conteúdo Extra</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="video-description">Descrição</label>
-                        <textarea id="video-description" class="form-control" placeholder="Descreva o conteúdo do vídeo" rows="3"></textarea>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="video-url">URL do Vídeo</label>
-                            <input type="url" id="video-url" class="form-control" placeholder="https://www.youtube.com/embed/..." required>
-                        </div>
-                        <div class="form-group">
-                            <label for="video-duration">Duração (minutos)</label>
-                            <input type="number" id="video-duration" class="form-control" placeholder="Ex: 15" min="1" required>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="video-thumbnail">Thumbnail (URL)</label>
-                        <input type="url" id="video-thumbnail" class="form-control" placeholder="https://exemplo.com/thumbnail.jpg">
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="video-dificulty">Dificuldade</label>
-                            <select id="video-dificulty" class="form-control" required>
-                                <option value="facil">Fácil</option>
-                                <option value="medio">Médio</option>
-                                <option value="dificil">Difícil</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="video-points">Pontos por Conclusão</label>
-                            <input type="number" id="video-points" class="form-control" placeholder="Ex: 100" min="0" required>
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-plus"></i> Adicionar Vídeo
-                    </button>
-                </form>
-            </div>
-
-            <div class="table-container">
-                <div class="table-header">
-                    <h3>Vídeos Cadastrados</h3>
-                    <div class="search-box">
-                        <i class="fas fa-search"></i>
-                        <input type="text" id="video-search" placeholder="Buscar vídeos...">
-                    </div>
-                </div>
-                <div class="loading" id="videos-loading">
-                    <div class="spinner"></div>
-                </div>
-                <div class="videos-grid" id="videos-grid">
-                    <!-- Videos will be loaded here -->
-                </div>
             </div>
         </div>
 
@@ -1015,108 +824,6 @@
         </div>
     </div>
 
-    <!-- Edit Video Modal -->
-    <div class="modal" id="edit-video-modal">
-        <div class="modal-content modal-large">
-            <div class="modal-header">
-                <h3>Editar Vídeo</h3>
-                <button class="modal-close">&times;</button>
-            </div>
-            <div class="modal-body">
-                <form id="edit-video-form">
-                    <input type="hidden" id="edit-video-id">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="edit-video-title">Título do Vídeo</label>
-                            <input type="text" id="edit-video-title" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="edit-video-category">Categoria</label>
-                            <select id="edit-video-category" class="form-control" required>
-                                <option value="aula">Aula</option>
-                                <option value="exercicio">Exercício</option>
-                                <option value="desafio">Desafio</option>
-                                <option value="tutorial">Tutorial</option>
-                                <option value="extra">Conteúdo Extra</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="edit-video-description">Descrição</label>
-                        <textarea id="edit-video-description" class="form-control" rows="3"></textarea>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="edit-video-url">URL do Vídeo</label>
-                            <input type="url" id="edit-video-url" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="edit-video-duration">Duração (minutos)</label>
-                            <input type="number" id="edit-video-duration" class="form-control" min="1" required>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="edit-video-thumbnail">Thumbnail (URL)</label>
-                        <input type="url" id="edit-video-thumbnail" class="form-control">
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="edit-video-dificulty">Dificuldade</label>
-                            <select id="edit-video-dificulty" class="form-control" required>
-                                <option value="facil">Fácil</option>
-                                <option value="medio">Médio</option>
-                                <option value="dificil">Difícil</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="edit-video-points">Pontos por Conclusão</label>
-                            <input type="number" id="edit-video-points" class="form-control" min="0" required>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="edit-video-status">Status</label>
-                        <select id="edit-video-status" class="form-control" required>
-                            <option value="ativo">Ativo</option>
-                            <option value="inativo">Inativo</option>
-                            <option value="rascunho">Rascunho</option>
-                        </select>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-warning" id="cancel-edit-video">Cancelar</button>
-                <button class="btn btn-primary" id="save-video">Salvar Alterações</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Video Preview Modal -->
-    <div class="modal" id="preview-video-modal">
-        <div class="modal-content modal-large">
-            <div class="modal-header">
-                <h3 id="preview-video-title">Pré-visualização do Vídeo</h3>
-                <button class="modal-close">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div id="video-player-container">
-                    <iframe id="video-player" width="100%" height="400" frameborder="0" allowfullscreen></iframe>
-                </div>
-                <div class="video-info" style="margin-top: 20px;">
-                    <h4 id="preview-video-description-title">Descrição</h4>
-                    <p id="preview-video-description" style="color: #ddd; line-height: 1.5;"></p>
-                    <div class="video-meta" style="margin-top: 15px;">
-                        <div>
-                            <span class="badge" id="preview-video-category">Categoria</span>
-                            <span class="badge" id="preview-video-dificulty">Dificuldade</span>
-                            <span class="badge" id="preview-video-points">Pontos</span>
-                        </div>
-                        <span id="preview-video-duration" style="color: #aaa;"></span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Confirmation Modal -->
     <div class="modal" id="confirm-modal">
         <div class="modal-content">
@@ -1146,7 +853,6 @@
         
         // State
         let users = [];
-        let videos = [];
         let currentTab = 'dashboard';
         let pendingAction = null;
 
@@ -1186,9 +892,6 @@
                                 case 'users':
                                     loadUsers();
                                     break;
-                                case 'videos':
-                                    loadVideos();
-                                    break;
                                 case 'ranking':
                                     loadFullRanking();
                                     break;
@@ -1203,7 +906,6 @@
         function setupEventListeners() {
             // Search functionality
             document.getElementById('user-search').addEventListener('input', filterUsers);
-            document.getElementById('video-search').addEventListener('input', filterVideos);
             
             // Refresh ranking
             document.getElementById('refresh-ranking').addEventListener('click', loadFullRanking);
@@ -1219,22 +921,12 @@
                 document.getElementById('edit-user-modal').style.display = 'none';
             });
             
-            document.getElementById('cancel-edit-video').addEventListener('click', function() {
-                document.getElementById('edit-video-modal').style.display = 'none';
-            });
-            
             document.getElementById('cancel-action').addEventListener('click', function() {
                 document.getElementById('confirm-modal').style.display = 'none';
             });
             
             // Save user
             document.getElementById('save-user').addEventListener('click', saveUser);
-            
-            // Save video
-            document.getElementById('save-video').addEventListener('click', saveVideo);
-            
-            // Add video form
-            document.getElementById('add-video-form').addEventListener('submit', addVideo);
             
             // Settings
             document.getElementById('save-settings').addEventListener('click', saveSettings);
@@ -1292,12 +984,13 @@
                 const totalUsers = ranking.length;
                 const totalPoints = ranking.reduce((sum, user) => sum + user.pontuacao, 0);
                 const totalChallenges = ranking.reduce((sum, user) => sum + user.desafiosCompletados, 0);
+                const series = [...new Set(ranking.map(user => user.serie))].length;
                 
                 // Update stats cards
                 document.getElementById('total-users').textContent = totalUsers;
                 document.getElementById('total-points').textContent = totalPoints;
                 document.getElementById('total-challenges').textContent = totalChallenges;
-                document.getElementById('total-videos').textContent = videos.length;
+                document.getElementById('total-series').textContent = series;
                 
             } catch (error) {
                 console.error('Error loading dashboard:', error);
@@ -1318,24 +1011,6 @@
                 console.error('Error loading users:', error);
             } finally {
                 document.getElementById('users-loading').style.display = 'none';
-            }
-        }
-
-        async function loadVideos() {
-            try {
-                document.getElementById('videos-loading').style.display = 'flex';
-                
-                // In a real application, you would fetch from your API
-                // For now, we'll use localStorage to simulate the database
-                const savedVideos = localStorage.getItem('coliseum-videos');
-                videos = savedVideos ? JSON.parse(savedVideos) : [];
-                
-                displayVideos(videos);
-                
-            } catch (error) {
-                console.error('Error loading videos:', error);
-            } finally {
-                document.getElementById('videos-loading').style.display = 'none';
             }
         }
 
@@ -1413,79 +1088,6 @@
             });
         }
 
-        function displayVideos(videos) {
-            const grid = document.getElementById('videos-grid');
-            grid.innerHTML = '';
-            
-            if (videos.length === 0) {
-                grid.innerHTML = `
-                    <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #aaa;">
-                        <i class="fas fa-video-slash" style="font-size: 3rem; margin-bottom: 15px;"></i>
-                        <p>Nenhum vídeo cadastrado ainda.</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            videos.forEach(video => {
-                const videoCard = document.createElement('div');
-                videoCard.className = 'video-card';
-                videoCard.innerHTML = `
-                    <div class="video-thumbnail">
-                        ${video.thumbnail ? 
-                            `<img src="${video.thumbnail}" alt="${video.title}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">` : 
-                            `<i class="fas fa-play-circle"></i>`
-                        }
-                    </div>
-                    <div class="video-info">
-                        <h4>${video.title}</h4>
-                        <p>${video.description || 'Sem descrição'}</p>
-                        <div class="video-meta">
-                            <div>
-                                <span class="badge ${getCategoryBadgeClass(video.category)}">${getCategoryName(video.category)}</span>
-                                <span class="badge ${getDifficultyBadgeClass(video.dificulty)}">${getDifficultyName(video.dificulty)}</span>
-                            </div>
-                            <span style="color: #ffcf00;">${video.points} pts</span>
-                        </div>
-                    </div>
-                    <div class="video-actions">
-                        <button class="btn btn-primary btn-sm preview-video" data-id="${video.id}">
-                            <i class="fas fa-play"></i>
-                        </button>
-                        <button class="btn btn-warning btn-sm edit-video" data-id="${video.id}">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="btn btn-danger btn-sm delete-video" data-id="${video.id}">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                `;
-                grid.appendChild(videoCard);
-            });
-            
-            // Add event listeners to video action buttons
-            document.querySelectorAll('.preview-video').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const videoId = this.getAttribute('data-id');
-                    previewVideo(videoId);
-                });
-            });
-            
-            document.querySelectorAll('.edit-video').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const videoId = this.getAttribute('data-id');
-                    editVideo(videoId);
-                });
-            });
-            
-            document.querySelectorAll('.delete-video').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const videoId = this.getAttribute('data-id');
-                    deleteVideo(videoId);
-                });
-            });
-        }
-
         function displayFullRanking(ranking) {
             const tbody = document.getElementById('full-ranking-body');
             tbody.innerHTML = '';
@@ -1502,169 +1104,6 @@
                 `;
                 tbody.appendChild(row);
             });
-        }
-
-        // Video Management
-        function addVideo(e) {
-            e.preventDefault();
-            
-            const videoData = {
-                id: Date.now(),
-                title: document.getElementById('video-title').value,
-                category: document.getElementById('video-category').value,
-                description: document.getElementById('video-description').value,
-                url: document.getElementById('video-url').value,
-                duration: parseInt(document.getElementById('video-duration').value),
-                thumbnail: document.getElementById('video-thumbnail').value || null,
-                dificulty: document.getElementById('video-dificulty').value,
-                points: parseInt(document.getElementById('video-points').value),
-                status: 'ativo',
-                createdAt: new Date().toISOString()
-            };
-            
-            videos.push(videoData);
-            saveVideosToStorage();
-            displayVideos(videos);
-            
-            // Reset form
-            document.getElementById('add-video-form').reset();
-            
-            // Update dashboard stats
-            document.getElementById('total-videos').textContent = videos.length;
-            
-            showAlert('Vídeo adicionado com sucesso!', 'success');
-        }
-
-        function editVideo(videoId) {
-            const video = videos.find(v => v.id == videoId);
-            if (!video) return;
-            
-            document.getElementById('edit-video-id').value = video.id;
-            document.getElementById('edit-video-title').value = video.title;
-            document.getElementById('edit-video-category').value = video.category;
-            document.getElementById('edit-video-description').value = video.description || '';
-            document.getElementById('edit-video-url').value = video.url;
-            document.getElementById('edit-video-duration').value = video.duration;
-            document.getElementById('edit-video-thumbnail').value = video.thumbnail || '';
-            document.getElementById('edit-video-dificulty').value = video.dificulty;
-            document.getElementById('edit-video-points').value = video.points;
-            document.getElementById('edit-video-status').value = video.status;
-            
-            document.getElementById('edit-video-modal').style.display = 'flex';
-        }
-
-        function saveVideo() {
-            const videoId = document.getElementById('edit-video-id').value;
-            const videoIndex = videos.findIndex(v => v.id == videoId);
-            
-            if (videoIndex === -1) return;
-            
-            videos[videoIndex] = {
-                ...videos[videoIndex],
-                title: document.getElementById('edit-video-title').value,
-                category: document.getElementById('edit-video-category').value,
-                description: document.getElementById('edit-video-description').value,
-                url: document.getElementById('edit-video-url').value,
-                duration: parseInt(document.getElementById('edit-video-duration').value),
-                thumbnail: document.getElementById('edit-video-thumbnail').value || null,
-                dificulty: document.getElementById('edit-video-dificulty').value,
-                points: parseInt(document.getElementById('edit-video-points').value),
-                status: document.getElementById('edit-video-status').value
-            };
-            
-            saveVideosToStorage();
-            displayVideos(videos);
-            document.getElementById('edit-video-modal').style.display = 'none';
-            
-            showAlert('Vídeo atualizado com sucesso!', 'success');
-        }
-
-        function previewVideo(videoId) {
-            const video = videos.find(v => v.id == videoId);
-            if (!video) return;
-            
-            document.getElementById('preview-video-title').textContent = video.title;
-            document.getElementById('video-player').src = video.url;
-            document.getElementById('preview-video-description').textContent = video.description || 'Sem descrição disponível.';
-            document.getElementById('preview-video-category').textContent = getCategoryName(video.category);
-            document.getElementById('preview-video-dificulty').textContent = getDifficultyName(video.dificulty);
-            document.getElementById('preview-video-points').textContent = `${video.points} pontos`;
-            document.getElementById('preview-video-duration').textContent = `${video.duration} minutos`;
-            
-            // Set badge classes
-            document.getElementById('preview-video-category').className = `badge ${getCategoryBadgeClass(video.category)}`;
-            document.getElementById('preview-video-dificulty').className = `badge ${getDifficultyBadgeClass(video.dificulty)}`;
-            document.getElementById('preview-video-points').className = 'badge warning';
-            
-            document.getElementById('preview-video-modal').style.display = 'flex';
-        }
-
-        function deleteVideo(videoId) {
-            showConfirmation('Tem certeza que deseja excluir este vídeo?', function() {
-                videos = videos.filter(v => v.id != videoId);
-                saveVideosToStorage();
-                displayVideos(videos);
-                
-                // Update dashboard stats
-                document.getElementById('total-videos').textContent = videos.length;
-                
-                showAlert('Vídeo excluído com sucesso!', 'success');
-            });
-        }
-
-        function filterVideos() {
-            const searchTerm = document.getElementById('video-search').value.toLowerCase();
-            const filteredVideos = videos.filter(video => 
-                video.title.toLowerCase().includes(searchTerm) || 
-                (video.description && video.description.toLowerCase().includes(searchTerm)) ||
-                video.category.toLowerCase().includes(searchTerm)
-            );
-            displayVideos(filteredVideos);
-        }
-
-        function saveVideosToStorage() {
-            localStorage.setItem('coliseum-videos', JSON.stringify(videos));
-        }
-
-        // Helper Functions
-        function getCategoryName(category) {
-            const categories = {
-                'aula': 'Aula',
-                'exercicio': 'Exercício',
-                'desafio': 'Desafio',
-                'tutorial': 'Tutorial',
-                'extra': 'Conteúdo Extra'
-            };
-            return categories[category] || category;
-        }
-
-        function getCategoryBadgeClass(category) {
-            const classes = {
-                'aula': 'primary',
-                'exercicio': 'success',
-                'desafio': 'warning',
-                'tutorial': 'primary',
-                'extra': 'success'
-            };
-            return classes[category] || 'primary';
-        }
-
-        function getDifficultyName(difficulty) {
-            const difficulties = {
-                'facil': 'Fácil',
-                'medio': 'Médio',
-                'dificil': 'Difícil'
-            };
-            return difficulties[difficulty] || difficulty;
-        }
-
-        function getDifficultyBadgeClass(difficulty) {
-            const classes = {
-                'facil': 'success',
-                'medio': 'warning',
-                'dificil': 'danger'
-            };
-            return classes[difficulty] || 'primary';
         }
 
         // User Management
