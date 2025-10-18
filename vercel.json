@@ -1,0 +1,19 @@
+{
+  "version": 2,
+  "name": "coliseum-admin",
+  "builds": [
+    {
+      "src": "index.html",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ],
+  "env": {
+    "API_BASE_URL": "https://coliseum-api.onrender.com"
+  }
+}
