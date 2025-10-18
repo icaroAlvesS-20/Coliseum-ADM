@@ -1,0 +1,16 @@
+{
+  "name": "coliseum-admin",
+  "version": "1.0.0",
+  "description": "Sistema administrativo para Coliseum API",
+  "type": "module",
+  "scripts": {
+    "dev": "python -m http.server 3000",
+    "build": "echo 'Building static site'",
+    "start": "python -m http.server 3000"
+  },
+  "keywords": ["admin", "coliseum", "dashboard"],
+  "author": "Seu Nome",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {}
+}
