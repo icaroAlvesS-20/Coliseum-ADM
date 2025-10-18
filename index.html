@@ -1152,21 +1152,32 @@
             }
         }
 
-        function deleteUser(userId) {
-            showConfirmation('Tem certeza que deseja excluir este usuário?', async () => {
-                try {
-                    // Note: Your API doesn't have a delete user endpoint yet
-                    // This would need to be implemented in your backend
-                    showAlert('Funcionalidade de exclusão ainda não implementada no backend', 'error');
-                } catch (error) {
-                    showAlert('Erro ao excluir usuário: ' + error.message, 'error');
-                }
+  async function deleteUser(userId) {
+    showConfirmation('Tem certeza que deseja excluir este usuário? Esta ação não pode ser desfeita.', async function() {
+        try {
+            showGlobalLoading(true);
+            
+            const response = await fetchAPI(`/api/usuarios/${userId}`, {
+                method: 'DELETE'
             });
+            
+            showAlert(`Usuário excluído com sucesso!`, 'success');
+            
+            // Recarrega os dados
+            if (currentTab === 'dashboard') loadDashboardData();
+            if (currentTab === 'users') loadUsers();
+            if (currentTab === 'ranking') loadFullRanking();
+            
+        } catch (error) {
+            console.error('Erro ao excluir usuário:', error);
+            showAlert('Erro ao excluir usuário: ' + error.message, 'error');
+        } finally {
+            showGlobalLoading(false);
         }
+    });
+}
 
-        // System Functions
         function saveSettings() {
-            // In a real application, you would save these to localStorage or a backend
             showAlert('Configurações salvas com sucesso!', 'success');
         }
 
@@ -1174,8 +1185,6 @@
             try {
                 showGlobalLoading(true);
                 
-                // This would need to be implemented in your backend
-                // For now, we'll update each user individually
                 for (const user of users) {
                     await fetchAPI(`/api/usuarios/${user.id}`, {
                         method: 'PUT',
