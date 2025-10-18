@@ -282,7 +282,6 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
 
-        /* Forms */
         .form-container {
             background: linear-gradient(145deg, #383838, #282828);
             border-radius: 15px;
@@ -342,7 +341,6 @@
             flex: 1;
         }
 
-        /* Modal */
         .modal {
             display: none;
             position: fixed;
@@ -408,7 +406,6 @@
             background: rgba(0, 0, 0, 0.2);
         }
 
-        /* Loading */
         .loading {
             display: flex;
             justify-content: center;
@@ -430,7 +427,6 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* Alert */
         .alert {
             padding: 14px 20px;
             border-radius: 12px;
@@ -462,7 +458,6 @@
             color: inherit;
         }
 
-        /* Global Loading */
         #loadingGlobal {
             position: fixed;
             top: 0;
@@ -1152,32 +1147,38 @@
             }
         }
 
-  async function deleteUser(userId) {
-    showConfirmation('Tem certeza que deseja excluir este usuário? Esta ação não pode ser desfeita.', async function() {
-        try {
-            showGlobalLoading(true);
+        // CORREÇÃO DA FUNÇÃO DELETE USER
+        async function deleteUser(userId) {
+            const user = users.find(u => u.id == userId);
+            if (!user) return;
             
-            const response = await fetchAPI(`/api/usuarios/${userId}`, {
-                method: 'DELETE'
+            showConfirmation(`Tem certeza que deseja excluir o usuário "${user.nome}" (RA: ${user.ra})? Esta ação não pode ser desfeita.`, async function() {
+                try {
+                    showGlobalLoading(true);
+                    
+                    const response = await fetchAPI(`/api/usuarios/${userId}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    showAlert(`Usuário "${user.nome}" excluído com sucesso!`, 'success');
+                    
+                    // Recarrega os dados
+                    if (currentTab === 'dashboard') loadDashboardData();
+                    if (currentTab === 'users') loadUsers();
+                    if (currentTab === 'ranking') loadFullRanking();
+                    
+                } catch (error) {
+                    console.error('Erro ao excluir usuário:', error);
+                    showAlert('Erro ao excluir usuário: ' + error.message, 'error');
+                } finally {
+                    showGlobalLoading(false);
+                }
             });
-            
-            showAlert(`Usuário excluído com sucesso!`, 'success');
-            
-            // Recarrega os dados
-            if (currentTab === 'dashboard') loadDashboardData();
-            if (currentTab === 'users') loadUsers();
-            if (currentTab === 'ranking') loadFullRanking();
-            
-        } catch (error) {
-            console.error('Erro ao excluir usuário:', error);
-            showAlert('Erro ao excluir usuário: ' + error.message, 'error');
-        } finally {
-            showGlobalLoading(false);
         }
-    });
-}
 
+        // System Functions
         function saveSettings() {
+            // In a real application, you would save these to localStorage or a backend
             showAlert('Configurações salvas com sucesso!', 'success');
         }
 
@@ -1185,6 +1186,8 @@
             try {
                 showGlobalLoading(true);
                 
+                // This would need to be implemented in your backend
+                // For now, we'll update each user individually
                 for (const user of users) {
                     await fetchAPI(`/api/usuarios/${user.id}`, {
                         method: 'PUT',
