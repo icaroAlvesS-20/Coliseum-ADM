@@ -1169,15 +1169,62 @@
     document.getElementById('edit-user-modal').style.display = 'flex';
 }
 
-      async function saveUser() {
+   async function saveUser() {
     const userId = document.getElementById('edit-user-id').value;
     const userData = {
         pontuacao: parseInt(document.getElementById('edit-user-pontuacao').value),
         desafiosCompletados: parseInt(document.getElementById('edit-user-desafios').value)
     };
     
-    console.log('💾 Salvando usuário:', userId, userData);
+    console.log('💾 Salvando no banco de dados...', userId, userData);
     
+    try {
+        showGlobalLoading(true);
+        
+        // ✅ ENVIA PARA A API
+        const response = await fetch(`${API_BASE_URL}/api/usuarios/${userId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(userData)
+        });
+        
+        console.log('📡 Status da resposta:', response.status);
+        
+        if (!response.ok) {
+            throw new Error(`Erro ${response.status}`);
+        }
+        
+        const result = await response.json();
+        console.log('✅ API respondeu:', result);
+        
+        // ✅ **NÃO ATUALIZA LOCALMENTE - FORÇA RECARREGAMENTO DA API**
+        showAlert('✅ Alterações salvas no banco de dados!', 'success');
+        document.getElementById('edit-user-modal').style.display = 'none';
+        
+        // ✅ **RECARREGA OS DADOS REAIS DA API**
+        console.log('🔄 Recarregando dados da API...');
+        
+        if (currentTab === 'dashboard') {
+            await loadDashboardData(); // Recarrega tudo da API
+        }
+        if (currentTab === 'users') {
+            await loadUsers(); // Recarrega usuários da API
+        }
+        if (currentTab === 'ranking') {
+            await loadFullRanking(); // Recarrega ranking da API
+        }
+        
+        console.log('✅ Dados recarregados da API com sucesso!');
+        
+    } catch (error) {
+        console.error('❌ Erro ao salvar:', error);
+        showAlert('❌ Erro ao salvar no banco: ' + error.message, 'error');
+    } finally {
+        showGlobalLoading(false);
+    }
+}
     try {
         showGlobalLoading(true);
         
