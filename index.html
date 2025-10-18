@@ -1148,33 +1148,49 @@
         }
 
         // CORREÇÃO DA FUNÇÃO DELETE USER
-        async function deleteUser(userId) {
-            const user = users.find(u => u.id == userId);
-            if (!user) return;
+      async function deleteUser(userId) {
+    const user = users.find(u => u.id == userId);
+    if (!user) return;
+    
+    showConfirmation(`Tem certeza que deseja excluir o usuário "${user.nome}" (RA: ${user.ra})?`, async function() {
+        try {
+            showGlobalLoading(true);
             
-            showConfirmation(`Tem certeza que deseja excluir o usuário "${user.nome}" (RA: ${user.ra})? Esta ação não pode ser desfeita.`, async function() {
-                try {
-                    showGlobalLoading(true);
-                    
-                    const response = await fetchAPI(`/api/usuarios/${userId}`, {
-                        method: 'DELETE'
-                    });
-                    
-                    showAlert(`Usuário "${user.nome}" excluído com sucesso!`, 'success');
-                    
-                    // Recarrega os dados
-                    if (currentTab === 'dashboard') loadDashboardData();
-                    if (currentTab === 'users') loadUsers();
-                    if (currentTab === 'ranking') loadFullRanking();
-                    
-                } catch (error) {
-                    console.error('Erro ao excluir usuário:', error);
-                    showAlert('Erro ao excluir usuário: ' + error.message, 'error');
-                } finally {
-                    showGlobalLoading(false);
+            const response = await fetch(`${API_BASE_URL}/api/usuarios/${userId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
                 }
             });
+            
+            if (!response.ok) {
+                if (response.status === 404) {
+                    throw new Error('Endpoint de exclusão não encontrado. A API precisa ser atualizada.');
+                }
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const result = await response.json();
+            
+            showAlert(`Usuário "${user.nome}" excluído com sucesso!`, 'success');
+            
+            // Recarrega os dados
+            if (currentTab === 'dashboard') loadDashboardData();
+            if (currentTab === 'users') loadUsers();
+            if (currentTab === 'ranking') loadFullRanking();
+            
+        } catch (error) {
+            console.error('Erro ao excluir usuário:', error);
+            if (error.message.includes('404') || error.message.includes('não encontrado')) {
+                showAlert('❌ Funcionalidade de exclusão indisponível. Atualize a API no Render com o endpoint DELETE /api/usuarios/:id', 'error');
+            } else {
+                showAlert('Erro ao excluir usuário: ' + error.message, 'error');
+            }
+        } finally {
+            showGlobalLoading(false);
         }
+    });
+}
 
         // System Functions
         function saveSettings() {
