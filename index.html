@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Coliseum API</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #000000 0%, #2d2d2d 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .container {
+            background: linear-gradient(145deg, #383838, #282828);
+            border-radius: 20px;
+            padding: 40px 35px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border: 1px solid #555;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        /* CONTAINER DO CÍRCULO COM IMAGEM DENTRO */
+        .logo-container {
+            width: 110px;
+            height: 110px;
+            margin: 0 auto 20px auto;
+            border-radius: 50%;
+            border: 3px solid #ffcf00;
+            box-shadow: 0 0 20px rgba(255, 207, 0, 0.4);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #383838;
+            padding: 8px;
+        }
+
+        /* IMAGEM DENTRO DO CÍRCULO */
+        .logo-emoji {
+            font-size: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100px;
+            height: 100px;
+        }
+
+        h1 {
+            color: #ffcf00;
+            font-size: 36px;
+            font-weight: bold;
+            text-shadow: 0 2px 10px rgba(255, 207, 0, 0.3);
+            margin: 0;
+        }
+
+        /* Tabs Navigation */
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #555;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 12px 25px;
+            cursor: pointer;
+            color: #888;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab.active {
+            color: #ffcf00;
+            border-bottom: 3px solid #ffcf00;
+        }
+
+        .tab:hover {
+            color: #ffcf00;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Cards */
+        .cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: linear-gradient(145deg, #383838, #282828);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            border: 1px solid #555;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .card-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: #000;
+            background: #ffcf00;
+        }
+
+        .card-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #ffcf00;
+        }
+
+        .card-label {
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+
+        /* Tables */
+        .table-container {
+            background: linear-gradient(145deg, #383838, #282828);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            margin-bottom: 20px;
+            border: 1px solid #555;
+        }
+
+        .table-header {
+            padding: 18px 25px;
+            background: rgba(255, 207, 0, 0.1);
+            color: #ffcf00;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #555;
+        }
+
+        .table-header h3 {
+            margin: 0;
+            font-size: 1.3rem;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            background: #1a1a1a;
+            border-radius: 10px;
+            padding: 8px 15px;
+            border: 1px solid #555;
+        }
+
+        .search-box input {
+            background: transparent;
+            border: none;
+            color: #fff;
+            padding: 5px;
+            outline: none;
+            width: 200px;
+        }
+
+        .search-box input::placeholder {
+            color: #888;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #444;
+            color: #ddd;
+        }
+
+        th {
+            background: rgba(0, 0, 0, 0.3);
+            font-weight: 600;
+            color: #ffcf00;
+        }
+
+        tr:hover {
+            background: rgba(255, 207, 0, 0.05);
+        }
+
+        .badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .badge.primary { background: rgba(67, 97, 238, 0.2); color: #4361ee; }
+        .badge.success { background: rgba(76, 201, 240, 0.2); color: #4cc9f0; }
+        .badge.warning { background: rgba(255, 207, 0, 0.2); color: #ffcf00; }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: 600;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.75rem;
+        }
+
+        .btn-primary { 
+            background: linear-gradient(135deg, #4361ee, #3a56d4); 
+            color: white; 
+        }
+        
+        .btn-success { 
+            background: linear-gradient(135deg, #4cc9f0, #3ab7e0); 
+            color: white; 
+        }
+        
+        .btn-danger { 
+            background: linear-gradient(135deg, #f72585, #e02178); 
+            color: white; 
+        }
+        
+        .btn-warning { 
+            background: linear-gradient(135deg, #ffcf00, #e6ba00); 
+            color: #000; 
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Forms */
+        .form-container {
+            background: linear-gradient(145deg, #383838, #282828);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            margin-bottom: 20px;
+            border: 1px solid #555;
+        }
+
+        .form-container h3 {
+            color: #ffcf00;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #ffffff;
+            font-size: 15px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 15px 18px;
+            border: 2px solid #555;
+            border-radius: 12px;
+            font-size: 16px;
+            background: #1a1a1a;
+            color: #ffffff;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #ffcf00;
+            box-shadow: 0 0 15px rgba(255, 207, 0, 0.3);
+            background: #222222;
+        }
+
+        .form-control::placeholder {
+            color: #888;
+            font-size: 15px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: linear-gradient(145deg, #383838, #282828);
+            border-radius: 20px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+            border: 1px solid #555;
+            overflow: hidden;
+        }
+
+        .modal-header {
+            padding: 20px 25px;
+            border-bottom: 1px solid #555;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 207, 0, 0.1);
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: #ffcf00;
+            font-size: 1.4rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #ffcf00;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            transform: scale(1.1);
+        }
+
+        .modal-body {
+            padding: 25px;
+        }
+
+        .modal-footer {
+            padding: 20px 25px;
+            border-top: 1px solid #555;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        /* Loading */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 207, 0, 0.3);
+            border-left: 4px solid #ffcf00;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Alert */
+        .alert {
+            padding: 14px 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .alert-success {
+            background: rgba(76, 175, 80, 0.1);
+            color: #4caf50;
+            border-left-color: #4caf50;
+        }
+
+        .alert-error {
+            background: rgba(244, 67, 54, 0.1);
+            color: #f44336;
+            border-left-color: #f44336;
+        }
+
+        .alert-close {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: inherit;
+        }
+
+        /* Global Loading */
+        #loadingGlobal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            color: #ffcf00;
+            z-index: 9999;
+            font-size: 18px;
+            backdrop-filter: blur(5px);
+        }
+        
+        .spinner-large {
+            border: 4px solid rgba(255, 207, 0, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid #ffcf00;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        /* RESPONSIVIDADE */
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+            }
+            
+            .container {
+                padding: 25px 20px;
+                max-width: 100%;
+            }
+            
+            .logo-container {
+                width: 90px;
+                height: 90px;
+            }
+            
+            .logo-emoji {
+                font-size: 50px;
+                width: 80px;
+                height: 80px;
+            }
+            
+            h1 {
+                font-size: 28px;
+            }
+            
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .tab {
+                padding: 12px 15px;
+                text-align: center;
+            }
+            
+            .cards-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .table-header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+            
+            .search-box {
+                width: 100%;
+            }
+            
+            .search-box input {
+                width: 100%;
+            }
+            
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+            
+            .modal-content {
+                width: 95%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px 15px;
+            }
+            
+            .logo-container {
+                width: 80px;
+                height: 80px;
+            }
+            
+            .logo-emoji {
+                font-size: 40px;
+                width: 70px;
+                height: 70px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            .card {
+                padding: 20px;
+            }
+            
+            .table-header h3 {
+                font-size: 1.1rem;
+            }
+            
+            th, td {
+                padding: 10px 8px;
+                font-size: 0.85rem;
+            }
+            
+            .btn {
+                padding: 6px 10px;
+                font-size: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo-container">
+                <div class="logo-emoji">👑</div>
+            </div>
+            <h1>Coliseum Admin</h1>
+        </div>
+
+        <!-- Tabs Navigation -->
+        <div class="tabs">
+            <div class="tab active" data-tab="dashboard">Dashboard</div>
+            <div class="tab" data-tab="users">Gerenciar Usuários</div>
+            <div class="tab" data-tab="ranking">Ranking Completo</div>
+            <div class="tab" data-tab="settings">Configurações</div>
+        </div>
+
+        <!-- Alert Container -->
+        <div id="alert-container"></div>
+
+        <!-- Dashboard Tab -->
+        <div id="dashboard" class="tab-content active">
+            <div class="cards-container">
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-value" id="total-users">0</div>
+                            <div class="card-label">Total de Usuários</div>
+                        </div>
+                        <div class="card-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-value" id="total-points">0</div>
+                            <div class="card-label">Pontuação Total</div>
+                        </div>
+                        <div class="card-icon">
+                            <i class="fas fa-star"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-value" id="total-challenges">0</div>
+                            <div class="card-label">Desafios Completos</div>
+                        </div>
+                        <div class="card-icon">
+                            <i class="fas fa-flag"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-value" id="total-series">0</div>
+                            <div class="card-label">Séries Diferentes</div>
+                        </div>
+                        <div class="card-icon">
+                            <i class="fas fa-graduation-cap"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <div class="table-header">
+                    <h3>Ranking - Top 10</h3>
+                </div>
+                <div class="loading" id="ranking-loading">
+                    <div class="spinner"></div>
+                </div>
+                <table id="ranking-table">
+                    <thead>
+                        <tr>
+                            <th>Posição</th>
+                            <th>Nome</th>
+                            <th>RA</th>
+                            <th>Série</th>
+                            <th>Pontuação</th>
+                            <th>Desafios</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ranking-body">
+                        <!-- Ranking data will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Users Tab -->
+        <div id="users" class="tab-content">
+            <div class="table-container">
+                <div class="table-header">
+                    <h3>Gerenciar Usuários</h3>
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="user-search" placeholder="Buscar usuários...">
+                    </div>
+                </div>
+                <div class="loading" id="users-loading">
+                    <div class="spinner"></div>
+                </div>
+                <table id="users-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome</th>
+                            <th>RA</th>
+                            <th>Série</th>
+                            <th>Pontuação</th>
+                            <th>Desafios</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-body">
+                        <!-- Users data will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Ranking Tab -->
+        <div id="ranking" class="tab-content">
+            <div class="table-container">
+                <div class="table-header">
+                    <h3>Ranking Completo</h3>
+                    <button class="btn btn-primary" id="refresh-ranking">
+                        <i class="fas fa-sync-alt"></i> Atualizar
+                    </button>
+                </div>
+                <div class="loading" id="full-ranking-loading">
+                    <div class="spinner"></div>
+                </div>
+                <table id="full-ranking-table">
+                    <thead>
+                        <tr>
+                            <th>Posição</th>
+                            <th>Nome</th>
+                            <th>RA</th>
+                            <th>Série</th>
+                            <th>Pontuação</th>
+                            <th>Desafios</th>
+                        </tr>
+                    </thead>
+                    <tbody id="full-ranking-body">
+                        <!-- Full ranking data will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Settings Tab -->
+        <div id="settings" class="tab-content">
+            <div class="form-container">
+                <h3>Configurações do Sistema</h3>
+                <div class="form-group">
+                    <label for="api-url">URL da API</label>
+                    <input type="text" id="api-url" class="form-control" value="https://coliseum-api.onrender.com">
+                </div>
+                <div class="form-group">
+                    <label for="admin-password">Senha de Administrador</label>
+                    <input type="password" id="admin-password" class="form-control" placeholder="Digite sua senha">
+                </div>
+                <button class="btn btn-primary" id="save-settings">
+                    <i class="fas fa-save"></i> Salvar Configurações
+                </button>
+            </div>
+
+            <div class="form-container">
+                <h3>Manutenção do Sistema</h3>
+                <p style="color: #aaa; margin-bottom: 15px;">Use estas opções com cuidado. As ações não podem ser desfeitas.</p>
+                <div class="form-row">
+                    <button class="btn btn-warning" id="reset-points">
+                        <i class="fas fa-undo"></i> Zerar Pontuações
+                    </button>
+                    <button class="btn btn-danger" id="reset-all">
+                        <i class="fas fa-trash"></i> Resetar Todos os Dados
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit User Modal -->
+    <div class="modal" id="edit-user-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Editar Usuário</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="edit-user-form">
+                    <input type="hidden" id="edit-user-id">
+                    <div class="form-group">
+                        <label for="edit-user-name">Nome</label>
+                        <input type="text" id="edit-user-name" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-user-ra">RA</label>
+                        <input type="text" id="edit-user-ra" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-user-serie">Série</label>
+                        <input type="text" id="edit-user-serie" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-user-pontuacao">Pontuação</label>
+                        <input type="number" id="edit-user-pontuacao" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-user-desafios">Desafios Completos</label>
+                        <input type="number" id="edit-user-desafios" class="form-control" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-warning" id="cancel-edit">Cancelar</button>
+                <button class="btn btn-primary" id="save-user">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal" id="confirm-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Confirmação</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="confirm-message" style="color: #ddd;">Tem certeza que deseja realizar esta ação?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-warning" id="cancel-action">Cancelar</button>
+                <button class="btn btn-danger" id="confirm-action">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Global Loading -->
+    <div id="loadingGlobal">
+        <div class="spinner-large"></div>
+        <div>Carregando...</div>
+    </div>
+
+    <script>
+        // Configuration
+        const API_BASE_URL = 'https://coliseum-api.onrender.com';
+        
+        // State
+        let users = [];
+        let currentTab = 'dashboard';
+        let pendingAction = null;
+
+        // DOM Elements
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const alertContainer = document.getElementById('alert-container');
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeTabs();
+            loadDashboardData();
+            setupEventListeners();
+        });
+
+        // Tab Navigation
+        function initializeTabs() {
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    // Update active tab
+                    tabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Show corresponding content
+                    const tabId = this.getAttribute('data-tab');
+                    tabContents.forEach(content => {
+                        content.classList.remove('active');
+                        if (content.id === tabId) {
+                            content.classList.add('active');
+                            currentTab = tabId;
+                            
+                            // Load data for the tab
+                            switch(tabId) {
+                                case 'dashboard':
+                                    loadDashboardData();
+                                    break;
+                                case 'users':
+                                    loadUsers();
+                                    break;
+                                case 'ranking':
+                                    loadFullRanking();
+                                    break;
+                            }
+                        }
+                    });
+                });
+            });
+        }
+
+        // Event Listeners
+        function setupEventListeners() {
+            // Search functionality
+            document.getElementById('user-search').addEventListener('input', filterUsers);
+            
+            // Refresh ranking
+            document.getElementById('refresh-ranking').addEventListener('click', loadFullRanking);
+            
+            // Modal controls
+            document.querySelectorAll('.modal-close').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    this.closest('.modal').style.display = 'none';
+                });
+            });
+            
+            document.getElementById('cancel-edit').addEventListener('click', function() {
+                document.getElementById('edit-user-modal').style.display = 'none';
+            });
+            
+            document.getElementById('cancel-action').addEventListener('click', function() {
+                document.getElementById('confirm-modal').style.display = 'none';
+            });
+            
+            // Save user
+            document.getElementById('save-user').addEventListener('click', saveUser);
+            
+            // Settings
+            document.getElementById('save-settings').addEventListener('click', saveSettings);
+            document.getElementById('reset-points').addEventListener('click', function() {
+                showConfirmation('Zerar todas as pontuações?', resetPoints);
+            });
+            document.getElementById('reset-all').addEventListener('click', function() {
+                showConfirmation('Resetar TODOS os dados? Esta ação não pode ser desfeita!', resetAllData);
+            });
+            
+            // Confirm action
+            document.getElementById('confirm-action').addEventListener('click', function() {
+                if (pendingAction) {
+                    pendingAction();
+                    document.getElementById('confirm-modal').style.display = 'none';
+                    pendingAction = null;
+                }
+            });
+        }
+
+        // API Functions
+        async function fetchAPI(endpoint, options = {}) {
+            try {
+                const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...options.headers
+                    },
+                    ...options
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                return await response.json();
+            } catch (error) {
+                console.error('API Error:', error);
+                showAlert('Erro ao conectar com a API: ' + error.message, 'error');
+                throw error;
+            }
+        }
+
+        // Data Loading Functions
+        async function loadDashboardData() {
+            try {
+                // Show loading
+                document.getElementById('ranking-loading').style.display = 'flex';
+                
+                // Load ranking for dashboard
+                const ranking = await fetchAPI('/api/ranking');
+                displayRanking(ranking.slice(0, 10));
+                
+                // Calculate stats
+                const totalUsers = ranking.length;
+                const totalPoints = ranking.reduce((sum, user) => sum + user.pontuacao, 0);
+                const totalChallenges = ranking.reduce((sum, user) => sum + user.desafiosCompletados, 0);
+                const series = [...new Set(ranking.map(user => user.serie))].length;
+                
+                // Update stats cards
+                document.getElementById('total-users').textContent = totalUsers;
+                document.getElementById('total-points').textContent = totalPoints;
+                document.getElementById('total-challenges').textContent = totalChallenges;
+                document.getElementById('total-series').textContent = series;
+                
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+            } finally {
+                document.getElementById('ranking-loading').style.display = 'none';
+            }
+        }
+
+        async function loadUsers() {
+            try {
+                document.getElementById('users-loading').style.display = 'flex';
+                
+                const ranking = await fetchAPI('/api/ranking');
+                users = ranking;
+                displayUsers(users);
+                
+            } catch (error) {
+                console.error('Error loading users:', error);
+            } finally {
+                document.getElementById('users-loading').style.display = 'none';
+            }
+        }
+
+        async function loadFullRanking() {
+            try {
+                document.getElementById('full-ranking-loading').style.display = 'flex';
+                
+                const ranking = await fetchAPI('/api/ranking');
+                displayFullRanking(ranking);
+                
+            } catch (error) {
+                console.error('Error loading full ranking:', error);
+            } finally {
+                document.getElementById('full-ranking-loading').style.display = 'none';
+            }
+        }
+
+        // Display Functions
+        function displayRanking(ranking) {
+            const tbody = document.getElementById('ranking-body');
+            tbody.innerHTML = '';
+            
+            ranking.forEach((user, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${user.nome}</td>
+                    <td>${user.ra}</td>
+                    <td>${user.serie}</td>
+                    <td>${user.pontuacao}</td>
+                    <td>${user.desafiosCompletados}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function displayUsers(users) {
+            const tbody = document.getElementById('users-body');
+            tbody.innerHTML = '';
+            
+            users.forEach(user => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${user.id}</td>
+                    <td>${user.nome}</td>
+                    <td>${user.ra}</td>
+                    <td>${user.serie}</td>
+                    <td>${user.pontuacao}</td>
+                    <td>${user.desafiosCompletados}</td>
+                    <td class="actions">
+                        <button class="btn btn-primary btn-sm edit-user" data-id="${user.id}">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-danger btn-sm delete-user" data-id="${user.id}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            // Add event listeners to action buttons
+            document.querySelectorAll('.edit-user').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const userId = this.getAttribute('data-id');
+                    editUser(userId);
+                });
+            });
+            
+            document.querySelectorAll('.delete-user').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const userId = this.getAttribute('data-id');
+                    deleteUser(userId);
+                });
+            });
+        }
+
+        function displayFullRanking(ranking) {
+            const tbody = document.getElementById('full-ranking-body');
+            tbody.innerHTML = '';
+            
+            ranking.forEach((user, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${user.nome}</td>
+                    <td>${user.ra}</td>
+                    <td>${user.serie}</td>
+                    <td>${user.pontuacao}</td>
+                    <td>${user.desafiosCompletados}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // User Management
+        function filterUsers() {
+            const searchTerm = document.getElementById('user-search').value.toLowerCase();
+            const filteredUsers = users.filter(user => 
+                user.nome.toLowerCase().includes(searchTerm) || 
+                user.ra.toLowerCase().includes(searchTerm) ||
+                user.serie.toLowerCase().includes(searchTerm)
+            );
+            displayUsers(filteredUsers);
+        }
+
+        function editUser(userId) {
+            const user = users.find(u => u.id == userId);
+            if (!user) return;
+            
+            document.getElementById('edit-user-id').value = user.id;
+            document.getElementById('edit-user-name').value = user.nome;
+            document.getElementById('edit-user-ra').value = user.ra;
+            document.getElementById('edit-user-serie').value = user.serie;
+            document.getElementById('edit-user-pontuacao').value = user.pontuacao;
+            document.getElementById('edit-user-desafios').value = user.desafiosCompletados;
+            
+            document.getElementById('edit-user-modal').style.display = 'flex';
+        }
+
+        async function saveUser() {
+            const userId = document.getElementById('edit-user-id').value;
+            const userData = {
+                pontuacao: parseInt(document.getElementById('edit-user-pontuacao').value),
+                desafiosCompletados: parseInt(document.getElementById('edit-user-desafios').value)
+            };
+            
+            try {
+                await fetchAPI(`/api/usuarios/${userId}`, {
+                    method: 'PUT',
+                    body: JSON.stringify(userData)
+                });
+                
+                showAlert('Usuário atualizado com sucesso!', 'success');
+                document.getElementById('edit-user-modal').style.display = 'none';
+                
+                // Reload data
+                if (currentTab === 'dashboard') loadDashboardData();
+                if (currentTab === 'users') loadUsers();
+                if (currentTab === 'ranking') loadFullRanking();
+                
+            } catch (error) {
+                showAlert('Erro ao atualizar usuário: ' + error.message, 'error');
+            }
+        }
+
+        function deleteUser(userId) {
+            showConfirmation('Tem certeza que deseja excluir este usuário?', async () => {
+                try {
+                    // Note: Your API doesn't have a delete user endpoint yet
+                    // This would need to be implemented in your backend
+                    showAlert('Funcionalidade de exclusão ainda não implementada no backend', 'error');
+                } catch (error) {
+                    showAlert('Erro ao excluir usuário: ' + error.message, 'error');
+                }
+            });
+        }
+
+        // System Functions
+        function saveSettings() {
+            // In a real application, you would save these to localStorage or a backend
+            showAlert('Configurações salvas com sucesso!', 'success');
+        }
+
+        async function resetPoints() {
+            try {
+                showGlobalLoading(true);
+                
+                // This would need to be implemented in your backend
+                // For now, we'll update each user individually
+                for (const user of users) {
+                    await fetchAPI(`/api/usuarios/${user.id}`, {
+                        method: 'PUT',
+                        body: JSON.stringify({
+                            pontuacao: 0,
+                            desafiosCompletados: 0
+                        })
+                    });
+                }
+                
+                showAlert('Pontuações zeradas com sucesso!', 'success');
+                loadDashboardData();
+                
+            } catch (error) {
+                showAlert('Erro ao zerar pontuações: ' + error.message, 'error');
+            } finally {
+                showGlobalLoading(false);
+            }
+        }
+
+        async function resetAllData() {
+            try {
+                showGlobalLoading(true);
+                
+                await fetchAPI('/api/usuarios', {
+                    method: 'DELETE'
+                });
+                
+                showAlert('Todos os dados foram resetados!', 'success');
+                loadDashboardData();
+                
+            } catch (error) {
+                showAlert('Erro ao resetar dados: ' + error.message, 'error');
+            } finally {
+                showGlobalLoading(false);
+            }
+        }
+
+        // UI Helper Functions
+        function showAlert(message, type = 'success') {
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.innerHTML = `
+                <span>${message}</span>
+                <button class="alert-close">&times;</button>
+            `;
+            
+            alertContainer.appendChild(alert);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                alert.remove();
+            }, 5000);
+            
+            // Close button
+            alert.querySelector('.alert-close').addEventListener('click', function() {
+                alert.remove();
+            });
+        }
+
+        function showConfirmation(message, action) {
+            document.getElementById('confirm-message').textContent = message;
+            pendingAction = action;
+            document.getElementById('confirm-modal').style.display = 'flex';
+        }
+
+        function showGlobalLoading(show) {
+            document.getElementById('loadingGlobal').style.display = show ? 'flex' : 'none';
+        }
+    </script>
+</body>
+</html>
