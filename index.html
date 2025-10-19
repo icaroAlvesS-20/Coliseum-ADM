@@ -1241,16 +1241,20 @@ async function saveUser() {
         const result = await response.json();
         console.log('✅ Usuário COMPLETAMENTE salvo na API:', result);
         
+        // 2. ✅ VERIFICA SE OS DADOS FORAM REALMENTE SALVOS
+        console.log('🔍 Verificando persistência...');
+        const debugResponse = await fetch(`${API_BASE_URL}/api/debug/persistence/${userId}`);
+        const debugData = await debugResponse.json();
+        console.log('📊 Estado atual no banco:', debugData);
+        
         showAlert('✅ Usuário COMPLETAMENTE atualizado no banco!', 'success');
         document.getElementById('edit-user-modal').style.display = 'none';
         
-        // 2. ✅ RECARREGA OS DADOS
+        // 3. ✅ RECARREGA OS DADOS
         console.log('🔄 Atualizando interface...');
         
-        // Remove dados locais para forçar recarregamento
         users = [];
         
-        // Recarrega baseado na aba atual
         if (currentTab === 'dashboard') {
             await loadDashboardData();
         } else if (currentTab === 'users') {
