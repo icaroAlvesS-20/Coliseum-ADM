@@ -603,10 +603,23 @@
     </style>
 </head>
 <body>
+ <!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Coliseum API</title>
+    <meta name="description" content="Sistema administrativo para gerenciar usuários e vídeos do Coliseum">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* CSS será adicionado separadamente */
+    </style>
+</head>
+<body>
     <div class="container">
         <div class="header">
             <div class="logo-container">
-                <div class="logo-emoji">🏛️</div>
+                <div class="logo-emoji">👑</div>
             </div>
             <h1>Coliseum Admin</h1>
         </div>
@@ -615,6 +628,7 @@
         <div class="tabs">
             <div class="tab active" data-tab="dashboard">Dashboard</div>
             <div class="tab" data-tab="users">Gerenciar Usuários</div>
+            <div class="tab" data-tab="videos">Gerenciar Vídeos</div>
             <div class="tab" data-tab="ranking">Ranking Completo</div>
             <div class="tab" data-tab="settings">Configurações</div>
         </div>
@@ -728,6 +742,37 @@
             </div>
         </div>
 
+        <!-- Videos Tab -->
+        <div id="videos" class="tab-content">
+            <div class="table-container">
+                <div class="table-header">
+                    <h3>Gerenciar Vídeos</h3>
+                    <button class="btn btn-primary" id="add-video-btn">
+                        <i class="fas fa-plus"></i> Adicionar Vídeo
+                    </button>
+                </div>
+                <div class="loading" id="videos-loading">
+                    <div class="spinner"></div>
+                </div>
+                <table id="videos-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Título</th>
+                            <th>Matéria</th>
+                            <th>Categoria</th>
+                            <th>URL</th>
+                            <th>Duração</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="videos-body">
+                        <!-- Videos data will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
         <!-- Ranking Tab -->
         <div id="ranking" class="tab-content">
             <div class="table-container">
@@ -828,6 +873,8 @@
             </div>
         </div>
     </div>
+
+    <!-- Video Modal -->
     <div class="modal" id="video-modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -900,28 +947,11 @@
         <div>Carregando...</div>
     </div>
 
-    <!-- Confirmation Modal -->
-    <div class="modal" id="confirm-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Confirmação</h3>
-                <button class="modal-close">&times;</button>
-            </div>
-            <div class="modal-body">
-                <p id="confirm-message" style="color: #ddd;">Tem certeza que deseja realizar esta ação?</p>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-warning" id="cancel-action">Cancelar</button>
-                <button class="btn btn-danger" id="confirm-action">Confirmar</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Global Loading -->
-    <div id="loadingGlobal">
-        <div class="spinner-large"></div>
-        <div>Carregando...</div>
-    </div>
+    <script>
+        // JavaScript será adicionado separadamente
+    </script>
+</body>
+</html>
 
     <script>
               // Configuration
