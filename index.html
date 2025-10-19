@@ -941,7 +941,6 @@
 </html>
 
     <script>
-              // Configuration
         const API_BASE_URL = 'https://coliseum-api.onrender.com';
         
         // State
@@ -999,103 +998,108 @@
             });
         }
 
-        // Event Listeners
-        // Event Listeners
-function setupEventListeners() {
-    // Search functionality - só adiciona se o elemento existir
-    const userSearch = document.getElementById('user-search');
-    if (userSearch) {
-        userSearch.addEventListener('input', filterUsers);
-    }
-    
-    // Refresh ranking - só adiciona se o elemento existir
-    const refreshRanking = document.getElementById('refresh-ranking');
-    if (refreshRanking) {
-        refreshRanking.addEventListener('click', loadFullRanking);
-    }
-    
-    // Modal controls
-    document.querySelectorAll('.modal-close').forEach(btn => {
-        btn.addEventListener('click', function() {
-            this.closest('.modal').style.display = 'none';
-        });
-    });
-    
-    // Só adiciona listeners se os elementos existirem
-    const cancelEdit = document.getElementById('cancel-edit');
-    if (cancelEdit) {
-        cancelEdit.addEventListener('click', function() {
-            document.getElementById('edit-user-modal').style.display = 'none';
-        });
-    }
-    
-    const cancelVideo = document.getElementById('cancel-video');
-    if (cancelVideo) {
-        cancelVideo.addEventListener('click', function() {
-            document.getElementById('video-modal').style.display = 'none';
-        });
-    }
-    
-    const cancelAction = document.getElementById('cancel-action');
-    if (cancelAction) {
-        cancelAction.addEventListener('click', function() {
-            document.getElementById('confirm-modal').style.display = 'none';
-        });
-    }
-    
-    // Save user
-    const saveUserBtn = document.getElementById('save-user');
-    if (saveUserBtn) {
-        saveUserBtn.addEventListener('click', saveUser);
-    }
-    
-    // Save video
-    const saveVideoBtn = document.getElementById('save-video');
-    if (saveVideoBtn) {
-        saveVideoBtn.addEventListener('click', saveVideo);
-    }
-    
-    // Add video button
-    const addVideoBtn = document.getElementById('add-video-btn');
-    if (addVideoBtn) {
-        addVideoBtn.addEventListener('click', function() {
-            showVideoModal();
-        });
-    }
-    
-    // Settings - só adiciona se os elementos existirem
-    const saveSettingsbtn = document.getElementById('save-settingsbtn');
-    if (saveSettings) {
-        saveSettingsbtn.addEventListener('click', saveSettingsbtn);
-    }
-    
-    const resetPoints = document.getElementById('reset-points');
-    if (resetPoints) {
-        resetPoints.addEventListener('click', function() {
-            showConfirmation('Zerar todas as pontuações?', resetPoints);
-        });
-    }
-    
-    const resetAll = document.getElementById('reset-all');
-    if (resetAll) {
-        resetAll.addEventListener('click', function() {
-            showConfirmation('Resetar TODOS os dados? Esta ação não pode ser desfeita!', resetAllData);
-        });
-    }
-    
-    // Confirm action
-    const confirmAction = document.getElementById('confirm-action');
-    if (confirmAction) {
-        confirmAction.addEventListener('click', function() {
-            if (pendingAction) {
-                pendingAction();
-                document.getElementById('confirm-modal').style.display = 'none';
-                pendingAction = null;
+        // Event Listeners - VERSÃO CORRIGIDA
+        function setupEventListeners() {
+            console.log('🔧 Configurando event listeners...');
+            
+            // Search functionality
+            const userSearch = document.getElementById('user-search');
+            if (userSearch) {
+                userSearch.addEventListener('input', filterUsers);
+                console.log('✅ Listener de busca configurado');
             }
-        });
-    }
-}
-        // API Functions
+            
+            // Refresh ranking
+            const refreshRanking = document.getElementById('refresh-ranking');
+            if (refreshRanking) {
+                refreshRanking.addEventListener('click', loadFullRanking);
+                console.log('✅ Listener de refresh configurado');
+            }
+            
+            // Modal controls - usando event delegation para elementos que podem não existir ainda
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('modal-close')) {
+                    e.target.closest('.modal').style.display = 'none';
+                }
+            });
+            
+            // Cancel buttons
+            const cancelEdit = document.getElementById('cancel-edit');
+            if (cancelEdit) {
+                cancelEdit.addEventListener('click', function() {
+                    document.getElementById('edit-user-modal').style.display = 'none';
+                });
+            }
+            
+            const cancelVideo = document.getElementById('cancel-video');
+            if (cancelVideo) {
+                cancelVideo.addEventListener('click', function() {
+                    document.getElementById('video-modal').style.display = 'none';
+                });
+            }
+            
+            const cancelAction = document.getElementById('cancel-action');
+            if (cancelAction) {
+                cancelAction.addEventListener('click', function() {
+                    document.getElementById('confirm-modal').style.display = 'none';
+                });
+            }
+            
+            // Save buttons
+            const saveUserBtn = document.getElementById('save-user');
+            if (saveUserBtn) {
+                saveUserBtn.addEventListener('click', saveUser);
+            }
+            
+            const saveVideoBtn = document.getElementById('save-video');
+            if (saveVideoBtn) {
+                saveVideoBtn.addEventListener('click', saveVideo);
+            }
+            
+            // Add video button
+            const addVideoBtn = document.getElementById('add-video-btn');
+            if (addVideoBtn) {
+                addVideoBtn.addEventListener('click', function() {
+                    showVideoModal();
+                });
+            }
+            
+            // Settings buttons - CORREÇÃO: IDs corretos
+            const saveSettings = document.getElementById('save-settings');
+            if (saveSettings) {
+                saveSettings.addEventListener('click', saveSettings);
+            }
+            
+            const resetPoints = document.getElementById('reset-points');
+            if (resetPoints) {
+                resetPoints.addEventListener('click', function() {
+                    showConfirmation('Zerar todas as pontuações?', resetAllPoints);
+                });
+            }
+            
+            const resetAll = document.getElementById('reset-all');
+            if (resetAll) {
+                resetAll.addEventListener('click', function() {
+                    showConfirmation('Resetar TODOS os dados? Esta ação não pode ser desfeita!', resetAllData);
+                });
+            }
+            
+            // Confirm action
+            const confirmAction = document.getElementById('confirm-action');
+            if (confirmAction) {
+                confirmAction.addEventListener('click', function() {
+                    if (pendingAction) {
+                        pendingAction();
+                        document.getElementById('confirm-modal').style.display = 'none';
+                        pendingAction = null;
+                    }
+                });
+            }
+            
+            console.log('✅ Todos os event listeners configurados');
+        }
+
+        // API Functions (mantenha as existentes)
         async function fetchAPI(endpoint, options = {}) {
             try {
                 console.log(`🌐 API Request: ${endpoint}`);
@@ -1116,42 +1120,17 @@ function setupEventListeners() {
                 
             } catch (error) {
                 console.error('❌ API Error:', error);
-                
-                if (error.message.includes('Failed to fetch') || error.name === 'TypeError') {
-                    showAlert(`
-                    🚨 ERRO DE CONEXÃO
-                    
-                    Não foi possível conectar com a API.
-                    
-                    📋 Possíveis causas:
-                    • API offline
-                    • Problema de CORS
-                    • API precisa ser atualizada
-                    
-                    🔧 Solução:
-                    1. Atualize o CORS no server.js
-                    2. Faça deploy no Render
-                    3. Aguarde alguns minutos
-                    `, 'error');
-                } else {
-                    showAlert('Erro: ' + error.message, 'error');
-                }
-                
+                showAlert('Erro de conexão com a API: ' + error.message, 'error');
                 throw error;
             }
         }
 
-        // Data Loading Functions
+        // Data Loading Functions (mantenha as existentes)
         async function loadDashboardData() {
             try {
                 document.getElementById('ranking-loading').style.display = 'flex';
                 
                 console.log('🔄 Tentando carregar dados...');
-                
-                const healthCheck = await fetch(`${API_BASE_URL}/api/health`);
-                if (!healthCheck.ok) {
-                    throw new Error('API não está respondendo');
-                }
                 
                 const ranking = await fetchAPI('/api/ranking');
                 displayRanking(ranking.slice(0, 10));
@@ -1218,9 +1197,11 @@ function setupEventListeners() {
             }
         }
 
-        // Display Functions
+        // Display Functions (mantenha as existentes)
         function displayRanking(ranking) {
             const tbody = document.getElementById('ranking-body');
+            if (!tbody) return;
+            
             tbody.innerHTML = '';
             
             ranking.forEach((user, index) => {
@@ -1239,6 +1220,8 @@ function setupEventListeners() {
 
         function displayUsers(users) {
             const tbody = document.getElementById('users-body');
+            if (!tbody) return;
+            
             tbody.innerHTML = '';
             
             users.forEach(user => {
@@ -1262,23 +1245,23 @@ function setupEventListeners() {
                 tbody.appendChild(row);
             });
             
-            document.querySelectorAll('.edit-user').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const userId = this.getAttribute('data-id');
+            // Add event listeners usando event delegation
+            tbody.addEventListener('click', function(e) {
+                if (e.target.closest('.edit-user')) {
+                    const userId = e.target.closest('.edit-user').getAttribute('data-id');
                     editUser(userId);
-                });
-            });
-            
-            document.querySelectorAll('.delete-user').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const userId = this.getAttribute('data-id');
+                }
+                if (e.target.closest('.delete-user')) {
+                    const userId = e.target.closest('.delete-user').getAttribute('data-id');
                     deleteUser(userId);
-                });
+                }
             });
         }
 
         function displayVideos(videosList) {
             const tbody = document.getElementById('videos-body');
+            if (!tbody) return;
+            
             tbody.innerHTML = '';
             
             videosList.forEach(video => {
@@ -1304,23 +1287,23 @@ function setupEventListeners() {
                 tbody.appendChild(row);
             });
             
-            document.querySelectorAll('.edit-video').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const videoId = this.getAttribute('data-id');
+            // Add event listeners usando event delegation
+            tbody.addEventListener('click', function(e) {
+                if (e.target.closest('.edit-video')) {
+                    const videoId = e.target.closest('.edit-video').getAttribute('data-id');
                     editVideo(videoId);
-                });
-            });
-            
-            document.querySelectorAll('.delete-video').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const videoId = this.getAttribute('data-id');
+                }
+                if (e.target.closest('.delete-video')) {
+                    const videoId = e.target.closest('.delete-video').getAttribute('data-id');
                     deleteVideo(videoId);
-                });
+                }
             });
         }
 
         function displayFullRanking(ranking) {
             const tbody = document.getElementById('full-ranking-body');
+            if (!tbody) return;
+            
             tbody.innerHTML = '';
             
             ranking.forEach((user, index) => {
@@ -1337,7 +1320,7 @@ function setupEventListeners() {
             });
         }
 
-        // User Management
+        // User Management (mantenha as funções existentes)
         function filterUsers() {
             const searchTerm = document.getElementById('user-search').value.toLowerCase();
             const filteredUsers = users.filter(user => 
@@ -1367,7 +1350,6 @@ function setupEventListeners() {
             document.getElementById('edit-user-modal').style.display = 'flex';
         }
 
-        // ✅ FUNÇÃO PARA EXCLUIR USUÁRIO
         async function deleteUser(userId) {
             const user = users.find(u => u.id == userId);
             if (!user) {
@@ -1426,7 +1408,6 @@ function setupEventListeners() {
             try {
                 showGlobalLoading(true);
                 
-                // 1. ✅ SALVA NA API COM TODOS OS DADOS
                 const response = await fetch(`${API_BASE_URL}/api/usuarios/${userId}`, {
                     method: 'PUT',
                     headers: {'Content-Type': 'application/json'},
@@ -1441,24 +1422,10 @@ function setupEventListeners() {
                 const result = await response.json();
                 console.log('✅ Usuário COMPLETAMENTE salvo na API:', result);
                 
-                // 2. ✅ VERIFICA SE OS DADOS FORAM REALMENTE SALVOS
-                console.log('🔍 Verificando persistência...');
-                try {
-                    const debugResponse = await fetch(`${API_BASE_URL}/api/debug/persistence/${userId}`);
-                    if (debugResponse.ok) {
-                        const debugData = await debugResponse.json();
-                        console.log('📊 Estado atual no banco:', debugData);
-                    }
-                } catch (debugError) {
-                    console.log('⚠️ Debug endpoint não disponível:', debugError.message);
-                }
-                
                 showAlert('✅ Usuário COMPLETAMENTE atualizado no banco!', 'success');
                 document.getElementById('edit-user-modal').style.display = 'none';
                 
-                // 3. ✅ RECARREGA OS DADOS
-                console.log('🔄 Atualizando interface...');
-                
+                // Recarrega os dados
                 users = [];
                 
                 if (currentTab === 'dashboard') {
@@ -1477,7 +1444,7 @@ function setupEventListeners() {
             }
         }
 
-        // Video Management
+        // Video Management (mantenha as funções existentes)
         function showVideoModal(video = null) {
             const modal = document.getElementById('video-modal');
             const title = document.getElementById('video-modal-title');
@@ -1523,14 +1490,12 @@ function setupEventListeners() {
                 
                 let response;
                 if (videoId) {
-                    // Editar vídeo existente
                     response = await fetch(`${API_BASE_URL}/api/videos/${videoId}`, {
                         method: 'PUT',
                         headers: {'Content-Type': 'application/json'},
                         body: JSON.stringify(videoData)
                     });
                 } else {
-                    // Adicionar novo vídeo
                     response = await fetch(`${API_BASE_URL}/api/videos`, {
                         method: 'POST',
                         headers: {'Content-Type': 'application/json'},
@@ -1549,7 +1514,6 @@ function setupEventListeners() {
                 showAlert('✅ Vídeo salvo com sucesso!', 'success');
                 document.getElementById('video-modal').style.display = 'none';
                 
-                // Recarregar lista de vídeos
                 await loadVideos();
                 
             } catch (error) {
@@ -1579,7 +1543,6 @@ function setupEventListeners() {
                     
                     showAlert('✅ Vídeo excluído com sucesso!', 'success');
                     
-                    // Recarregar lista de vídeos
                     await loadVideos();
                     
                 } catch (error) {
@@ -1591,12 +1554,12 @@ function setupEventListeners() {
             });
         }
 
-        // System Functions
+        // System Functions - CORREÇÃO: Funções renomeadas para evitar conflitos
         function saveSettings() {
             showAlert('Configurações salvas com sucesso!', 'success');
         }
 
-        async function resetPoints() {
+        async function resetAllPoints() {
             try {
                 showGlobalLoading(true);
                 
@@ -1638,8 +1601,10 @@ function setupEventListeners() {
             }
         }
 
-        // UI Helper Functions
+        // UI Helper Functions (mantenha as existentes)
         function showAlert(message, type = 'success') {
+            if (!alertContainer) return;
+            
             const alert = document.createElement('div');
             alert.className = `alert alert-${type}`;
             alert.innerHTML = `
@@ -1659,13 +1624,19 @@ function setupEventListeners() {
         }
 
         function showConfirmation(message, action) {
-            document.getElementById('confirm-message').textContent = message;
+            const confirmMessage = document.getElementById('confirm-message');
+            if (confirmMessage) {
+                confirmMessage.textContent = message;
+            }
             pendingAction = action;
             document.getElementById('confirm-modal').style.display = 'flex';
         }
 
         function showGlobalLoading(show) {
-            document.getElementById('loadingGlobal').style.display = show ? 'flex' : 'none';
+            const loading = document.getElementById('loadingGlobal');
+            if (loading) {
+                loading.style.display = show ? 'flex' : 'none';
+            }
         }
     </script>
 </body>
