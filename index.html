@@ -1169,19 +1169,22 @@
     document.getElementById('edit-user-modal').style.display = 'flex';
 }
 
-  async function saveUser() {
+ async function saveUser() {
     const userId = document.getElementById('edit-user-id').value;
     const userData = {
+        nome: document.getElementById('edit-user-name').value,
+        ra: document.getElementById('edit-user-ra').value,
+        serie: document.getElementById('edit-user-serie').value,
         pontuacao: parseInt(document.getElementById('edit-user-pontuacao').value),
         desafiosCompletados: parseInt(document.getElementById('edit-user-desafios').value)
     };
     
-    console.log('💾 Salvando no banco...', userId, userData);
+    console.log('💾 Salvando usuário completo...', userId, userData);
     
     try {
         showGlobalLoading(true);
         
-        // 1. ✅ SALVA NA API
+        // 1. ✅ SALVA NA API COM TODOS OS DADOS
         const response = await fetch(`${API_BASE_URL}/api/usuarios/${userId}`, {
             method: 'PUT',
             headers: {'Content-Type': 'application/json'},
@@ -1191,18 +1194,18 @@
         if (!response.ok) throw new Error(`Erro ${response.status}`);
         
         const result = await response.json();
-        console.log('✅ Salvo na API:', result);
+        console.log('✅ Usuário salvo na API:', result);
         
-        showAlert('✅ Salvo no banco de dados!', 'success');
+        showAlert('✅ Usuário atualizado com sucesso!', 'success');
         document.getElementById('edit-user-modal').style.display = 'none';
         
-        // 2. ✅ RECARREGA OS DADOS SEM AWAIT PROBLEMÁTICO
+        // 2. ✅ RECARREGA OS DADOS
         console.log('🔄 Atualizando interface...');
         
         // Remove dados locais para forçar recarregamento
         users = [];
         
-        // Recarrega baseado na aba atual SEM await
+        // Recarrega baseado na aba atual
         if (currentTab === 'dashboard') {
             loadDashboardData().catch(err => console.error('Erro ao recarregar dashboard:', err));
         } else if (currentTab === 'users') {
@@ -1212,8 +1215,8 @@
         }
         
     } catch (error) {
-        console.error('❌ Erro:', error);
-        showAlert('❌ Erro ao salvar: ' + error.message, 'error');
+        console.error('❌ Erro ao salvar usuário:', error);
+        showAlert('❌ Erro ao salvar usuário: ' + error.message, 'error');
     } finally {
         showGlobalLoading(false);
     }
