@@ -983,62 +983,101 @@
         }
 
         // Event Listeners
-        function setupEventListeners() {
-            // Search functionality
-            document.getElementById('user-search').addEventListener('input', filterUsers);
-            
-            // Refresh ranking
-            document.getElementById('refresh-ranking').addEventListener('click', loadFullRanking);
-            
-            // Modal controls
-            document.querySelectorAll('.modal-close').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    this.closest('.modal').style.display = 'none';
-                });
-            });
-            
-            document.getElementById('cancel-edit').addEventListener('click', function() {
-                document.getElementById('edit-user-modal').style.display = 'none';
-            });
-            
-            document.getElementById('cancel-video').addEventListener('click', function() {
-                document.getElementById('video-modal').style.display = 'none';
-            });
-            
-            document.getElementById('cancel-action').addEventListener('click', function() {
+        // Event Listeners
+function setupEventListeners() {
+    // Search functionality - só adiciona se o elemento existir
+    const userSearch = document.getElementById('user-search');
+    if (userSearch) {
+        userSearch.addEventListener('input', filterUsers);
+    }
+    
+    // Refresh ranking - só adiciona se o elemento existir
+    const refreshRanking = document.getElementById('refresh-ranking');
+    if (refreshRanking) {
+        refreshRanking.addEventListener('click', loadFullRanking);
+    }
+    
+    // Modal controls
+    document.querySelectorAll('.modal-close').forEach(btn => {
+        btn.addEventListener('click', function() {
+            this.closest('.modal').style.display = 'none';
+        });
+    });
+    
+    // Só adiciona listeners se os elementos existirem
+    const cancelEdit = document.getElementById('cancel-edit');
+    if (cancelEdit) {
+        cancelEdit.addEventListener('click', function() {
+            document.getElementById('edit-user-modal').style.display = 'none';
+        });
+    }
+    
+    const cancelVideo = document.getElementById('cancel-video');
+    if (cancelVideo) {
+        cancelVideo.addEventListener('click', function() {
+            document.getElementById('video-modal').style.display = 'none';
+        });
+    }
+    
+    const cancelAction = document.getElementById('cancel-action');
+    if (cancelAction) {
+        cancelAction.addEventListener('click', function() {
+            document.getElementById('confirm-modal').style.display = 'none';
+        });
+    }
+    
+    // Save user
+    const saveUserBtn = document.getElementById('save-user');
+    if (saveUserBtn) {
+        saveUserBtn.addEventListener('click', saveUser);
+    }
+    
+    // Save video
+    const saveVideoBtn = document.getElementById('save-video');
+    if (saveVideoBtn) {
+        saveVideoBtn.addEventListener('click', saveVideo);
+    }
+    
+    // Add video button
+    const addVideoBtn = document.getElementById('add-video-btn');
+    if (addVideoBtn) {
+        addVideoBtn.addEventListener('click', function() {
+            showVideoModal();
+        });
+    }
+    
+    // Settings - só adiciona se os elementos existirem
+    const saveSettingsbtn = document.getElementById('save-settingsbtn');
+    if (saveSettings) {
+        saveSettingsbtn.addEventListener('click', saveSettingsbtn);
+    }
+    
+    const resetPoints = document.getElementById('reset-points');
+    if (resetPoints) {
+        resetPoints.addEventListener('click', function() {
+            showConfirmation('Zerar todas as pontuações?', resetPoints);
+        });
+    }
+    
+    const resetAll = document.getElementById('reset-all');
+    if (resetAll) {
+        resetAll.addEventListener('click', function() {
+            showConfirmation('Resetar TODOS os dados? Esta ação não pode ser desfeita!', resetAllData);
+        });
+    }
+    
+    // Confirm action
+    const confirmAction = document.getElementById('confirm-action');
+    if (confirmAction) {
+        confirmAction.addEventListener('click', function() {
+            if (pendingAction) {
+                pendingAction();
                 document.getElementById('confirm-modal').style.display = 'none';
-            });
-            
-            // Save user
-            document.getElementById('save-user').addEventListener('click', saveUser);
-            
-            // Save video
-            document.getElementById('save-video').addEventListener('click', saveVideo);
-            
-            // Add video button
-            document.getElementById('add-video-btn').addEventListener('click', function() {
-                showVideoModal();
-            });
-            
-            // Settings
-            document.getElementById('save-settings').addEventListener('click', saveSettings);
-            document.getElementById('reset-points').addEventListener('click', function() {
-                showConfirmation('Zerar todas as pontuações?', resetPoints);
-            });
-            document.getElementById('reset-all').addEventListener('click', function() {
-                showConfirmation('Resetar TODOS os dados? Esta ação não pode ser desfeita!', resetAllData);
-            });
-            
-            // Confirm action
-            document.getElementById('confirm-action').addEventListener('click', function() {
-                if (pendingAction) {
-                    pendingAction();
-                    document.getElementById('confirm-modal').style.display = 'none';
-                    pendingAction = null;
-                }
-            });
-        }
-
+                pendingAction = null;
+            }
+        });
+    }
+}
         // API Functions
         async function fetchAPI(endpoint, options = {}) {
             try {
