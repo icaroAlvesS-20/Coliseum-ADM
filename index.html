@@ -1093,30 +1093,43 @@
         }
 
         // API Functions (mantenha as existentes)
-        async function fetchAPI(endpoint, options = {}) {
-            try {
-                console.log(`🌐 API Request: ${endpoint}`);
-                
-                const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        ...options.headers
-                    },
-                    ...options
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
-                return await response.json();
-                
-            } catch (error) {
-                console.error('❌ API Error:', error);
-                showAlert('Erro de conexão com a API: ' + error.message, 'error');
-                throw error;
-            }
+      async function fetchAPI(endpoint, options = {}) {
+    try {
+        console.log(`🌐 Fazendo requisição para: ${API_BASE_URL}${endpoint}`);
+        
+        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            },
+            ...options
+        });
+        
+        console.log(`📡 Resposta da API - Status: ${response.status}`);
+        
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error(`❌ Erro HTTP ${response.status}:`, errorText);
+            throw new Error(`Erro ${response.status}: ${errorText}`);
         }
+        
+        const data = await response.json();
+        console.log(`✅ Dados recebidos de ${endpoint}:`, data);
+        
+        return data;
+        
+    } catch (error) {
+        console.error('❌ Erro na requisição API:', error);
+        
+        if (error.message.includes('Failed to fetch') || error.name === 'TypeError') {
+            showAlert('🚨 ERRO: Não foi possível conectar com a API. Verifique a URL e CORS.', 'error');
+        } else {
+            showAlert('Erro na API: ' + error.message, 'error');
+        }
+        
+        throw error;
+    }
+}
 
         // Data Loading Functions (mantenha as existentes)
        async function loadDashboardData() {
@@ -1229,26 +1242,57 @@
             }
         }
 
-        // Display Functions (mantenha as existentes)
-        function displayRanking(ranking) {
-            const tbody = document.getElementById('ranking-body');
-            if (!tbody) return;
-            
-            tbody.innerHTML = '';
-            
-            ranking.forEach((user, index) => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${index + 1}</td>
-                    <td>${user.nome}</td>
-                    <td>${user.ra}</td>
-                    <td>${user.serie}</td>
-                    <td>${user.pontuacao}</td>
-                    <td>${user.desafiosCompletados}</td>
-                `;
-                tbody.appendChild(row);
-            });
-        }
+       function displayRanking(ranking) {
+    const tbody = document.getElementById('ranking-body');
+    if (!tbody) {
+        console.error('❌ Elemento ranking-body não encontrado!');
+        return;
+    }
+    
+    tbody.innerHTML = '';
+    
+    // ✅ VERIFICA SE HÁ DADOS
+    if (!ranking || ranking.length === 0) {
+        console.log('📭 Nenhum dado para exibir no ranking');
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td colspan="6" style="text-align: center; color: #888; padding: 20px;">
+                <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
+                Nenhum usuário encontrado
+            </td>
+        `;
+        tbody.appendChild(row);
+        return;
+    }
+    
+    console.log(`🎯 Renderizando ${ranking.length} usuários no ranking`);
+    
+    // ✅ RENDERIZA CADA USUÁRIO COM FALLBACKS
+    ranking.forEach((user, index) => {
+        const row = document.createElement('tr');
+        
+        // ✅ FALLBACKS PARA DIFERENTES ESTRUTURAS DE DADOS
+        const nome = user.nome || user.name || 'Nome não informado';
+        const ra = user.ra || user.id || 'RA não informado';
+        const serie = user.serie || user.grade || user.turma || 'Série não informada';
+        const pontuacao = user.pontuacao || user.points || user.score || 0;
+        const desafios = user.desafiosCompletados || user.challengesCompleted || user.desafios || 0;
+        
+        console.log(`👤 Usuário ${index + 1}:`, { nome, ra, serie, pontuacao, desafios });
+        
+        row.innerHTML = `
+            <td><strong>${index + 1}º</strong></td>
+            <td>${nome}</td>
+            <td><code>${ra}</code></td>
+            <td>${serie}</td>
+            <td><span style="color: #ffcf00; font-weight: bold;">${pontuacao}</span></td>
+            <td>${desafios}</td>
+        `;
+        tbody.appendChild(row);
+    });
+    
+    console.log('✅ Ranking renderizado com sucesso!');
+}
 
         function displayUsers(users) {
             const tbody = document.getElementById('users-body');
