@@ -1221,7 +1221,7 @@ async function saveUser() {
         desafiosCompletados: parseInt(document.getElementById('edit-user-desafios').value)
     };
     
-    console.log('💾 Salvando usuário completo...', userId, userData);
+    console.log('💾 Salvando usuário COMPLETO...', userId, userData);
     
     try {
         showGlobalLoading(true);
@@ -1233,12 +1233,15 @@ async function saveUser() {
             body: JSON.stringify(userData)
         });
         
-        if (!response.ok) throw new Error(`Erro ${response.status}`);
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Erro ${response.status}: ${errorText}`);
+        }
         
         const result = await response.json();
-        console.log('✅ Usuário salvo na API:', result);
+        console.log('✅ Usuário COMPLETAMENTE salvo na API:', result);
         
-        showAlert('✅ Usuário atualizado com sucesso!', 'success');
+        showAlert('✅ Usuário COMPLETAMENTE atualizado no banco!', 'success');
         document.getElementById('edit-user-modal').style.display = 'none';
         
         // 2. ✅ RECARREGA OS DADOS
@@ -1249,16 +1252,16 @@ async function saveUser() {
         
         // Recarrega baseado na aba atual
         if (currentTab === 'dashboard') {
-            loadDashboardData().catch(err => console.error('Erro ao recarregar dashboard:', err));
+            await loadDashboardData();
         } else if (currentTab === 'users') {
-            loadUsers().catch(err => console.error('Erro ao recarregar usuários:', err));
+            await loadUsers();
         } else if (currentTab === 'ranking') {
-            loadFullRanking().catch(err => console.error('Erro ao recarregar ranking:', err));
+            await loadFullRanking();
         }
         
     } catch (error) {
-        console.error('❌ Erro ao salvar usuário:', error);
-        showAlert('❌ Erro ao salvar usuário: ' + error.message, 'error');
+        console.error('❌ Erro CRÍTICO ao salvar usuário:', error);
+        showAlert('❌ ERRO: Não foi possível salvar no banco: ' + error.message, 'error');
     } finally {
         showGlobalLoading(false);
     }
