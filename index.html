@@ -1168,7 +1168,49 @@
     // Mostra o modal
     document.getElementById('edit-user-modal').style.display = 'flex';
 }
-
+// ✅ FUNÇÃO PARA EXCLUIR USUÁRIO
+async function deleteUser(userId) {
+    const user = users.find(u => u.id == userId);
+    if (!user) {
+        console.error('❌ Usuário não encontrado:', userId);
+        return;
+    }
+    
+    showConfirmation(`Tem certeza que deseja excluir o usuário "${user.nome}" (RA: ${user.ra})? Esta ação não pode ser desfeita.`, async () => {
+        try {
+            showGlobalLoading(true);
+            
+            console.log(`🗑️ Excluindo usuário ${userId}...`);
+            
+            const response = await fetch(`${API_BASE_URL}/api/usuarios/${userId}`, {
+                method: 'DELETE'
+            });
+            
+            if (!response.ok) throw new Error(`Erro ${response.status}`);
+            
+            const result = await response.json();
+            console.log('✅ Usuário excluído:', result);
+            
+            showAlert('✅ Usuário excluído com sucesso!', 'success');
+            
+            // Recarrega os dados
+            users = [];
+            if (currentTab === 'dashboard') {
+                await loadDashboardData();
+            } else if (currentTab === 'users') {
+                await loadUsers();
+            } else if (currentTab === 'ranking') {
+                await loadFullRanking();
+            }
+            
+        } catch (error) {
+            console.error('❌ Erro ao excluir usuário:', error);
+            showAlert('❌ Erro ao excluir usuário: ' + error.message, 'error');
+        } finally {
+            showGlobalLoading(false);
+        }
+    });
+}
  async function saveUser() {
     const userId = document.getElementById('edit-user-id').value;
     const userData = {
