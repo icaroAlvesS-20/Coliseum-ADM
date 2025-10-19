@@ -1119,38 +1119,77 @@
         }
 
         // Data Loading Functions (mantenha as existentes)
-        async function loadDashboardData() {
-            try {
-                document.getElementById('ranking-loading').style.display = 'flex';
-                
-                console.log('🔄 Tentando carregar dados...');
-                
-                const ranking = await fetchAPI('/api/ranking');
-                displayRanking(ranking.slice(0, 10));
-                
-                const totalUsers = ranking.length;
-                const totalPoints = ranking.reduce((sum, user) => sum + user.pontuacao, 0);
-                const totalChallenges = ranking.reduce((sum, user) => sum + user.desafiosCompletados, 0);
-                const series = [...new Set(ranking.map(user => user.serie))].length;
-                
-                document.getElementById('total-users').textContent = totalUsers;
-                document.getElementById('total-points').textContent = totalPoints;
-                document.getElementById('total-challenges').textContent = totalChallenges;
-                document.getElementById('total-series').textContent = series;
-                
-                console.log('✅ Dados carregados com sucesso!');
-                
-            } catch (error) {
-                console.error('❌ Erro ao carregar dashboard:', error);
-                document.getElementById('total-users').textContent = '?';
-                document.getElementById('total-points').textContent = '?';
-                document.getElementById('total-challenges').textContent = '?';
-                document.getElementById('total-series').textContent = '?';
-            } finally {
-                document.getElementById('ranking-loading').style.display = 'none';
-            }
+       async function loadDashboardData() {
+    try {
+        document.getElementById('ranking-loading').style.display = 'flex';
+        
+        console.log('🔄 Carregando dados do dashboard...');
+        
+        const ranking = await fetchAPI('/api/ranking');
+        console.log('📊 Dados brutos da API:', ranking);
+        
+        // ✅ VERIFICAÇÃO CRÍTICA: A API está retornando array vazio?
+        if (!ranking || !Array.isArray(ranking)) {
+            console.error('❌ API retornou dados inválidos:', ranking);
+            showAlert('API retornou dados inválidos ou vazios', 'error');
+            return;
         }
-
+        
+        console.log(`✅ API retornou ${ranking.length} usuários`);
+        
+        // ✅ DEBUG: Mostrar estrutura do primeiro usuário
+        if (ranking.length > 0) {
+            console.log('🔍 Estrutura do primeiro usuário:', Object.keys(ranking[0]));
+            console.log('📝 Valores do primeiro usuário:', ranking[0]);
+        }
+        
+        displayRanking(ranking.slice(0, 10));
+        
+        // ✅ CÁLCULOS COM VERIFICAÇÃO
+        const totalUsers = ranking.length;
+        const totalPoints = ranking.reduce((sum, user) => {
+            // ✅ FALLBACK para diferentes nomes de campo
+            const pontos = user.pontuacao || user.points || user.score || 0;
+            return sum + pontos;
+        }, 0);
+        
+        const totalChallenges = ranking.reduce((sum, user) => {
+            // ✅ FALLBACK para diferentes nomes de campo
+            const desafios = user.desafiosCompletados || user.challengesCompleted || user.desafios || 0;
+            return sum + desafios;
+        }, 0);
+        
+        const series = [...new Set(ranking.map(user => {
+            // ✅ FALLBACK para diferentes nomes de campo
+            return user.serie || user.grade || user.turma || 'N/A';
+        }))].length;
+        
+        // ✅ ATUALIZA A INTERFACE
+        document.getElementById('total-users').textContent = totalUsers;
+        document.getElementById('total-points').textContent = totalPoints;
+        document.getElementById('total-challenges').textContent = totalChallenges;
+        document.getElementById('total-series').textContent = series;
+        
+        console.log('✅ Dashboard atualizado:', {
+            usuarios: totalUsers,
+            pontos: totalPoints,
+            desafios: totalChallenges,
+            series: series
+        });
+        
+    } catch (error) {
+        console.error('❌ Erro crítico no dashboard:', error);
+        showAlert('Erro ao carregar dashboard: ' + error.message, 'error');
+        
+        // ✅ MOSTRA "0" EM VEZ DE "?"
+        document.getElementById('total-users').textContent = '0';
+        document.getElementById('total-points').textContent = '0';
+        document.getElementById('total-challenges').textContent = '0';
+        document.getElementById('total-series').textContent = '0';
+    } finally {
+        document.getElementById('ranking-loading').style.display = 'none';
+    }
+}
         async function loadUsers() {
             try {
                 document.getElementById('users-loading').style.display = 'flex';
