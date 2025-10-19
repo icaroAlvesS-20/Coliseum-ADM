@@ -7,7 +7,7 @@
     <meta name="description" content="Sistema administrativo para gerenciar usuários do Coliseum">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        * {
+      * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
@@ -286,7 +286,7 @@
             background: linear-gradient(145deg, #383838, #282828);
             border-radius: 15px;
             padding: 25px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);       
             margin-bottom: 20px;
             border: 1px solid #555;
         }
@@ -330,6 +330,15 @@
         .form-control::placeholder {
             color: #888;
             font-size: 15px;
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        select.form-control {
+            cursor: pointer;
         }
 
         .form-row {
@@ -395,6 +404,8 @@
 
         .modal-body {
             padding: 25px;
+            max-height: 70vh;
+            overflow-y: auto;
         }
 
         .modal-footer {
@@ -545,6 +556,11 @@
             .modal-content {
                 width: 95%;
             }
+            
+            th, td {
+                padding: 10px 8px;
+                font-size: 0.85rem;
+            }
         }
 
         @media (max-width: 480px) {
@@ -575,14 +591,13 @@
                 font-size: 1.1rem;
             }
             
-            th, td {
-                padding: 10px 8px;
-                font-size: 0.85rem;
-            }
-            
             .btn {
                 padding: 6px 10px;
                 font-size: 0.75rem;
+            }
+            
+            .modal-body {
+                padding: 20px;
             }
         }
     </style>
@@ -813,6 +828,77 @@
             </div>
         </div>
     </div>
+    <div class="modal" id="video-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="video-modal-title">Adicionar Vídeo</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="video-form">
+                    <input type="hidden" id="video-id">
+                    <div class="form-group">
+                        <label for="video-title">Título do Vídeo</label>
+                        <input type="text" id="video-title" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="video-materia">Matéria</label>
+                        <select id="video-materia" class="form-control" required>
+                            <option value="">Selecione a matéria</option>
+                            <option value="historia">História</option>
+                            <option value="geografia">Geografia</option>
+                            <option value="filosofia">Filosofia</option>
+                            <option value="sociologia">Sociologia</option>
+                            <option value="atualidades">Atualidades</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="video-categoria">Categoria</label>
+                        <input type="text" id="video-categoria" class="form-control" placeholder="Ex: História Mundial, Geografia Física..." required>
+                    </div>
+                    <div class="form-group">
+                        <label for="video-url">URL do Vídeo (YouTube)</label>
+                        <input type="text" id="video-url" class="form-control" placeholder="https://www.youtube.com/embed/..." required>
+                    </div>
+                    <div class="form-group">
+                        <label for="video-descricao">Descrição</label>
+                        <textarea id="video-descricao" class="form-control" rows="3" placeholder="Descrição do vídeo..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="video-duracao">Duração (minutos)</label>
+                        <input type="number" id="video-duracao" class="form-control" min="1" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-warning" id="cancel-video">Cancelar</button>
+                <button class="btn btn-primary" id="save-video">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal" id="confirm-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Confirmação</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="confirm-message" style="color: #ddd;">Tem certeza que deseja realizar esta ação?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-warning" id="cancel-action">Cancelar</button>
+                <button class="btn btn-danger" id="confirm-action">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Global Loading -->
+    <div id="loadingGlobal">
+        <div class="spinner-large"></div>
+        <div>Carregando...</div>
+    </div>
 
     <!-- Confirmation Modal -->
     <div class="modal" id="confirm-modal">
@@ -838,11 +924,12 @@
     </div>
 
     <script>
-        // Configuration
+              // Configuration
         const API_BASE_URL = 'https://coliseum-api.onrender.com';
         
         // State
         let users = [];
+        let videos = [];
         let currentTab = 'dashboard';
         let pendingAction = null;
 
@@ -882,6 +969,9 @@
                                 case 'users':
                                     loadUsers();
                                     break;
+                                case 'videos':
+                                    loadVideos();
+                                    break;
                                 case 'ranking':
                                     loadFullRanking();
                                     break;
@@ -911,12 +1001,24 @@
                 document.getElementById('edit-user-modal').style.display = 'none';
             });
             
+            document.getElementById('cancel-video').addEventListener('click', function() {
+                document.getElementById('video-modal').style.display = 'none';
+            });
+            
             document.getElementById('cancel-action').addEventListener('click', function() {
                 document.getElementById('confirm-modal').style.display = 'none';
             });
             
             // Save user
             document.getElementById('save-user').addEventListener('click', saveUser);
+            
+            // Save video
+            document.getElementById('save-video').addEventListener('click', saveVideo);
+            
+            // Add video button
+            document.getElementById('add-video-btn').addEventListener('click', function() {
+                showVideoModal();
+            });
             
             // Settings
             document.getElementById('save-settings').addEventListener('click', saveSettings);
@@ -959,7 +1061,6 @@
             } catch (error) {
                 console.error('❌ API Error:', error);
                 
-                // Mostra instruções específicas para CORS
                 if (error.message.includes('Failed to fetch') || error.name === 'TypeError') {
                     showAlert(`
                     🚨 ERRO DE CONEXÃO
@@ -985,29 +1086,25 @@
         }
 
         // Data Loading Functions
-         async function loadDashboardData() {
+        async function loadDashboardData() {
             try {
                 document.getElementById('ranking-loading').style.display = 'flex';
                 
                 console.log('🔄 Tentando carregar dados...');
                 
-                // Primeiro testa se a API está respondendo
                 const healthCheck = await fetch(`${API_BASE_URL}/api/health`);
                 if (!healthCheck.ok) {
                     throw new Error('API não está respondendo');
                 }
                 
-                // Se passou, carrega os dados
                 const ranking = await fetchAPI('/api/ranking');
                 displayRanking(ranking.slice(0, 10));
                 
-                // Calcula estatísticas
                 const totalUsers = ranking.length;
                 const totalPoints = ranking.reduce((sum, user) => sum + user.pontuacao, 0);
                 const totalChallenges = ranking.reduce((sum, user) => sum + user.desafiosCompletados, 0);
                 const series = [...new Set(ranking.map(user => user.serie))].length;
                 
-                // Atualiza cards
                 document.getElementById('total-users').textContent = totalUsers;
                 document.getElementById('total-points').textContent = totalPoints;
                 document.getElementById('total-challenges').textContent = totalChallenges;
@@ -1017,27 +1114,21 @@
                 
             } catch (error) {
                 console.error('❌ Erro ao carregar dashboard:', error);
-                
-                // Mostra estado offline
                 document.getElementById('total-users').textContent = '?';
                 document.getElementById('total-points').textContent = '?';
                 document.getElementById('total-challenges').textContent = '?';
                 document.getElementById('total-series').textContent = '?';
-                
             } finally {
                 document.getElementById('ranking-loading').style.display = 'none';
             }
         }
 
-        // ✅ RESTANTE DO SE
         async function loadUsers() {
             try {
                 document.getElementById('users-loading').style.display = 'flex';
-                
                 const ranking = await fetchAPI('/api/ranking');
                 users = ranking;
                 displayUsers(users);
-                
             } catch (error) {
                 console.error('Error loading users:', error);
             } finally {
@@ -1045,13 +1136,25 @@
             }
         }
 
+        async function loadVideos() {
+            try {
+                document.getElementById('videos-loading').style.display = 'flex';
+                const videosData = await fetchAPI('/api/videos');
+                videos = videosData;
+                displayVideos(videos);
+            } catch (error) {
+                console.error('Error loading videos:', error);
+                showAlert('Erro ao carregar vídeos: ' + error.message, 'error');
+            } finally {
+                document.getElementById('videos-loading').style.display = 'none';
+            }
+        }
+
         async function loadFullRanking() {
             try {
                 document.getElementById('full-ranking-loading').style.display = 'flex';
-                
                 const ranking = await fetchAPI('/api/ranking');
                 displayFullRanking(ranking);
-                
             } catch (error) {
                 console.error('Error loading full ranking:', error);
             } finally {
@@ -1103,7 +1206,6 @@
                 tbody.appendChild(row);
             });
             
-            // Add event listeners to action buttons
             document.querySelectorAll('.edit-user').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const userId = this.getAttribute('data-id');
@@ -1115,6 +1217,48 @@
                 btn.addEventListener('click', function() {
                     const userId = this.getAttribute('data-id');
                     deleteUser(userId);
+                });
+            });
+        }
+
+        function displayVideos(videosList) {
+            const tbody = document.getElementById('videos-body');
+            tbody.innerHTML = '';
+            
+            videosList.forEach(video => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${video.id}</td>
+                    <td>${video.titulo}</td>
+                    <td>${video.materia}</td>
+                    <td>${video.categoria}</td>
+                    <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                        ${video.url}
+                    </td>
+                    <td>${video.duracao} min</td>
+                    <td class="actions">
+                        <button class="btn btn-primary btn-sm edit-video" data-id="${video.id}">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-danger btn-sm delete-video" data-id="${video.id}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            document.querySelectorAll('.edit-video').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const videoId = this.getAttribute('data-id');
+                    editVideo(videoId);
+                });
+            });
+            
+            document.querySelectorAll('.delete-video').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const videoId = this.getAttribute('data-id');
+                    deleteVideo(videoId);
                 });
             });
         }
@@ -1148,131 +1292,251 @@
             displayUsers(filteredUsers);
         }
 
-       function editUser(userId) {
-    const user = users.find(u => u.id == userId);
-    if (!user) {
-        console.error('❌ Usuário não encontrado:', userId);
-        return;
-    }
-    
-    console.log('✏️ Editando usuário:', user);
-    
-    // Preenche o formulário
-    document.getElementById('edit-user-id').value = user.id;
-    document.getElementById('edit-user-name').value = user.nome;
-    document.getElementById('edit-user-ra').value = user.ra;
-    document.getElementById('edit-user-serie').value = user.serie;
-    document.getElementById('edit-user-pontuacao').value = user.pontuacao;
-    document.getElementById('edit-user-desafios').value = user.desafiosCompletados;
-    
-    // Mostra o modal
-    document.getElementById('edit-user-modal').style.display = 'flex';
-}
-// ✅ FUNÇÃO PARA EXCLUIR USUÁRIO
-async function deleteUser(userId) {
-    const user = users.find(u => u.id == userId);
-    if (!user) {
-        console.error('❌ Usuário não encontrado:', userId);
-        return;
-    }
-    
-    showConfirmation(`Tem certeza que deseja excluir o usuário "${user.nome}" (RA: ${user.ra})? Esta ação não pode ser desfeita.`, async () => {
-        try {
-            showGlobalLoading(true);
-            
-            console.log(`🗑️ Excluindo usuário ${userId}...`);
-            
-            const response = await fetch(`${API_BASE_URL}/api/usuarios/${userId}`, {
-                method: 'DELETE'
-            });
-            
-            if (!response.ok) throw new Error(`Erro ${response.status}`);
-            
-            const result = await response.json();
-            console.log('✅ Usuário excluído:', result);
-            
-            showAlert('✅ Usuário excluído com sucesso!', 'success');
-            
-            // Recarrega os dados
-            users = [];
-            if (currentTab === 'dashboard') {
-                await loadDashboardData();
-            } else if (currentTab === 'users') {
-                await loadUsers();
-            } else if (currentTab === 'ranking') {
-                await loadFullRanking();
+        function editUser(userId) {
+            const user = users.find(u => u.id == userId);
+            if (!user) {
+                console.error('❌ Usuário não encontrado:', userId);
+                return;
             }
             
-        } catch (error) {
-            console.error('❌ Erro ao excluir usuário:', error);
-            showAlert('❌ Erro ao excluir usuário: ' + error.message, 'error');
-        } finally {
-            showGlobalLoading(false);
+            console.log('✏️ Editando usuário:', user);
+            
+            document.getElementById('edit-user-id').value = user.id;
+            document.getElementById('edit-user-name').value = user.nome;
+            document.getElementById('edit-user-ra').value = user.ra;
+            document.getElementById('edit-user-serie').value = user.serie;
+            document.getElementById('edit-user-pontuacao').value = user.pontuacao;
+            document.getElementById('edit-user-desafios').value = user.desafiosCompletados;
+            
+            document.getElementById('edit-user-modal').style.display = 'flex';
         }
-    });
-}
-async function saveUser() {
-    const userId = document.getElementById('edit-user-id').value;
-    const userData = {
-        nome: document.getElementById('edit-user-name').value,
-        ra: document.getElementById('edit-user-ra').value,
-        serie: document.getElementById('edit-user-serie').value,
-        pontuacao: parseInt(document.getElementById('edit-user-pontuacao').value),
-        desafiosCompletados: parseInt(document.getElementById('edit-user-desafios').value)
-    };
-    
-    console.log('💾 Salvando usuário COMPLETO...', userId, userData);
-    
-    try {
-        showGlobalLoading(true);
-        
-        // 1. ✅ SALVA NA API COM TODOS OS DADOS
-        const response = await fetch(`${API_BASE_URL}/api/usuarios/${userId}`, {
-            method: 'PUT',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(userData)
-        });
-        
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`Erro ${response.status}: ${errorText}`);
+
+        // ✅ FUNÇÃO PARA EXCLUIR USUÁRIO
+        async function deleteUser(userId) {
+            const user = users.find(u => u.id == userId);
+            if (!user) {
+                console.error('❌ Usuário não encontrado:', userId);
+                return;
+            }
+            
+            showConfirmation(`Tem certeza que deseja excluir o usuário "${user.nome}" (RA: ${user.ra})? Esta ação não pode ser desfeita.`, async () => {
+                try {
+                    showGlobalLoading(true);
+                    
+                    console.log(`🗑️ Excluindo usuário ${userId}...`);
+                    
+                    const response = await fetch(`${API_BASE_URL}/api/usuarios/${userId}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    if (!response.ok) throw new Error(`Erro ${response.status}`);
+                    
+                    const result = await response.json();
+                    console.log('✅ Usuário excluído:', result);
+                    
+                    showAlert('✅ Usuário excluído com sucesso!', 'success');
+                    
+                    // Recarrega os dados
+                    users = [];
+                    if (currentTab === 'dashboard') {
+                        await loadDashboardData();
+                    } else if (currentTab === 'users') {
+                        await loadUsers();
+                    } else if (currentTab === 'ranking') {
+                        await loadFullRanking();
+                    }
+                    
+                } catch (error) {
+                    console.error('❌ Erro ao excluir usuário:', error);
+                    showAlert('❌ Erro ao excluir usuário: ' + error.message, 'error');
+                } finally {
+                    showGlobalLoading(false);
+                }
+            });
         }
-        
-        const result = await response.json();
-        console.log('✅ Usuário COMPLETAMENTE salvo na API:', result);
-        
-        // 2. ✅ VERIFICA SE OS DADOS FORAM REALMENTE SALVOS
-        console.log('🔍 Verificando persistência...');
-        const debugResponse = await fetch(`${API_BASE_URL}/api/debug/persistence/${userId}`);
-        const debugData = await debugResponse.json();
-        console.log('📊 Estado atual no banco:', debugData);
-        
-        showAlert('✅ Usuário COMPLETAMENTE atualizado no banco!', 'success');
-        document.getElementById('edit-user-modal').style.display = 'none';
-        
-        // 3. ✅ RECARREGA OS DADOS
-        console.log('🔄 Atualizando interface...');
-        
-        users = [];
-        
-        if (currentTab === 'dashboard') {
-            await loadDashboardData();
-        } else if (currentTab === 'users') {
-            await loadUsers();
-        } else if (currentTab === 'ranking') {
-            await loadFullRanking();
+
+        async function saveUser() {
+            const userId = document.getElementById('edit-user-id').value;
+            const userData = {
+                nome: document.getElementById('edit-user-name').value,
+                ra: document.getElementById('edit-user-ra').value,
+                serie: document.getElementById('edit-user-serie').value,
+                pontuacao: parseInt(document.getElementById('edit-user-pontuacao').value),
+                desafiosCompletados: parseInt(document.getElementById('edit-user-desafios').value)
+            };
+            
+            console.log('💾 Salvando usuário COMPLETO...', userId, userData);
+            
+            try {
+                showGlobalLoading(true);
+                
+                // 1. ✅ SALVA NA API COM TODOS OS DADOS
+                const response = await fetch(`${API_BASE_URL}/api/usuarios/${userId}`, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(userData)
+                });
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Erro ${response.status}: ${errorText}`);
+                }
+                
+                const result = await response.json();
+                console.log('✅ Usuário COMPLETAMENTE salvo na API:', result);
+                
+                // 2. ✅ VERIFICA SE OS DADOS FORAM REALMENTE SALVOS
+                console.log('🔍 Verificando persistência...');
+                try {
+                    const debugResponse = await fetch(`${API_BASE_URL}/api/debug/persistence/${userId}`);
+                    if (debugResponse.ok) {
+                        const debugData = await debugResponse.json();
+                        console.log('📊 Estado atual no banco:', debugData);
+                    }
+                } catch (debugError) {
+                    console.log('⚠️ Debug endpoint não disponível:', debugError.message);
+                }
+                
+                showAlert('✅ Usuário COMPLETAMENTE atualizado no banco!', 'success');
+                document.getElementById('edit-user-modal').style.display = 'none';
+                
+                // 3. ✅ RECARREGA OS DADOS
+                console.log('🔄 Atualizando interface...');
+                
+                users = [];
+                
+                if (currentTab === 'dashboard') {
+                    await loadDashboardData();
+                } else if (currentTab === 'users') {
+                    await loadUsers();
+                } else if (currentTab === 'ranking') {
+                    await loadFullRanking();
+                }
+                
+            } catch (error) {
+                console.error('❌ Erro CRÍTICO ao salvar usuário:', error);
+                showAlert('❌ ERRO: Não foi possível salvar no banco: ' + error.message, 'error');
+            } finally {
+                showGlobalLoading(false);
+            }
         }
-        
-    } catch (error) {
-        console.error('❌ Erro CRÍTICO ao salvar usuário:', error);
-        showAlert('❌ ERRO: Não foi possível salvar no banco: ' + error.message, 'error');
-    } finally {
-        showGlobalLoading(false);
-    }
-}
+
+        // Video Management
+        function showVideoModal(video = null) {
+            const modal = document.getElementById('video-modal');
+            const title = document.getElementById('video-modal-title');
+            const form = document.getElementById('video-form');
+            
+            if (video) {
+                title.textContent = 'Editar Vídeo';
+                document.getElementById('video-id').value = video.id;
+                document.getElementById('video-title').value = video.titulo;
+                document.getElementById('video-materia').value = video.materia;
+                document.getElementById('video-categoria').value = video.categoria;
+                document.getElementById('video-url').value = video.url;
+                document.getElementById('video-descricao').value = video.descricao || '';
+                document.getElementById('video-duracao').value = video.duracao;
+            } else {
+                title.textContent = 'Adicionar Vídeo';
+                form.reset();
+            }
+            
+            modal.style.display = 'flex';
+        }
+
+        function editVideo(videoId) {
+            const video = videos.find(v => v.id == videoId);
+            if (video) {
+                showVideoModal(video);
+            }
+        }
+
+        async function saveVideo() {
+            const videoId = document.getElementById('video-id').value;
+            const videoData = {
+                titulo: document.getElementById('video-title').value,
+                materia: document.getElementById('video-materia').value,
+                categoria: document.getElementById('video-categoria').value,
+                url: document.getElementById('video-url').value,
+                descricao: document.getElementById('video-descricao').value,
+                duracao: parseInt(document.getElementById('video-duracao').value)
+            };
+            
+            try {
+                showGlobalLoading(true);
+                
+                let response;
+                if (videoId) {
+                    // Editar vídeo existente
+                    response = await fetch(`${API_BASE_URL}/api/videos/${videoId}`, {
+                        method: 'PUT',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(videoData)
+                    });
+                } else {
+                    // Adicionar novo vídeo
+                    response = await fetch(`${API_BASE_URL}/api/videos`, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(videoData)
+                    });
+                }
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Erro ${response.status}: ${errorText}`);
+                }
+                
+                const result = await response.json();
+                console.log('✅ Vídeo salvo:', result);
+                
+                showAlert('✅ Vídeo salvo com sucesso!', 'success');
+                document.getElementById('video-modal').style.display = 'none';
+                
+                // Recarregar lista de vídeos
+                await loadVideos();
+                
+            } catch (error) {
+                console.error('❌ Erro ao salvar vídeo:', error);
+                showAlert('❌ Erro ao salvar vídeo: ' + error.message, 'error');
+            } finally {
+                showGlobalLoading(false);
+            }
+        }
+
+        async function deleteVideo(videoId) {
+            const video = videos.find(v => v.id == videoId);
+            if (!video) return;
+            
+            showConfirmation(`Tem certeza que deseja excluir o vídeo "${video.titulo}"?`, async () => {
+                try {
+                    showGlobalLoading(true);
+                    
+                    const response = await fetch(`${API_BASE_URL}/api/videos/${videoId}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    if (!response.ok) throw new Error(`Erro ${response.status}`);
+                    
+                    const result = await response.json();
+                    console.log('✅ Vídeo excluído:', result);
+                    
+                    showAlert('✅ Vídeo excluído com sucesso!', 'success');
+                    
+                    // Recarregar lista de vídeos
+                    await loadVideos();
+                    
+                } catch (error) {
+                    console.error('❌ Erro ao excluir vídeo:', error);
+                    showAlert('❌ Erro ao excluir vídeo: ' + error.message, 'error');
+                } finally {
+                    showGlobalLoading(false);
+                }
+            });
+        }
+
         // System Functions
         function saveSettings() {
-            // In a real application, you would save these to localStorage or a backend
             showAlert('Configurações salvas com sucesso!', 'success');
         }
 
@@ -1280,8 +1544,6 @@ async function saveUser() {
             try {
                 showGlobalLoading(true);
                 
-                // This would need to be implemented in your backend
-                // For now, we'll update each user individually
                 for (const user of users) {
                     await fetchAPI(`/api/usuarios/${user.id}`, {
                         method: 'PUT',
@@ -1331,12 +1593,10 @@ async function saveUser() {
             
             alertContainer.appendChild(alert);
             
-            // Auto remove after 5 seconds
             setTimeout(() => {
                 alert.remove();
             }, 5000);
             
-            // Close button
             alert.querySelector('.alert-close').addEventListener('click', function() {
                 alert.remove();
             });
