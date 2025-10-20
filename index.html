@@ -7,7 +7,7 @@
     <meta name="description" content="Sistema administrativo para gerenciar usuários do Coliseum">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-      * {
+        * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
@@ -261,17 +261,17 @@
             background: linear-gradient(135deg, #4361ee, #3a56d4); 
             color: white; 
         }
-        
+
         .btn-success { 
             background: linear-gradient(135deg, #4cc9f0, #3ab7e0); 
             color: white; 
         }
-        
+
         .btn-danger { 
             background: linear-gradient(135deg, #f72585, #e02178); 
             color: white; 
         }
-        
+
         .btn-warning { 
             background: linear-gradient(135deg, #ffcf00, #e6ba00); 
             color: #000; 
@@ -485,7 +485,7 @@
             font-size: 18px;
             backdrop-filter: blur(5px);
         }
-        
+
         .spinner-large {
             border: 4px solid rgba(255, 207, 0, 0.3);
             border-radius: 50%;
@@ -500,63 +500,63 @@
             body {
                 padding: 15px;
             }
-            
+
             .container {
                 padding: 25px 20px;
                 max-width: 100%;
             }
-            
+
             .logo-container {
                 width: 90px;
                 height: 90px;
             }
-            
+
             .logo-emoji {
                 font-size: 50px;
                 width: 80px;
                 height: 80px;
             }
-            
+
             h1 {
                 font-size: 28px;
             }
-            
+
             .tabs {
                 flex-direction: column;
             }
-            
+
             .tab {
                 padding: 12px 15px;
                 text-align: center;
             }
-            
+
             .cards-container {
                 grid-template-columns: 1fr;
             }
-            
+
             .table-header {
                 flex-direction: column;
                 gap: 15px;
                 align-items: flex-start;
             }
-            
+
             .search-box {
                 width: 100%;
             }
-            
+
             .search-box input {
                 width: 100%;
             }
-            
+
             .form-row {
                 flex-direction: column;
                 gap: 0;
             }
-            
+
             .modal-content {
                 width: 95%;
             }
-            
+
             th, td {
                 padding: 10px 8px;
                 font-size: 0.85rem;
@@ -567,35 +567,35 @@
             .container {
                 padding: 20px 15px;
             }
-            
+
             .logo-container {
                 width: 80px;
                 height: 80px;
             }
-            
+
             .logo-emoji {
                 font-size: 40px;
                 width: 70px;
                 height: 70px;
             }
-            
+
             h1 {
                 font-size: 24px;
             }
-            
+
             .card {
                 padding: 20px;
             }
-            
+
             .table-header h3 {
                 font-size: 1.1rem;
             }
-            
+
             .btn {
                 padding: 6px 10px;
                 font-size: 0.75rem;
             }
-            
+
             .modal-body {
                 padding: 20px;
             }
@@ -873,40 +873,85 @@
                     <input type="hidden" id="video-id">
                     <div class="form-group">
                         <label for="video-title">Título do Vídeo</label>
-                        <input type="text" id="video-title" class="form-control" required>
+                        <input type="text" id="video-title" class="form-control" placeholder="Ex: Introdução à Álgebra" required>
                     </div>
+                    
                     <div class="form-group">
                         <label for="video-materia">Matéria</label>
                         <select id="video-materia" class="form-control" required>
                             <option value="">Selecione a matéria</option>
-                            <option value="historia">História</option>
-                            <option value="geografia">Geografia</option>
-                            <option value="filosofia">Filosofia</option>
-                            <option value="sociologia">Sociologia</option>
-                            <option value="atualidades">Atualidades</option>
+                            
+                            <!-- CIÊNCIAS HUMANAS -->
+                            <optgroup label="🟡 Ciências Humanas">
+                                <option value="historia">História</option>
+                                <option value="geografia">Geografia</option>
+                                <option value="filosofia">Filosofia</option>
+                                <option value="sociologia">Sociologia</option>
+                                <option value="atualidades">Atualidades</option>
+                            </optgroup>
+                            
+                            <!-- CIÊNCIAS DA NATUREZA -->
+                            <optgroup label="🟢 Ciências da Natureza">
+                                <option value="biologia">Biologia</option>
+                                <option value="quimica">Química</option>
+                                <option value="fisica">Física</option>
+                            </optgroup>
+                            
+                            <!-- LINGUAGENS -->
+                            <optgroup label="🔵 Linguagens">
+                                <option value="portugues">Língua Portuguesa</option>
+                                <option value="gramatica">Gramática</option>
+                                <option value="literatura">Literatura</option>
+                                <option value="redacao">Redação</option>
+                            </optgroup>
+                            
+                            <!-- MATEMÁTICA -->
+                            <optgroup label="🔴 Matemática">
+                                <option value="matematica">Matemática Geral</option>
+                                <option value="algebra">Álgebra</option>
+                                <option value="geometria">Geometria</option>
+                                <option value="trigonometria">Trigonometria</option>
+                                <option value="calculo">Cálculo</option>
+                            </optgroup>
                         </select>
                     </div>
+                    
                     <div class="form-group">
-                        <label for="video-categoria">Categoria</label>
-                        <input type="text" id="video-categoria" class="form-control" placeholder="Ex: História Mundial, Geografia Física..." required>
+                        <label for="video-categoria">Categoria Específica</label>
+                        <input type="text" id="video-categoria" class="form-control" 
+                               placeholder="Ex: História Mundial, Álgebra Básica, Gramática..." 
+                               required>
+                        <small style="color: #888; font-size: 12px; margin-top: 5px;">
+                            Esta categoria aparecerá como badge no vídeo
+                        </small>
                     </div>
+                    
                     <div class="form-group">
                         <label for="video-url">URL do Vídeo (YouTube)</label>
-                        <input type="text" id="video-url" class="form-control" placeholder="https://www.youtube.com/embed/..." required>
+                        <input type="text" id="video-url" class="form-control" 
+                               placeholder="https://www.youtube.com/embed/... ou https://www.youtube.com/watch?v=..." 
+                               required>
+                        <small style="color: #888; font-size: 12px; margin-top: 5px;">
+                            Aceita URLs embed ou normais do YouTube
+                        </small>
                     </div>
+                    
                     <div class="form-group">
-                        <label for="video-descricao">Descrição</label>
-                        <textarea id="video-descricao" class="form-control" rows="3" placeholder="Descrição do vídeo..."></textarea>
+                        <label for="video-descricao">Descrição do Vídeo</label>
+                        <textarea id="video-descricao" class="form-control" rows="3" 
+                                  placeholder="Descreva o conteúdo do vídeo, tópicos abordados..."></textarea>
                     </div>
+                    
                     <div class="form-group">
                         <label for="video-duracao">Duração (minutos)</label>
-                        <input type="number" id="video-duracao" class="form-control" min="1" required>
+                        <input type="number" id="video-duracao" class="form-control" min="1" 
+                               placeholder="Ex: 15" required>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-warning" id="cancel-video">Cancelar</button>
-                <button class="btn btn-primary" id="save-video">Salvar</button>
+                <button class="btn btn-primary" id="save-video">Salvar Vídeo</button>
             </div>
         </div>
     </div>
@@ -935,7 +980,7 @@
     </div>
     <script>
         const API_BASE_URL = 'https://coliseum-api.onrender.com';
-        
+
         // State
         let users = [];
         let videos = [];
@@ -961,7 +1006,7 @@
                     // Update active tab
                     tabs.forEach(t => t.classList.remove('active'));
                     this.classList.add('active');
-                    
+
                     // Show corresponding content
                     const tabId = this.getAttribute('data-tab');
                     tabContents.forEach(content => {
@@ -969,7 +1014,7 @@
                         if (content.id === tabId) {
                             content.classList.add('active');
                             currentTab = tabId;
-                            
+
                             // Load data for the tab
                             switch(tabId) {
                                 case 'dashboard':
@@ -994,28 +1039,28 @@
         // Event Listeners - VERSÃO CORRIGIDA
         function setupEventListeners() {
             console.log('🔧 Configurando event listeners...');
-            
+
             // Search functionality
             const userSearch = document.getElementById('user-search');
             if (userSearch) {
                 userSearch.addEventListener('input', filterUsers);
                 console.log('✅ Listener de busca configurado');
             }
-            
+
             // Refresh ranking
             const refreshRanking = document.getElementById('refresh-ranking');
             if (refreshRanking) {
                 refreshRanking.addEventListener('click', loadFullRanking);
                 console.log('✅ Listener de refresh configurado');
             }
-            
+
             // Modal controls - usando event delegation para elementos que podem não existir ainda
             document.addEventListener('click', function(e) {
                 if (e.target.classList.contains('modal-close')) {
                     e.target.closest('.modal').style.display = 'none';
                 }
             });
-            
+
             // Cancel buttons
             const cancelEdit = document.getElementById('cancel-edit');
             if (cancelEdit) {
@@ -1023,32 +1068,32 @@
                     document.getElementById('edit-user-modal').style.display = 'none';
                 });
             }
-            
+
             const cancelVideo = document.getElementById('cancel-video');
             if (cancelVideo) {
                 cancelVideo.addEventListener('click', function() {
                     document.getElementById('video-modal').style.display = 'none';
                 });
             }
-            
+
             const cancelAction = document.getElementById('cancel-action');
             if (cancelAction) {
                 cancelAction.addEventListener('click', function() {
                     document.getElementById('confirm-modal').style.display = 'none';
                 });
             }
-            
+
             // Save buttons
             const saveUserBtn = document.getElementById('save-user');
             if (saveUserBtn) {
                 saveUserBtn.addEventListener('click', saveUser);
             }
-            
+
             const saveVideoBtn = document.getElementById('save-video');
             if (saveVideoBtn) {
                 saveVideoBtn.addEventListener('click', saveVideo);
             }
-            
+
             // Add video button
             const addVideoBtn = document.getElementById('add-video-btn');
             if (addVideoBtn) {
@@ -1056,27 +1101,27 @@
                     showVideoModal();
                 });
             }
-            
+
             // Settings buttons - CORREÇÃO: IDs corretos
             const saveSettings = document.getElementById('save-settings');
             if (saveSettings) {
                 saveSettings.addEventListener('click', saveSettings);
             }
-            
+
             const resetPoints = document.getElementById('reset-points');
             if (resetPoints) {
                 resetPoints.addEventListener('click', function() {
                     showConfirmation('Zerar todas as pontuações?', resetAllPoints);
                 });
             }
-            
+
             const resetAll = document.getElementById('reset-all');
             if (resetAll) {
                 resetAll.addEventListener('click', function() {
                     showConfirmation('Resetar TODOS os dados? Esta ação não pode ser desfeita!', resetAllData);
                 });
             }
-            
+
             // Confirm action
             const confirmAction = document.getElementById('confirm-action');
             if (confirmAction) {
@@ -1088,121 +1133,122 @@
                     }
                 });
             }
-            
+
             console.log('✅ Todos os event listeners configurados');
         }
 
-        // API Functions (mantenha as existentes)
-      async function fetchAPI(endpoint, options = {}) {
-    try {
-        console.log(`🌐 Fazendo requisição para: ${API_BASE_URL}${endpoint}`);
-        
-        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-            headers: {
-                'Content-Type': 'application/json',
-                ...options.headers
-            },
-            ...options
-        });
-        
-        console.log(`📡 Resposta da API - Status: ${response.status}`);
-        
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error(`❌ Erro HTTP ${response.status}:`, errorText);
-            throw new Error(`Erro ${response.status}: ${errorText}`);
-        }
-        
-        const data = await response.json();
-        console.log(`✅ Dados recebidos de ${endpoint}:`, data);
-        
-        return data;
-        
-    } catch (error) {
-        console.error('❌ Erro na requisição API:', error);
-        
-        if (error.message.includes('Failed to fetch') || error.name === 'TypeError') {
-            showAlert('🚨 ERRO: Não foi possível conectar com a API. Verifique a URL e CORS.', 'error');
-        } else {
-            showAlert('Erro na API: ' + error.message, 'error');
-        }
-        
-        throw error;
-    }
-}
+        // API Functions
+        async function fetchAPI(endpoint, options = {}) {
+            try {
+                console.log(`🌐 Fazendo requisição para: ${API_BASE_URL}${endpoint}`);
 
-        // Data Loading Functions (mantenha as existentes)
-       async function loadDashboardData() {
-    try {
-        document.getElementById('ranking-loading').style.display = 'flex';
-        
-        console.log('🔄 Carregando dados do dashboard...');
-        
-        const ranking = await fetchAPI('/api/ranking');
-        console.log('📊 Dados brutos da API:', ranking);
-        
-        // ✅ VERIFICAÇÃO CRÍTICA: A API está retornando array vazio?
-        if (!ranking || !Array.isArray(ranking)) {
-            console.error('❌ API retornou dados inválidos:', ranking);
-            showAlert('API retornou dados inválidos ou vazios', 'error');
-            return;
+                const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...options.headers
+                    },
+                    ...options
+                });
+
+                console.log(`📡 Resposta da API - Status: ${response.status}`);
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error(`❌ Erro HTTP ${response.status}:`, errorText);
+                    throw new Error(`Erro ${response.status}: ${errorText}`);
+                }
+
+                const data = await response.json();
+                console.log(`✅ Dados recebidos de ${endpoint}:`, data);
+
+                return data;
+
+            } catch (error) {
+                console.error('❌ Erro na requisição API:', error);
+
+                if (error.message.includes('Failed to fetch') || error.name === 'TypeError') {
+                    showAlert('🚨 ERRO: Não foi possível conectar com a API. Verifique a URL e CORS.', 'error');
+                } else {
+                    showAlert('Erro na API: ' + error.message, 'error');
+                }
+
+                throw error;
+            }
         }
-        
-        console.log(`✅ API retornou ${ranking.length} usuários`);
-        
-        // ✅ DEBUG: Mostrar estrutura do primeiro usuário
-        if (ranking.length > 0) {
-            console.log('🔍 Estrutura do primeiro usuário:', Object.keys(ranking[0]));
-            console.log('📝 Valores do primeiro usuário:', ranking[0]);
+
+        // Data Loading Functions
+        async function loadDashboardData() {
+            try {
+                document.getElementById('ranking-loading').style.display = 'flex';
+
+                console.log('🔄 Carregando dados do dashboard...');
+
+                const ranking = await fetchAPI('/api/ranking');
+                console.log('📊 Dados brutos da API:', ranking);
+
+                // ✅ VERIFICAÇÃO CRÍTICA: A API está retornando array vazio?
+                if (!ranking || !Array.isArray(ranking)) {
+                    console.error('❌ API retornou dados inválidos:', ranking);
+                    showAlert('API retornou dados inválidos ou vazios', 'error');
+                    return;
+                }
+
+                console.log(`✅ API retornou ${ranking.length} usuários`);
+
+                // ✅ DEBUG: Mostrar estrutura do primeiro usuário
+                if (ranking.length > 0) {
+                    console.log('🔍 Estrutura do primeiro usuário:', Object.keys(ranking[0]));
+                    console.log('📝 Valores do primeiro usuário:', ranking[0]);
+                }
+
+                displayRanking(ranking.slice(0, 10));
+
+                // ✅ CÁLCULOS COM VERIFICAÇÃO
+                const totalUsers = ranking.length;
+                const totalPoints = ranking.reduce((sum, user) => {
+                    // ✅ FALLBACK para diferentes nomes de campo
+                    const pontos = user.pontuacao || user.points || user.score || 0;
+                    return sum + pontos;
+                }, 0);
+
+                const totalChallenges = ranking.reduce((sum, user) => {
+                    // ✅ FALLBACK para diferentes nomes de campo
+                    const desafios = user.desafiosCompletados || user.challengesCompleted || user.desafios || 0;
+                    return sum + desafios;
+                }, 0);
+
+                const series = [...new Set(ranking.map(user => {
+                    // ✅ FALLBACK para diferentes nomes de campo
+                    return user.serie || user.grade || user.turma || 'N/A';
+                }))].length;
+
+                // ✅ ATUALIZA A INTERFACE
+                document.getElementById('total-users').textContent = totalUsers;
+                document.getElementById('total-points').textContent = totalPoints;
+                document.getElementById('total-challenges').textContent = totalChallenges;
+                document.getElementById('total-series').textContent = series;
+
+                console.log('✅ Dashboard atualizado:', {
+                    usuarios: totalUsers,
+                    pontos: totalPoints,
+                    desafios: totalChallenges,
+                    series: series
+                });
+
+            } catch (error) {
+                console.error('❌ Erro crítico no dashboard:', error);
+                showAlert('Erro ao carregar dashboard: ' + error.message, 'error');
+
+                // ✅ MOSTRA "0" EM VEZ DE "?"
+                document.getElementById('total-users').textContent = '0';
+                document.getElementById('total-points').textContent = '0';
+                document.getElementById('total-challenges').textContent = '0';
+                document.getElementById('total-series').textContent = '0';
+            } finally {
+                document.getElementById('ranking-loading').style.display = 'none';
+            }
         }
-        
-        displayRanking(ranking.slice(0, 10));
-        
-        // ✅ CÁLCULOS COM VERIFICAÇÃO
-        const totalUsers = ranking.length;
-        const totalPoints = ranking.reduce((sum, user) => {
-            // ✅ FALLBACK para diferentes nomes de campo
-            const pontos = user.pontuacao || user.points || user.score || 0;
-            return sum + pontos;
-        }, 0);
-        
-        const totalChallenges = ranking.reduce((sum, user) => {
-            // ✅ FALLBACK para diferentes nomes de campo
-            const desafios = user.desafiosCompletados || user.challengesCompleted || user.desafios || 0;
-            return sum + desafios;
-        }, 0);
-        
-        const series = [...new Set(ranking.map(user => {
-            // ✅ FALLBACK para diferentes nomes de campo
-            return user.serie || user.grade || user.turma || 'N/A';
-        }))].length;
-        
-        // ✅ ATUALIZA A INTERFACE
-        document.getElementById('total-users').textContent = totalUsers;
-        document.getElementById('total-points').textContent = totalPoints;
-        document.getElementById('total-challenges').textContent = totalChallenges;
-        document.getElementById('total-series').textContent = series;
-        
-        console.log('✅ Dashboard atualizado:', {
-            usuarios: totalUsers,
-            pontos: totalPoints,
-            desafios: totalChallenges,
-            series: series
-        });
-        
-    } catch (error) {
-        console.error('❌ Erro crítico no dashboard:', error);
-        showAlert('Erro ao carregar dashboard: ' + error.message, 'error');
-        
-        // ✅ MOSTRA "0" EM VEZ DE "?"
-        document.getElementById('total-users').textContent = '0';
-        document.getElementById('total-points').textContent = '0';
-        document.getElementById('total-challenges').textContent = '0';
-        document.getElementById('total-series').textContent = '0';
-    } finally {
-        document.getElementById('ranking-loading').style.display = 'none';
-    }
-}
+
         async function loadUsers() {
             try {
                 document.getElementById('users-loading').style.display = 'flex';
@@ -1242,64 +1288,64 @@
             }
         }
 
-       function displayRanking(ranking) {
-    const tbody = document.getElementById('ranking-body');
-    if (!tbody) {
-        console.error('❌ Elemento ranking-body não encontrado!');
-        return;
-    }
-    
-    tbody.innerHTML = '';
-    
-    // ✅ VERIFICA SE HÁ DADOS
-    if (!ranking || ranking.length === 0) {
-        console.log('📭 Nenhum dado para exibir no ranking');
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td colspan="6" style="text-align: center; color: #888; padding: 20px;">
-                <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
-                Nenhum usuário encontrado
-            </td>
-        `;
-        tbody.appendChild(row);
-        return;
-    }
-    
-    console.log(`🎯 Renderizando ${ranking.length} usuários no ranking`);
-    
-    // ✅ RENDERIZA CADA USUÁRIO COM FALLBACKS
-    ranking.forEach((user, index) => {
-        const row = document.createElement('tr');
-        
-        // ✅ FALLBACKS PARA DIFERENTES ESTRUTURAS DE DADOS
-        const nome = user.nome || user.name || 'Nome não informado';
-        const ra = user.ra || user.id || 'RA não informado';
-        const serie = user.serie || user.grade || user.turma || 'Série não informada';
-        const pontuacao = user.pontuacao || user.points || user.score || 0;
-        const desafios = user.desafiosCompletados || user.challengesCompleted || user.desafios || 0;
-        
-        console.log(`👤 Usuário ${index + 1}:`, { nome, ra, serie, pontuacao, desafios });
-        
-        row.innerHTML = `
-            <td><strong>${index + 1}º</strong></td>
-            <td>${nome}</td>
-            <td><code>${ra}</code></td>
-            <td>${serie}</td>
-            <td><span style="color: #ffcf00; font-weight: bold;">${pontuacao}</span></td>
-            <td>${desafios}</td>
-        `;
-        tbody.appendChild(row);
-    });
-    
-    console.log('✅ Ranking renderizado com sucesso!');
-}
+        function displayRanking(ranking) {
+            const tbody = document.getElementById('ranking-body');
+            if (!tbody) {
+                console.error('❌ Elemento ranking-body não encontrado!');
+                return;
+            }
+
+            tbody.innerHTML = '';
+
+            // ✅ VERIFICA SE HÁ DADOS
+            if (!ranking || ranking.length === 0) {
+                console.log('📭 Nenhum dado para exibir no ranking');
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td colspan="6" style="text-align: center; color: #888; padding: 20px;">
+                        <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
+                        Nenhum usuário encontrado
+                    </td>
+                `;
+                tbody.appendChild(row);
+                return;
+            }
+
+            console.log(`🎯 Renderizando ${ranking.length} usuários no ranking`);
+
+            // ✅ RENDERIZA CADA USUÁRIO COM FALLBACKS
+            ranking.forEach((user, index) => {
+                const row = document.createElement('tr');
+
+                // ✅ FALLBACKS PARA DIFERENTES ESTRUTURAS DE DADOS
+                const nome = user.nome || user.name || 'Nome não informado';
+                const ra = user.ra || user.id || 'RA não informado';
+                const serie = user.serie || user.grade || user.turma || 'Série não informada';
+                const pontuacao = user.pontuacao || user.points || user.score || 0;
+                const desafios = user.desafiosCompletados || user.challengesCompleted || user.desafios || 0;
+
+                console.log(`👤 Usuário ${index + 1}:`, { nome, ra, serie, pontuacao, desafios });
+
+                row.innerHTML = `
+                    <td><strong>${index + 1}º</strong></td>
+                    <td>${nome}</td>
+                    <td><code>${ra}</code></td>
+                    <td>${serie}</td>
+                    <td><span style="color: #ffcf00; font-weight: bold;">${pontuacao}</span></td>
+                    <td>${desafios}</td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            console.log('✅ Ranking renderizado com sucesso!');
+        }
 
         function displayUsers(users) {
             const tbody = document.getElementById('users-body');
             if (!tbody) return;
-            
+
             tbody.innerHTML = '';
-            
+
             users.forEach(user => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
@@ -1320,7 +1366,7 @@
                 `;
                 tbody.appendChild(row);
             });
-            
+
             // Add event listeners usando event delegation
             tbody.addEventListener('click', function(e) {
                 if (e.target.closest('.edit-user')) {
@@ -1337,9 +1383,9 @@
         function displayVideos(videosList) {
             const tbody = document.getElementById('videos-body');
             if (!tbody) return;
-            
+
             tbody.innerHTML = '';
-            
+
             videosList.forEach(video => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
@@ -1362,7 +1408,7 @@
                 `;
                 tbody.appendChild(row);
             });
-            
+
             // Add event listeners usando event delegation
             tbody.addEventListener('click', function(e) {
                 if (e.target.closest('.edit-video')) {
@@ -1379,9 +1425,9 @@
         function displayFullRanking(ranking) {
             const tbody = document.getElementById('full-ranking-body');
             if (!tbody) return;
-            
+
             tbody.innerHTML = '';
-            
+
             ranking.forEach((user, index) => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
@@ -1396,7 +1442,7 @@
             });
         }
 
-        // User Management (mantenha as funções existentes)
+        // User Management
         function filterUsers() {
             const searchTerm = document.getElementById('user-search').value.toLowerCase();
             const filteredUsers = users.filter(user => 
@@ -1413,16 +1459,16 @@
                 console.error('❌ Usuário não encontrado:', userId);
                 return;
             }
-            
+
             console.log('✏️ Editando usuário:', user);
-            
+
             document.getElementById('edit-user-id').value = user.id;
             document.getElementById('edit-user-name').value = user.nome;
             document.getElementById('edit-user-ra').value = user.ra;
             document.getElementById('edit-user-serie').value = user.serie;
             document.getElementById('edit-user-pontuacao').value = user.pontuacao;
             document.getElementById('edit-user-desafios').value = user.desafiosCompletados;
-            
+
             document.getElementById('edit-user-modal').style.display = 'flex';
         }
 
@@ -1432,24 +1478,24 @@
                 console.error('❌ Usuário não encontrado:', userId);
                 return;
             }
-            
+
             showConfirmation(`Tem certeza que deseja excluir o usuário "${user.nome}" (RA: ${user.ra})? Esta ação não pode ser desfeita.`, async () => {
                 try {
                     showGlobalLoading(true);
-                    
+
                     console.log(`🗑️ Excluindo usuário ${userId}...`);
-                    
+
                     const response = await fetch(`${API_BASE_URL}/api/usuarios/${userId}`, {
                         method: 'DELETE'
                     });
-                    
+
                     if (!response.ok) throw new Error(`Erro ${response.status}`);
-                    
+
                     const result = await response.json();
                     console.log('✅ Usuário excluído:', result);
-                    
+
                     showAlert('✅ Usuário excluído com sucesso!', 'success');
-                    
+
                     // Recarrega os dados
                     users = [];
                     if (currentTab === 'dashboard') {
@@ -1459,7 +1505,7 @@
                     } else if (currentTab === 'ranking') {
                         await loadFullRanking();
                     }
-                    
+
                 } catch (error) {
                     console.error('❌ Erro ao excluir usuário:', error);
                     showAlert('❌ Erro ao excluir usuário: ' + error.message, 'error');
@@ -1478,32 +1524,32 @@
                 pontuacao: parseInt(document.getElementById('edit-user-pontuacao').value),
                 desafiosCompletados: parseInt(document.getElementById('edit-user-desafios').value)
             };
-            
+
             console.log('💾 Salvando usuário COMPLETO...', userId, userData);
-            
+
             try {
                 showGlobalLoading(true);
-                
+
                 const response = await fetch(`${API_BASE_URL}/api/usuarios/${userId}`, {
                     method: 'PUT',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(userData)
                 });
-                
+
                 if (!response.ok) {
                     const errorText = await response.text();
                     throw new Error(`Erro ${response.status}: ${errorText}`);
                 }
-                
+
                 const result = await response.json();
                 console.log('✅ Usuário COMPLETAMENTE salvo na API:', result);
-                
+
                 showAlert('✅ Usuário COMPLETAMENTE atualizado no banco!', 'success');
                 document.getElementById('edit-user-modal').style.display = 'none';
-                
+
                 // Recarrega os dados
                 users = [];
-                
+
                 if (currentTab === 'dashboard') {
                     await loadDashboardData();
                 } else if (currentTab === 'users') {
@@ -1511,7 +1557,7 @@
                 } else if (currentTab === 'ranking') {
                     await loadFullRanking();
                 }
-                
+
             } catch (error) {
                 console.error('❌ Erro CRÍTICO ao salvar usuário:', error);
                 showAlert('❌ ERRO: Não foi possível salvar no banco: ' + error.message, 'error');
@@ -1520,12 +1566,12 @@
             }
         }
 
-        // Video Management (mantenha as funções existentes)
+        // Video Management
         function showVideoModal(video = null) {
             const modal = document.getElementById('video-modal');
             const title = document.getElementById('video-modal-title');
             const form = document.getElementById('video-form');
-            
+
             if (video) {
                 title.textContent = 'Editar Vídeo';
                 document.getElementById('video-id').value = video.id;
@@ -1539,7 +1585,7 @@
                 title.textContent = 'Adicionar Vídeo';
                 form.reset();
             }
-            
+
             modal.style.display = 'flex';
         }
 
@@ -1560,10 +1606,10 @@
                 descricao: document.getElementById('video-descricao').value,
                 duracao: parseInt(document.getElementById('video-duracao').value)
             };
-            
+
             try {
                 showGlobalLoading(true);
-                
+
                 let response;
                 if (videoId) {
                     response = await fetch(`${API_BASE_URL}/api/videos/${videoId}`, {
@@ -1578,20 +1624,20 @@
                         body: JSON.stringify(videoData)
                     });
                 }
-                
+
                 if (!response.ok) {
                     const errorText = await response.text();
                     throw new Error(`Erro ${response.status}: ${errorText}`);
                 }
-                
+
                 const result = await response.json();
                 console.log('✅ Vídeo salvo:', result);
-                
+
                 showAlert('✅ Vídeo salvo com sucesso!', 'success');
                 document.getElementById('video-modal').style.display = 'none';
-                
+
                 await loadVideos();
-                
+
             } catch (error) {
                 console.error('❌ Erro ao salvar vídeo:', error);
                 showAlert('❌ Erro ao salvar vídeo: ' + error.message, 'error');
@@ -1603,24 +1649,24 @@
         async function deleteVideo(videoId) {
             const video = videos.find(v => v.id == videoId);
             if (!video) return;
-            
+
             showConfirmation(`Tem certeza que deseja excluir o vídeo "${video.titulo}"?`, async () => {
                 try {
                     showGlobalLoading(true);
-                    
+
                     const response = await fetch(`${API_BASE_URL}/api/videos/${videoId}`, {
                         method: 'DELETE'
                     });
-                    
+
                     if (!response.ok) throw new Error(`Erro ${response.status}`);
-                    
+
                     const result = await response.json();
                     console.log('✅ Vídeo excluído:', result);
-                    
+
                     showAlert('✅ Vídeo excluído com sucesso!', 'success');
-                    
+
                     await loadVideos();
-                    
+
                 } catch (error) {
                     console.error('❌ Erro ao excluir vídeo:', error);
                     showAlert('❌ Erro ao excluir vídeo: ' + error.message, 'error');
@@ -1638,7 +1684,7 @@
         async function resetAllPoints() {
             try {
                 showGlobalLoading(true);
-                
+
                 for (const user of users) {
                     await fetchAPI(`/api/usuarios/${user.id}`, {
                         method: 'PUT',
@@ -1648,10 +1694,10 @@
                         })
                     });
                 }
-                
+
                 showAlert('Pontuações zeradas com sucesso!', 'success');
                 loadDashboardData();
-                
+
             } catch (error) {
                 showAlert('Erro ao zerar pontuações: ' + error.message, 'error');
             } finally {
@@ -1662,14 +1708,14 @@
         async function resetAllData() {
             try {
                 showGlobalLoading(true);
-                
+
                 await fetchAPI('/api/usuarios', {
                     method: 'DELETE'
                 });
-                
+
                 showAlert('Todos os dados foram resetados!', 'success');
                 loadDashboardData();
-                
+
             } catch (error) {
                 showAlert('Erro ao resetar dados: ' + error.message, 'error');
             } finally {
@@ -1677,23 +1723,23 @@
             }
         }
 
-        // UI Helper Functions (mantenha as existentes)
+        // UI Helper Functions
         function showAlert(message, type = 'success') {
             if (!alertContainer) return;
-            
+
             const alert = document.createElement('div');
             alert.className = `alert alert-${type}`;
             alert.innerHTML = `
                 <span>${message}</span>
                 <button class="alert-close">&times;</button>
             `;
-            
+
             alertContainer.appendChild(alert);
-            
+
             setTimeout(() => {
                 alert.remove();
             }, 5000);
-            
+
             alert.querySelector('.alert-close').addEventListener('click', function() {
                 alert.remove();
             });
