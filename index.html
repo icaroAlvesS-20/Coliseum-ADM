@@ -2214,32 +2214,51 @@
         }
 
         // ✅ FUNÇÃO DELETE CURSO CORRIGIDA - Com verificação completa
-       async function deleteCurso(cursoId) {
+       // ✅ FUNÇÃO DELETE CORRIGIDA - Versão Simplificada
+async function deleteCurso(cursoId) {
     const curso = cursos.find(c => c.id == cursoId);
     if (!curso) {
         showAlert('❌ Curso não encontrado!', 'error');
         return;
     }
 
-    showConfirmation(`Excluir curso "${curso.titulo}"?`, async () => {
+    showConfirmation(`Tem certeza que deseja excluir o curso "${curso.titulo}"?`, async () => {
         try {
             showGlobalLoading(true);
+
+            console.log(`🗑️ Tentando excluir curso ID: ${cursoId}`);
             
             const response = await fetch(`${API_BASE_URL}/api/cursos/${cursoId}`, {
                 method: 'DELETE',
-                headers: {'Content-Type': 'application/json'}
+                headers: {
+                    'Content-Type': 'application/json'
+                }
             });
+
+            console.log('📡 Status da resposta:', response.status);
 
             if (response.ok) {
                 const result = await response.json();
-                showAlert('✅ Curso excluído!', 'success');
-                await loadCursos(); // Recarrega a lista
+                console.log('✅ Curso excluído:', result);
+                showAlert('✅ Curso excluído com sucesso!', 'success');
+                
+                // Remove da lista local
+                cursos = cursos.filter(c => c.id != cursoId);
+                displayCursos(cursos);
+                
             } else {
-                const error = await response.json();
-                showAlert(`❌ ${error.error || 'Erro ao excluir'}`, 'error');
+                // Se der 404, significa que a rota não existe no backend
+                if (response.status === 404) {
+                    showAlert('❌ Rota DELETE não disponível no servidor. Atualize o backend.', 'error');
+                } else {
+                    const errorText = await response.text();
+                    showAlert(`❌ Erro ${response.status}: ${errorText}`, 'error');
+                }
             }
+
         } catch (error) {
-            showAlert('❌ Erro de conexão', 'error');
+            console.error('❌ Erro ao excluir curso:', error);
+            showAlert('❌ Erro de conexão: ' + error.message, 'error');
         } finally {
             showGlobalLoading(false);
         }
