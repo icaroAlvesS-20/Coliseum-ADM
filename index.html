@@ -1,3 +1,6 @@
+Perfeito! Vou atualizar o código do ADM para integrar completamente com o sistema de cursos que criamos. Aqui está o código completo e atualizado:
+
+```html
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -767,6 +770,28 @@
                         </div>
                     </div>
                 </div>
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-value" id="total-cursos">0</div>
+                            <div class="card-label">Total de Cursos</div>
+                        </div>
+                        <div class="card-icon">
+                            <i class="fas fa-graduation-cap"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-value" id="total-videos">0</div>
+                            <div class="card-label">Total de Vídeos</div>
+                        </div>
+                        <div class="card-icon">
+                            <i class="fas fa-video"></i>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="table-container">
@@ -857,7 +882,7 @@
             </div>
         </div>
 
-        <!-- Cursos Tab - NOVA ABA -->
+        <!-- Cursos Tab - ATUALIZADA -->
         <div id="cursos" class="tab-content">
             <div class="table-container">
                 <div class="table-header">
@@ -990,47 +1015,18 @@
                         <label for="video-title">Título do Vídeo</label>
                         <input type="text" id="video-title" class="form-control" placeholder="Ex: Introdução à Álgebra" required>
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="video-materia">Matéria</label>
                         <select id="video-materia" class="form-control" required>
                             <option value="">Selecione a matéria</option>
-                            
-                            <!-- CIÊNCIAS HUMANAS -->
-                            <optgroup label="🟡 Ciências Humanas">
-                                <option value="historia">História</option>
-                                <option value="geografia">Geografia</option>
-                                <option value="filosofia">Filosofia</option>
-                                <option value="sociologia">Sociologia</option>
-                                <option value="atualidades">Atualidades</option>
-                            </optgroup>
-                            
-                            <!-- CIÊNCIAS DA NATUREZA -->
-                            <optgroup label="🟢 Ciências da Natureza">
-                                <option value="biologia">Biologia</option>
-                                <option value="quimica">Química</option>
-                                <option value="fisica">Física</option>
-                            </optgroup>
-                            
-                            <!-- LINGUAGENS -->
-                            <optgroup label="🔵 Linguagens">
-                                <option value="portugues">Língua Portuguesa</option>
-                                <option value="gramatica">Gramática</option>
-                                <option value="literatura">Literatura</option>
-                                <option value="redacao">Redação</option>
-                            </optgroup>
-                            
-                            <!-- MATEMÁTICA -->
-                            <optgroup label="🔴 Matemática">
-                                <option value="matematica">Matemática Geral</option>
-                                <option value="algebra">Álgebra</option>
-                                <option value="geometria">Geometria</option>
-                                <option value="trigonometria">Trigonometria</option>
-                                <option value="calculo">Cálculo</option>
-                            </optgroup>
+                            <option value="matematica">Matemática</option>
+                            <option value="csn">CSN</option>
+                            <option value="csh">CSH</option>
+                            <option value="portugues">Português</option>
                         </select>
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="video-categoria">Categoria Específica</label>
                         <input type="text" id="video-categoria" class="form-control" 
@@ -1040,7 +1036,7 @@
                             Esta categoria aparecerá como badge no vídeo
                         </small>
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="video-url">URL do Vídeo (YouTube)</label>
                         <input type="text" id="video-url" class="form-control" 
@@ -1050,13 +1046,13 @@
                             Aceita URLs embed ou normais do YouTube
                         </small>
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="video-descricao">Descrição do Vídeo</label>
                         <textarea id="video-descricao" class="form-control" rows="3" 
                                   placeholder="Descreva o conteúdo do vídeo, tópicos abordados..."></textarea>
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="video-duracao">Duração (minutos)</label>
                         <input type="number" id="video-duracao" class="form-control" min="1" 
@@ -1071,7 +1067,7 @@
         </div>
     </div>
 
-    <!-- Curso Modal -->
+    <!-- Curso Modal ATUALIZADO -->
     <div class="modal" id="curso-modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -1085,55 +1081,79 @@
                         <label for="curso-titulo">Título do Curso</label>
                         <input type="text" id="curso-titulo" class="form-control" placeholder="Ex: Matemática Básica" required>
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="curso-descricao">Descrição do Curso</label>
                         <textarea id="curso-descricao" class="form-control" rows="3" 
                                   placeholder="Descreva o conteúdo do curso, objetivos e público-alvo..."></textarea>
                     </div>
-                    
+
                     <div class="form-row">
+                        <div class="form-group">
+                            <label for="curso-materia">Matéria</label>
+                            <select id="curso-materia" class="form-control" required>
+                                <option value="">Selecione a matéria</option>
+                                <option value="matematica">Matemática</option>
+                                <option value="csn">CSN</option>
+                                <option value="csh">CSH</option>
+                                <option value="portugues">Português</option>
+                            </select>
+                        </div>
+
                         <div class="form-group">
                             <label for="curso-categoria">Categoria</label>
                             <select id="curso-categoria" class="form-control" required>
                                 <option value="">Selecione a categoria</option>
-                                <option value="matematica">Matemática</option>
-                                <option value="ciencias">Ciências</option>
-                                <option value="humanas">Ciências Humanas</option>
-                                <option value="linguagens">Linguagens</option>
-                                <option value="preparatorio">Preparatório ENEM</option>
+                                <option value="algebra">Álgebra</option>
+                                <option value="geometria">Geometria</option>
+                                <option value="quimica">Química</option>
+                                <option value="fisica">Física</option>
+                                <option value="historia">História</option>
+                                <option value="geografia">Geografia</option>
+                                <option value="gramatica">Gramática</option>
+                                <option value="interpretacao">Interpretação</option>
                             </select>
                         </div>
-                        
+                    </div>
+
+                    <div class="form-row">
                         <div class="form-group">
                             <label for="curso-nivel">Nível</label>
                             <select id="curso-nivel" class="form-control" required>
                                 <option value="">Selecione o nível</option>
-                                <option value="iniciante">Iniciante</option>
-                                <option value="intermediario">Intermediário</option>
-                                <option value="avancado">Avançado</option>
+                                <option value="fundamental">Fundamental</option>
+                                <option value="medio">Ensino Médio</option>
+                                <option value="vestibular">Vestibular</option>
                             </select>
                         </div>
-                    </div>
-                    
-                    <div class="form-row">
+
                         <div class="form-group">
                             <label for="curso-duracao">Duração Estimada (horas)</label>
                             <input type="number" id="curso-duracao" class="form-control" min="1" placeholder="Ex: 20" required>
                         </div>
-                        
+                    </div>
+
+                    <div class="form-row">
                         <div class="form-group">
                             <label for="curso-modulos">Número de Módulos</label>
                             <input type="number" id="curso-modulos" class="form-control" min="1" placeholder="Ex: 5" required>
                         </div>
+
+                        <div class="form-group">
+                            <label for="curso-alunos">Alunos Iniciais</label>
+                            <input type="number" id="curso-alunos" class="form-control" min="0" placeholder="Ex: 0" value="0">
+                        </div>
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="curso-imagem">URL da Imagem do Curso</label>
                         <input type="text" id="curso-imagem" class="form-control" 
                                placeholder="https://exemplo.com/imagem.jpg">
+                        <small style="color: #888; font-size: 12px; margin-top: 5px;">
+                            Deixe em branco para usar imagem padrão
+                        </small>
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="curso-ativo">Status do Curso</label>
                         <select id="curso-ativo" class="form-control">
@@ -1234,7 +1254,7 @@
             });
         }
 
-        // Event Listeners - VERSÃO CORRIGIDA
+        // Event Listeners
         function setupEventListeners() {
             console.log('🔧 Configurando event listeners...');
 
@@ -1242,17 +1262,15 @@
             const userSearch = document.getElementById('user-search');
             if (userSearch) {
                 userSearch.addEventListener('input', filterUsers);
-                console.log('✅ Listener de busca configurado');
             }
 
             // Refresh ranking
             const refreshRanking = document.getElementById('refresh-ranking');
             if (refreshRanking) {
                 refreshRanking.addEventListener('click', loadFullRanking);
-                console.log('✅ Listener de refresh configurado');
             }
 
-            // Modal controls - usando event delegation para elementos que podem não existir ainda
+            // Modal controls
             document.addEventListener('click', function(e) {
                 if (e.target.classList.contains('modal-close')) {
                     e.target.closest('.modal').style.display = 'none';
@@ -1319,7 +1337,7 @@
                 });
             }
 
-            // Settings buttons - CORREÇÃO: IDs corretos
+            // Settings buttons
             const saveSettings = document.getElementById('save-settings');
             if (saveSettings) {
                 saveSettings.addEventListener('click', saveSettings);
@@ -1400,67 +1418,47 @@
 
                 console.log('🔄 Carregando dados do dashboard...');
 
-                const ranking = await fetchAPI('/api/ranking');
-                console.log('📊 Dados brutos da API:', ranking);
+                const [ranking, cursosData, videosData] = await Promise.all([
+                    fetchAPI('/api/ranking').catch(() => []),
+                    fetchAPI('/api/cursos').catch(() => []),
+                    fetchAPI('/api/videos').catch(() => [])
+                ]);
 
-                // ✅ VERIFICAÇÃO CRÍTICA: A API está retornando array vazio?
-                if (!ranking || !Array.isArray(ranking)) {
-                    console.error('❌ API retornou dados inválidos:', ranking);
-                    showAlert('API retornou dados inválidos ou vazios', 'error');
-                    return;
-                }
-
-                console.log(`✅ API retornou ${ranking.length} usuários`);
-
-                // ✅ DEBUG: Mostrar estrutura do primeiro usuário
-                if (ranking.length > 0) {
-                    console.log('🔍 Estrutura do primeiro usuário:', Object.keys(ranking[0]));
-                    console.log('📝 Valores do primeiro usuário:', ranking[0]);
-                }
+                console.log('📊 Dados carregados:', {
+                    usuarios: ranking.length,
+                    cursos: cursosData.length,
+                    videos: videosData.length
+                });
 
                 displayRanking(ranking.slice(0, 10));
 
-                // ✅ CÁLCULOS COM VERIFICAÇÃO
+                // Cálculos para estatísticas
                 const totalUsers = ranking.length;
-                const totalPoints = ranking.reduce((sum, user) => {
-                    // ✅ FALLBACK para diferentes nomes de campo
-                    const pontos = user.pontuacao || user.points || user.score || 0;
-                    return sum + pontos;
-                }, 0);
+                const totalPoints = ranking.reduce((sum, user) => sum + (user.pontuacao || 0), 0);
+                const totalChallenges = ranking.reduce((sum, user) => sum + (user.desafiosCompletados || 0), 0);
+                const series = [...new Set(ranking.map(user => user.serie || 'N/A'))].length;
+                const totalCursos = cursosData.length;
+                const totalVideos = videosData.length;
 
-                const totalChallenges = ranking.reduce((sum, user) => {
-                    // ✅ FALLBACK para diferentes nomes de campo
-                    const desafios = user.desafiosCompletados || user.challengesCompleted || user.desafios || 0;
-                    return sum + desafios;
-                }, 0);
-
-                const series = [...new Set(ranking.map(user => {
-                    // ✅ FALLBACK para diferentes nomes de campo
-                    return user.serie || user.grade || user.turma || 'N/A';
-                }))].length;
-
-                // ✅ ATUALIZA A INTERFACE
+                // Atualiza a interface
                 document.getElementById('total-users').textContent = totalUsers;
                 document.getElementById('total-points').textContent = totalPoints;
                 document.getElementById('total-challenges').textContent = totalChallenges;
                 document.getElementById('total-series').textContent = series;
-
-                console.log('✅ Dashboard atualizado:', {
-                    usuarios: totalUsers,
-                    pontos: totalPoints,
-                    desafios: totalChallenges,
-                    series: series
-                });
+                document.getElementById('total-cursos').textContent = totalCursos;
+                document.getElementById('total-videos').textContent = totalVideos;
 
             } catch (error) {
                 console.error('❌ Erro crítico no dashboard:', error);
                 showAlert('Erro ao carregar dashboard: ' + error.message, 'error');
 
-                // ✅ MOSTRA "0" EM VEZ DE "?"
+                // Mostra "0" em caso de erro
                 document.getElementById('total-users').textContent = '0';
                 document.getElementById('total-points').textContent = '0';
                 document.getElementById('total-challenges').textContent = '0';
                 document.getElementById('total-series').textContent = '0';
+                document.getElementById('total-cursos').textContent = '0';
+                document.getElementById('total-videos').textContent = '0';
             } finally {
                 document.getElementById('ranking-loading').style.display = 'none';
             }
@@ -1496,43 +1494,11 @@
         async function loadCursos() {
             try {
                 document.getElementById('cursos-loading').style.display = 'flex';
-                
-                // Em um sistema real, você teria um endpoint específico para cursos
-                // Por enquanto, vamos usar dados de exemplo
-                const cursosData = await fetchAPI('/api/cursos').catch(() => {
-                    // Se não houver endpoint de cursos, usar dados de exemplo
-                    return [
-                        {
-                            id: 1,
-                            titulo: 'Matemática Básica',
-                            descricao: 'Curso completo de matemática básica para iniciantes',
-                            categoria: 'matematica',
-                            nivel: 'iniciante',
-                            duracao: 20,
-                            modulos: 5,
-                            imagem: 'https://via.placeholder.com/300x200',
-                            ativo: true,
-                            alunos: 150,
-                            avaliacao: 4.8
-                        },
-                        {
-                            id: 2,
-                            titulo: 'História do Brasil',
-                            descricao: 'Aprenda sobre a história do Brasil desde o descobrimento',
-                            categoria: 'humanas',
-                            nivel: 'intermediario',
-                            duracao: 15,
-                            modulos: 4,
-                            imagem: 'https://via.placeholder.com/300x200',
-                            ativo: true,
-                            alunos: 89,
-                            avaliacao: 4.5
-                        }
-                    ];
-                });
-                
+
+                const cursosData = await fetchAPI('/api/cursos');
                 cursos = cursosData;
                 displayCursos(cursos);
+
             } catch (error) {
                 console.error('Error loading cursos:', error);
                 showAlert('Erro ao carregar cursos: ' + error.message, 'error');
@@ -1555,16 +1521,11 @@
 
         function displayRanking(ranking) {
             const tbody = document.getElementById('ranking-body');
-            if (!tbody) {
-                console.error('❌ Elemento ranking-body não encontrado!');
-                return;
-            }
+            if (!tbody) return;
 
             tbody.innerHTML = '';
 
-            // ✅ VERIFICA SE HÁ DADOS
             if (!ranking || ranking.length === 0) {
-                console.log('📭 Nenhum dado para exibir no ranking');
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td colspan="6" style="text-align: center; color: #888; padding: 20px;">
@@ -1576,33 +1537,18 @@
                 return;
             }
 
-            console.log(`🎯 Renderizando ${ranking.length} usuários no ranking`);
-
-            // ✅ RENDERIZA CADA USUÁRIO COM FALLBACKS
             ranking.forEach((user, index) => {
                 const row = document.createElement('tr');
-
-                // ✅ FALLBACKS PARA DIFERENTES ESTRUTURAS DE DADOS
-                const nome = user.nome || user.name || 'Nome não informado';
-                const ra = user.ra || user.id || 'RA não informado';
-                const serie = user.serie || user.grade || user.turma || 'Série não informada';
-                const pontuacao = user.pontuacao || user.points || user.score || 0;
-                const desafios = user.desafiosCompletados || user.challengesCompleted || user.desafios || 0;
-
-                console.log(`👤 Usuário ${index + 1}:`, { nome, ra, serie, pontuacao, desafios });
-
                 row.innerHTML = `
                     <td><strong>${index + 1}º</strong></td>
-                    <td>${nome}</td>
-                    <td><code>${ra}</code></td>
-                    <td>${serie}</td>
-                    <td><span style="color: #ffcf00; font-weight: bold;">${pontuacao}</span></td>
-                    <td>${desafios}</td>
+                    <td>${user.nome}</td>
+                    <td><code>${user.ra}</code></td>
+                    <td>${user.serie}</td>
+                    <td><span style="color: #ffcf00; font-weight: bold;">${user.pontuacao}</span></td>
+                    <td>${user.desafiosCompletados}</td>
                 `;
                 tbody.appendChild(row);
             });
-
-            console.log('✅ Ranking renderizado com sucesso!');
         }
 
         function displayUsers(users) {
@@ -1707,13 +1653,13 @@
             cursosList.forEach(curso => {
                 const cursoCard = document.createElement('div');
                 cursoCard.className = 'curso-card';
-                
+
                 cursoCard.innerHTML = `
                     <div class="curso-header">
                         <div class="curso-info">
                             <h4>${curso.titulo}</h4>
-                            <div class="badge ${getBadgeClass(curso.categoria)}">${getCategoriaNome(curso.categoria)}</div>
-                            <div class="badge ${getNivelClass(curso.nivel)}" style="margin-left: 5px;">${curso.nivel}</div>
+                            <div class="badge ${getMateriaBadgeClass(curso.materia)}">${getMateriaNome(curso.materia)}</div>
+                            <div class="badge ${getNivelClass(curso.nivel)}" style="margin-left: 5px;">${getNivelNome(curso.nivel)}</div>
                             <div class="curso-meta">
                                 <div class="curso-stat">
                                     <div class="curso-stat-value">${curso.duracao}h</div>
@@ -1745,13 +1691,16 @@
                     <div class="curso-description">
                         ${curso.descricao || 'Sem descrição disponível.'}
                     </div>
+                    <div class="curso-category">
+                        <small style="color: #ffcf00;">Categoria: ${getCategoriaNome(curso.categoria)}</small>
+                    </div>
                     <div class="curso-status">
                         <span class="badge ${curso.ativo ? 'success' : 'danger'}">
                             ${curso.ativo ? 'Ativo' : 'Inativo'}
                         </span>
                     </div>
                 `;
-                
+
                 container.appendChild(cursoCard);
             });
 
@@ -1789,33 +1738,54 @@
         }
 
         // Helper functions para cursos
-        function getBadgeClass(categoria) {
+        function getMateriaBadgeClass(materia) {
             const classes = {
                 'matematica': 'primary',
-                'ciencias': 'success',
-                'humanas': 'warning',
-                'linguagens': 'danger',
-                'preparatorio': 'primary'
+                'csn': 'success',
+                'csh': 'warning',
+                'portugues': 'danger'
             };
-            return classes[categoria] || 'primary';
+            return classes[materia] || 'primary';
+        }
+
+        function getMateriaNome(materia) {
+            const nomes = {
+                'matematica': 'Matemática',
+                'csn': 'CSN',
+                'csh': 'CSH',
+                'portugues': 'Português'
+            };
+            return nomes[materia] || materia;
         }
 
         function getNivelClass(nivel) {
             const classes = {
-                'iniciante': 'success',
-                'intermediario': 'warning',
-                'avancado': 'danger'
+                'fundamental': 'success',
+                'medio': 'warning',
+                'vestibular': 'danger'
             };
             return classes[nivel] || 'primary';
         }
 
+        function getNivelNome(nivel) {
+            const nomes = {
+                'fundamental': 'Fundamental',
+                'medio': 'Ensino Médio',
+                'vestibular': 'Vestibular'
+            };
+            return nomes[nivel] || nivel;
+        }
+
         function getCategoriaNome(categoria) {
             const nomes = {
-                'matematica': 'Matemática',
-                'ciencias': 'Ciências',
-                'humanas': 'Humanas',
-                'linguagens': 'Linguagens',
-                'preparatorio': 'Preparatório'
+                'algebra': 'Álgebra',
+                'geometria': 'Geometria',
+                'quimica': 'Química',
+                'fisica': 'Física',
+                'historia': 'História',
+                'geografia': 'Geografia',
+                'gramatica': 'Gramática',
+                'interpretacao': 'Interpretação'
             };
             return nomes[categoria] || categoria;
         }
@@ -2054,7 +2024,7 @@
             });
         }
 
-        // Curso Management - NOVAS FUNÇÕES
+        // Curso Management - FUNÇÕES ATUALIZADAS
         function showCursoModal(curso = null) {
             const modal = document.getElementById('curso-modal');
             const title = document.getElementById('curso-modal-title');
@@ -2065,15 +2035,18 @@
                 document.getElementById('curso-id').value = curso.id;
                 document.getElementById('curso-titulo').value = curso.titulo;
                 document.getElementById('curso-descricao').value = curso.descricao || '';
+                document.getElementById('curso-materia').value = curso.materia;
                 document.getElementById('curso-categoria').value = curso.categoria;
                 document.getElementById('curso-nivel').value = curso.nivel;
                 document.getElementById('curso-duracao').value = curso.duracao;
                 document.getElementById('curso-modulos').value = curso.modulos;
+                document.getElementById('curso-alunos').value = curso.alunos || 0;
                 document.getElementById('curso-imagem').value = curso.imagem || '';
                 document.getElementById('curso-ativo').value = curso.ativo.toString();
             } else {
                 title.textContent = 'Criar Curso';
                 form.reset();
+                document.getElementById('curso-ativo').value = 'true';
             }
 
             modal.style.display = 'flex';
@@ -2091,12 +2064,15 @@
             const cursoData = {
                 titulo: document.getElementById('curso-titulo').value,
                 descricao: document.getElementById('curso-descricao').value,
+                materia: document.getElementById('curso-materia').value,
                 categoria: document.getElementById('curso-categoria').value,
                 nivel: document.getElementById('curso-nivel').value,
                 duracao: parseInt(document.getElementById('curso-duracao').value),
                 modulos: parseInt(document.getElementById('curso-modulos').value),
-                imagem: document.getElementById('curso-imagem').value,
-                ativo: document.getElementById('curso-ativo').value === 'true'
+                alunos: parseInt(document.getElementById('curso-alunos').value) || 0,
+                imagem: document.getElementById('curso-imagem').value || null,
+                ativo: document.getElementById('curso-ativo').value === 'true',
+                avaliacao: 4.5 // Placeholder
             };
 
             try {
@@ -2104,24 +2080,16 @@
 
                 let response;
                 if (cursoId) {
-                    // Em um sistema real, você teria um endpoint para atualizar cursos
                     response = await fetch(`${API_BASE_URL}/api/cursos/${cursoId}`, {
                         method: 'PUT',
                         headers: {'Content-Type': 'application/json'},
                         body: JSON.stringify(cursoData)
-                    }).catch(() => {
-                        // Simulação de sucesso para demonstração
-                        return { ok: true, json: () => Promise.resolve({ success: true }) };
                     });
                 } else {
-                    // Em um sistema real, você teria um endpoint para criar cursos
                     response = await fetch(`${API_BASE_URL}/api/cursos`, {
                         method: 'POST',
                         headers: {'Content-Type': 'application/json'},
                         body: JSON.stringify(cursoData)
-                    }).catch(() => {
-                        // Simulação de sucesso para demonstração
-                        return { ok: true, json: () => Promise.resolve({ success: true, id: Date.now() }) };
                     });
                 }
 
@@ -2154,12 +2122,8 @@
                 try {
                     showGlobalLoading(true);
 
-                    // Em um sistema real, você teria um endpoint para excluir cursos
                     const response = await fetch(`${API_BASE_URL}/api/cursos/${cursoId}`, {
                         method: 'DELETE'
-                    }).catch(() => {
-                        // Simulação de sucesso para demonstração
-                        return { ok: true, json: () => Promise.resolve({ success: true }) };
                     });
 
                     if (!response.ok) throw new Error(`Erro ${response.status}`);
