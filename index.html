@@ -2147,7 +2147,7 @@
             });
         }
 
-        // Curso Management
+        // Curso Management - FUNÇÃO CORRIGIDA
         function showCursoModal(curso = null) {
             const modal = document.getElementById('curso-modal');
             const title = document.getElementById('curso-modal-title');
@@ -2237,30 +2237,51 @@
             }
         }
 
+        // FUNÇÃO DELETE CURSO CORRIGIDA - com tratamento de erro 404
         async function deleteCurso(cursoId) {
             const curso = cursos.find(c => c.id == cursoId);
-            if (!curso) return;
+            if (!curso) {
+                showAlert('❌ Curso não encontrado na lista local!', 'error');
+                return;
+            }
 
             showConfirmation(`Tem certeza que deseja excluir o curso "${curso.titulo}"? Todos os dados do curso serão perdidos.`, async () => {
                 try {
                     showGlobalLoading(true);
 
+                    console.log(`🗑️ Tentando excluir curso ID: ${cursoId}`);
+
                     const response = await fetch(`${API_BASE_URL}/api/cursos/${cursoId}`, {
                         method: 'DELETE'
                     });
 
-                    if (!response.ok) throw new Error(`Erro ${response.status}`);
+                    // Verifica se o curso não foi encontrado (404)
+                    if (response.status === 404) {
+                        throw new Error('Curso não encontrado no servidor. Pode já ter sido excluído.');
+                    }
+
+                    if (!response.ok) {
+                        throw new Error(`Erro ${response.status} ao excluir curso`);
+                    }
 
                     const result = await response.json();
-                    console.log('✅ Curso excluído:', result);
+                    console.log('✅ Curso excluído com sucesso:', result);
 
                     showAlert('✅ Curso excluído com sucesso!', 'success');
 
+                    // Recarrega a lista de cursos
                     await loadCursos();
 
                 } catch (error) {
                     console.error('❌ Erro ao excluir curso:', error);
-                    showAlert('❌ Erro ao excluir curso: ' + error.message, 'error');
+                    
+                    if (error.message.includes('não encontrado')) {
+                        showAlert('⚠️ Curso não encontrado no servidor. Atualizando lista...', 'warning');
+                        // Recarrega a lista para sincronizar com o servidor
+                        await loadCursos();
+                    } else {
+                        showAlert('❌ Erro ao excluir curso: ' + error.message, 'error');
+                    }
                 } finally {
                     showGlobalLoading(false);
                 }
