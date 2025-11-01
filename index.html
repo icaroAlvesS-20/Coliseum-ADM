@@ -1563,8 +1563,17 @@
                 console.log('📚 Buscando cursos da API...');
                 
                 // Tenta buscar da API
-                const cursosData = await fetchAPI('/api/cursos');
-                cursos = cursosData;
+// No admin panel, função saveCurso()
+const cursoData = {
+    titulo: document.getElementById('curso-titulo').value,
+    descricao: document.getElementById('curso-descricao').value,
+    materia: document.getElementById('curso-materia').value,
+    categoria: document.getElementById('curso-categoria').value,
+    nivel: document.getElementById('curso-nivel').value,
+    duracao: parseInt(document.getElementById('curso-duracao').value),
+    ativo: document.getElementById('curso-ativo').value === 'true', 
+    imagem: document.getElementById('curso-imagem').value || null
+};  cursos = cursosData;
                 
                 console.log('🎯 Cursos carregados:', cursos.map(c => ({ 
                     id: c.id, 
