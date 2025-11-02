@@ -1556,74 +1556,35 @@
             }
         }
 
-        async function loadCursos() {
-            try {
-                document.getElementById('cursos-loading').style.display = 'flex';
+      async function loadCursos() {
+    try {
+        document.getElementById('cursos-loading').style.display = 'flex';
 
-                console.log('📚 Buscando cursos da API...');
-                
-                // Tenta buscar da API
-// No admin panel, função saveCurso()
-const cursoData = {
-    titulo: document.getElementById('curso-titulo').value,
-    descricao: document.getElementById('curso-descricao').value,
-    materia: document.getElementById('curso-materia').value,
-    categoria: document.getElementById('curso-categoria').value,
-    nivel: document.getElementById('curso-nivel').value,
-    duracao: parseInt(document.getElementById('curso-duracao').value),
-    ativo: document.getElementById('curso-ativo').value === 'true', 
-    imagem: document.getElementById('curso-imagem').value || null
-};  cursos = cursosData;
-                
-                console.log('🎯 Cursos carregados:', cursos.map(c => ({ 
-                    id: c.id, 
-                    titulo: c.titulo,
-                    materia: c.materia,
-                    ativo: c.ativo 
-                })));
-                
-                displayCursos(cursos);
+        console.log('📚 Buscando cursos da API...');
+        
+        // Tenta buscar da API
+        const cursosData = await fetchAPI('/api/cursos');
+        cursos = cursosData;
+        
+        console.log('🎯 Cursos carregados:', cursos.map(c => ({ 
+            id: c.id, 
+            titulo: c.titulo,
+            materia: c.materia,
+            ativo: c.ativo 
+        })));
+        
+        displayCursos(cursos);
 
-            } catch (error) {
-                console.error('❌ Erro ao carregar cursos da API:', error);
-                
-                // Fallback para dados de exemplo
-                cursos = [
-                    {
-                        id: 1,
-                        titulo: 'Álgebra Básica',
-                        descricao: 'Domine os conceitos fundamentais da álgebra.',
-                        materia: 'matematica',
-                        categoria: 'algebra',
-                        nivel: 'fundamental',
-                        duracao: 15,
-                        modulos: 4,
-                        ativo: true,
-                        alunos: 150,
-                        avaliacao: 4.8
-                    },
-                    {
-                        id: 2,
-                        titulo: 'Química Geral',
-                        descricao: 'Introdução aos conceitos básicos da química.',
-                        materia: 'csn',
-                        categoria: 'quimica',
-                        nivel: 'medio',
-                        duracao: 18,
-                        modulos: 5,
-                        ativo: true,
-                        alunos: 95,
-                        avaliacao: 4.7
-                    }
-                ];
-                
-                displayCursos(cursos);
-                showAlert('⚠️ Usando dados de exemplo - Erro na API: ' + error.message, 'warning');
-            } finally {
-                document.getElementById('cursos-loading').style.display = 'none';
-            }
-        }
-
+    } catch (error) {
+        console.error('❌ Erro ao carregar cursos da API:', error);
+        
+        
+        displayCursos(cursos);
+        showAlert('⚠️ Usando dados de exemplo - Erro na API: ' + error.message, 'warning');
+    } finally {
+        document.getElementById('cursos-loading').style.display = 'none';
+    }
+}
         async function loadFullRanking() {
             try {
                 document.getElementById('full-ranking-loading').style.display = 'flex';
