@@ -1111,139 +1111,144 @@
     </div>
 
     <!-- Curso Modal -->
-    <div class="modal" id="curso-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="curso-modal-title">Criar Curso</h3>
-                <button class="modal-close">&times;</button>
+   <div id="cursos" class="tab-content">
+    <div class="table-container">
+        <div class="table-header">
+            <h3>Gerenciar Cursos</h3>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-success" id="criar-exemplo-btn">
+                    <i class="fas fa-magic"></i> Criar Exemplo
+                </button>
+                <button class="btn btn-primary" id="add-curso-btn">
+                    <i class="fas fa-plus"></i> Criar Curso
+                </button>
             </div>
-            <div class="modal-body">
-                <form id="curso-form">
-                    <input type="hidden" id="curso-id">
+        </div>
+        <div class="loading" id="cursos-loading">
+            <div class="spinner"></div>
+        </div>
+        <div id="cursos-container">
+            <!-- Cursos serão carregados aqui -->
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Curso COMPLETO - substitua o modal existente -->
+<div class="modal" id="curso-modal">
+    <div class="modal-content" style="max-width: 800px;">
+        <div class="modal-header">
+            <h3 id="curso-modal-title">Criar Curso</h3>
+            <button class="modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="curso-form">
+                <input type="hidden" id="curso-id">
+                
+                <div class="form-group">
+                    <label for="curso-titulo">Título do Curso *</label>
+                    <input type="text" id="curso-titulo" class="form-control" placeholder="Ex: Matemática Básica" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="curso-descricao">Descrição do Curso</label>
+                    <textarea id="curso-descricao" class="form-control" rows="3" 
+                              placeholder="Descreva o conteúdo do curso, objetivos e público-alvo..."></textarea>
+                </div>
+
+                <div class="form-row">
                     <div class="form-group">
-                        <label for="curso-titulo">Título do Curso</label>
-                        <input type="text" id="curso-titulo" class="form-control" placeholder="Ex: Matemática Básica" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="curso-descricao">Descrição do Curso</label>
-                        <textarea id="curso-descricao" class="form-control" rows="3" 
-                                  placeholder="Descreva o conteúdo do curso, objetivos e público-alvo..."></textarea>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="curso-materia">Matéria</label>
-                            <select id="curso-materia" class="form-control" required>
-                                <option value="">Selecione a matéria</option>
-                                <option value="matematica">Matemática</option>
-                                <option value="csn">CSN</option>
-                                <option value="csh">CSH</option>
-                                <option value="portugues">Português</option>
-                                <option value="programacao">Programação</option>
-                                
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="curso-categoria">Categoria</label>
-                            <select id="curso-categoria" class="form-control" required>
-                                <option value="">Selecione a categoria</option>
-                                <option value="algebra">Álgebra</option>
-                                <option value="geometria">Geometria</option>
-                                <option value="quimica">Química</option>
-                                <option value="fisica">Física</option>
-                                <option value="historia">História</option>
-                                <option value="geografia">Geografia</option>
-                                <option value="gramatica">Gramática</option>
-                                <option value="interpretacao">Interpretação</option>
-                                <option value="php">Pyton</option>
-                                <option value="js">JavaScript</option>
-                                <option value="react">React</option>
-
-                                
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="curso-nivel">Nível</label>
-                            <select id="curso-nivel" class="form-control" required>
-                                <option value="">Selecione o nível</option>
-                                <option value="fundamental">Fundamental</option>
-                                <option value="medio">Ensino Médio</option>
-                                <option value="vestibular">Vestibular</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="curso-duracao">Duração Estimada (horas)</label>
-                            <input type="number" id="curso-duracao" class="form-control" min="1" placeholder="Ex: 20" required>
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="curso-modulos">Número de Módulos</label>
-                            <input type="number" id="curso-modulos" class="form-control" min="1" placeholder="Ex: 5" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="curso-alunos">Alunos Iniciais</label>
-                            <input type="number" id="curso-alunos" class="form-control" min="0" placeholder="Ex: 0" value="0">
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="curso-imagem">URL da Imagem do Curso</label>
-                        <input type="text" id="curso-imagem" class="form-control" 
-                               placeholder="https://exemplo.com/imagem.jpg">
-                        <small style="color: #888; font-size: 12px; margin-top: 5px;">
-                            Deixe em branco para usar imagem padrão
-                        </small>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="curso-ativo">Status do Curso</label>
-                        <select id="curso-ativo" class="form-control">
-                            <option value="true">Ativo</option>
-                            <option value="false">Inativo</option>
+                        <label for="curso-materia">Matéria *</label>
+                        <select id="curso-materia" class="form-control" required>
+                            <option value="">Selecione a matéria</option>
+                            <option value="matematica">Matemática</option>
+                            <option value="csn">Ciências da Natureza</option>
+                            <option value="csh">Ciências Humanas</option>
+                            <option value="portugues">Língua Portuguesa</option>
+                            <option value="programacao">Programação</option>
                         </select>
                     </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-warning" id="cancel-curso">Cancelar</button>
-                <button class="btn btn-primary" id="save-curso">Salvar Curso</button>
-            </div>
+
+                    <div class="form-group">
+                        <label for="curso-categoria">Categoria *</label>
+                        <select id="curso-categoria" class="form-control" required>
+                            <option value="">Selecione a categoria</option>
+                            <option value="algebra">Álgebra</option>
+                            <option value="geometria">Geometria</option>
+                            <option value="quimica">Química</option>
+                            <option value="fisica">Física</option>
+                            <option value="historia">História</option>
+                            <option value="geografia">Geografia</option>
+                            <option value="gramatica">Gramática</option>
+                            <option value="interpretacao">Interpretação</option>
+                            <option value="python">Python</option>
+                            <option value="javascript">JavaScript</option>
+                            <option value="web">Desenvolvimento Web</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="curso-nivel">Nível *</label>
+                        <select id="curso-nivel" class="form-control" required>
+                            <option value="">Selecione o nível</option>
+                            <option value="iniciante">Iniciante</option>
+                            <option value="intermediario">Intermediário</option>
+                            <option value="avancado">Avançado</option>
+                            <option value="fundamental">Fundamental</option>
+                            <option value="medio">Ensino Médio</option>
+                            <option value="vestibular">Vestibular</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="curso-duracao">Duração Estimada (horas) *</label>
+                        <input type="number" id="curso-duracao" class="form-control" min="1" placeholder="Ex: 20" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="curso-imagem">URL da Imagem do Curso</label>
+                    <input type="text" id="curso-imagem" class="form-control" 
+                           placeholder="https://exemplo.com/imagem.jpg">
+                    <small style="color: #888; font-size: 12px; margin-top: 5px;">
+                        Deixe em branco para usar imagem padrão
+                    </small>
+                </div>
+
+                <!-- SEÇÃO DE MÓDULOS E AULAS -->
+                <div class="form-group">
+                    <label style="color: #ffcf00; font-size: 1.1rem; margin-bottom: 15px;">
+                        <i class="fas fa-layer-group"></i> Módulos e Aulas *
+                    </label>
+                    <small style="color: #888; display: block; margin-bottom: 10px;">
+                        Adicione pelo menos um módulo com uma aula para criar o curso
+                    </small>
+                    
+                    <div id="modulos-container">
+                        <!-- Módulos serão adicionados aqui -->
+                    </div>
+                    
+                    <button type="button" class="btn btn-secondary" id="add-modulo-btn" style="margin-top: 10px;">
+                        <i class="fas fa-plus"></i> Adicionar Módulo
+                    </button>
+                </div>
+
+                <div class="form-group">
+                    <label for="curso-ativo">Status do Curso</label>
+                    <select id="curso-ativo" class="form-control">
+                        <option value="true">Ativo</option>
+                        <option value="false">Inativo</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-warning" id="cancel-curso">Cancelar</button>
+            <button class="btn btn-primary" id="save-curso">Salvar Curso</button>
         </div>
     </div>
-
-    <!-- Confirmation Modal -->
-    <div class="modal" id="confirm-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Confirmação</h3>
-                <button class="modal-close">&times;</button>
-            </div>
-            <div class="modal-body">
-                <p id="confirm-message" style="color: #ddd;">Tem certeza que deseja realizar esta ação?</p>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-warning" id="cancel-action">Cancelar</button>
-                <button class="btn btn-danger" id="confirm-action">Confirmar</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Global Loading -->
-    <div id="loadingGlobal">
-        <div class="spinner-large"></div>
-        <div>Carregando...</div>
-    </div>
-
-    <!-- Botão Voltar FIXO -->
+</div>
 
 
     <script>
