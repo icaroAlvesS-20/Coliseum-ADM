@@ -922,6 +922,30 @@
                 </table>
             </div>
         </div>
+
+        <!-- Cursos Tab -->
+        <div id="cursos" class="tab-content">
+            <div class="table-container">
+                <div class="table-header">
+                    <h3>Gerenciar Cursos</h3>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-success" id="criar-exemplo-btn">
+                            <i class="fas fa-magic"></i> Criar Exemplo
+                        </button>
+                        <button class="btn btn-primary" id="add-curso-btn">
+                            <i class="fas fa-plus"></i> Criar Curso
+                        </button>
+                    </div>
+                </div>
+                <div class="loading" id="cursos-loading">
+                    <div class="spinner"></div>
+                </div>
+                <div id="cursos-container">
+                    <!-- Cursos cards will be loaded here -->
+                </div>
+            </div>
+        </div>
+
         <!-- Ranking Tab -->
         <div id="ranking" class="tab-content">
             <div class="table-container">
@@ -1047,7 +1071,6 @@
                             <option value="csh">CSH</option>
                             <option value="portugues">Português</option>
                             <option value="programacao">Programação</option>
-                            
                         </select>
                     </div>
 
@@ -1092,146 +1115,160 @@
     </div>
 
     <!-- Curso Modal -->
-   <!-- Na seção de cursos, atualize o table-header -->
-<div class="table-header">
-    <h3>Gerenciar Cursos</h3>
-    <div style="display: flex; gap: 10px;">
-        <button class="btn btn-success" id="criar-exemplo-btn">
-            <i class="fas fa-magic"></i> Criar Exemplo
-        </button>
-        <button class="btn btn-primary" id="add-curso-btn">
-            <i class="fas fa-plus"></i> Criar Curso
-        </button>
-    </div>
-</div>
-
-<!-- Modal de Curso COMPLETO - substitua o modal existente -->
-<!-- Modal de Curso CORRETO -->
-<div class="modal" id="curso-modal">
-    <div class="modal-content" style="max-width: 800px;">
-        <div class="modal-header">
-            <h3 id="curso-modal-title">Criar Curso</h3>
-            <button class="modal-close">&times;</button>
-        </div>
-        <div class="modal-body">
-            <form id="curso-form">
-                <input type="hidden" id="curso-id">
-                
-                <div class="form-group">
-                    <label for="curso-titulo">Título do Curso *</label>
-                    <input type="text" id="curso-titulo" class="form-control" placeholder="Ex: Matemática Básica" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="curso-descricao">Descrição do Curso</label>
-                    <textarea id="curso-descricao" class="form-control" rows="3" 
-                              placeholder="Descreva o conteúdo do curso, objetivos e público-alvo..."></textarea>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="curso-materia">Matéria *</label>
-                        <select id="curso-materia" class="form-control" required>
-                            <option value="">Selecione a matéria</option>
-                            <option value="matematica">Matemática</option>
-                            <option value="csn">Ciências da Natureza</option>
-                            <option value="csh">Ciências Humanas</option>
-                            <option value="portugues">Língua Portuguesa</option>
-                            <option value="programacao">Programação</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="curso-categoria">Categoria *</label>
-                        <select id="curso-categoria" class="form-control" required>
-                            <option value="">Selecione a categoria</option>
-                            <option value="algebra">Álgebra</option>
-                            <option value="geometria">Geometria</option>
-                            <option value="quimica">Química</option>
-                            <option value="fisica">Física</option>
-                            <option value="historia">História</option>
-                            <option value="geografia">Geografia</option>
-                            <option value="gramatica">Gramática</option>
-                            <option value="interpretacao">Interpretação</option>
-                            <option value="python">Python</option>
-                            <option value="javascript">JavaScript</option>
-                            <option value="web">Desenvolvimento Web</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="curso-nivel">Nível *</label>
-                        <select id="curso-nivel" class="form-control" required>
-                            <option value="">Selecione o nível</option>
-                            <option value="iniciante">Iniciante</option>
-                            <option value="intermediario">Intermediário</option>
-                            <option value="avancado">Avançado</option>
-                            <option value="fundamental">Fundamental</option>
-                            <option value="medio">Ensino Médio</option>
-                            <option value="vestibular">Vestibular</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="curso-duracao">Duração Estimada (horas) *</label>
-                        <input type="number" id="curso-duracao" class="form-control" min="1" placeholder="Ex: 20" required>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="curso-imagem">URL da Imagem do Curso</label>
-                    <input type="text" id="curso-imagem" class="form-control" 
-                           placeholder="https://exemplo.com/imagem.jpg">
-                    <small style="color: #888; font-size: 12px; margin-top: 5px;">
-                        Deixe em branco para usar imagem padrão
-                    </small>
-                </div>
-
-                <!-- SEÇÃO DE MÓDULOS E AULAS -->
-                <div class="form-group">
-                    <label style="color: #ffcf00; font-size: 1.1rem; margin-bottom: 15px;">
-                        <i class="fas fa-layer-group"></i> Módulos e Aulas *
-                    </label>
-                    <small style="color: #888; display: block; margin-bottom: 10px;">
-                        Adicione pelo menos um módulo com uma aula para criar o curso
-                    </small>
+    <div class="modal" id="curso-modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h3 id="curso-modal-title">Criar Curso</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="curso-form">
+                    <input type="hidden" id="curso-id">
                     
-                    <div id="modulos-container">
-                        <!-- Módulos serão adicionados aqui -->
+                    <div class="form-group">
+                        <label for="curso-titulo">Título do Curso *</label>
+                        <input type="text" id="curso-titulo" class="form-control" placeholder="Ex: Matemática Básica" required>
                     </div>
-                    
-                    <button type="button" class="btn btn-secondary" id="add-modulo-btn" style="margin-top: 10px;">
-                        <i class="fas fa-plus"></i> Adicionar Módulo
-                    </button>
-                </div>
 
-                <div class="form-group">
-                    <label for="curso-ativo">Status do Curso</label>
-                    <select id="curso-ativo" class="form-control">
-                        <option value="true">Ativo</option>
-                        <option value="false">Inativo</option>
-                    </select>
-                </div>
-            </form>
-        </div>
-        <div class="modal-footer">
-            <button class="btn btn-warning" id="cancel-curso">Cancelar</button>
-            <button class="btn btn-primary" id="save-curso">Salvar Curso</button>
+                    <div class="form-group">
+                        <label for="curso-descricao">Descrição do Curso</label>
+                        <textarea id="curso-descricao" class="form-control" rows="3" 
+                                  placeholder="Descreva o conteúdo do curso, objetivos e público-alvo..."></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="curso-materia">Matéria *</label>
+                            <select id="curso-materia" class="form-control" required>
+                                <option value="">Selecione a matéria</option>
+                                <option value="matematica">Matemática</option>
+                                <option value="csn">Ciências da Natureza</option>
+                                <option value="csh">Ciências Humanas</option>
+                                <option value="portugues">Língua Portuguesa</option>
+                                <option value="programacao">Programação</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="curso-categoria">Categoria *</label>
+                            <select id="curso-categoria" class="form-control" required>
+                                <option value="">Selecione a categoria</option>
+                                <option value="algebra">Álgebra</option>
+                                <option value="geometria">Geometria</option>
+                                <option value="quimica">Química</option>
+                                <option value="fisica">Física</option>
+                                <option value="historia">História</option>
+                                <option value="geografia">Geografia</option>
+                                <option value="gramatica">Gramática</option>
+                                <option value="interpretacao">Interpretação</option>
+                                <option value="python">Python</option>
+                                <option value="javascript">JavaScript</option>
+                                <option value="web">Desenvolvimento Web</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="curso-nivel">Nível *</label>
+                            <select id="curso-nivel" class="form-control" required>
+                                <option value="">Selecione o nível</option>
+                                <option value="iniciante">Iniciante</option>
+                                <option value="intermediario">Intermediário</option>
+                                <option value="avancado">Avançado</option>
+                                <option value="fundamental">Fundamental</option>
+                                <option value="medio">Ensino Médio</option>
+                                <option value="vestibular">Vestibular</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="curso-duracao">Duração Estimada (horas) *</label>
+                            <input type="number" id="curso-duracao" class="form-control" min="1" placeholder="Ex: 20" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="curso-imagem">URL da Imagem do Curso</label>
+                        <input type="text" id="curso-imagem" class="form-control" 
+                               placeholder="https://exemplo.com/imagem.jpg">
+                        <small style="color: #888; font-size: 12px; margin-top: 5px;">
+                            Deixe em branco para usar imagem padrão
+                        </small>
+                    </div>
+
+                    <!-- SEÇÃO DE MÓDULOS E AULAS -->
+                    <div class="form-group">
+                        <label style="color: #ffcf00; font-size: 1.1rem; margin-bottom: 15px;">
+                            <i class="fas fa-layer-group"></i> Módulos e Aulas *
+                        </label>
+                        <small style="color: #888; display: block; margin-bottom: 10px;">
+                            Adicione pelo menos um módulo com uma aula para criar o curso
+                        </small>
+                        
+                        <div id="modulos-container">
+                            <!-- Módulos serão adicionados aqui -->
+                        </div>
+                        
+                        <button type="button" class="btn btn-secondary" id="add-modulo-btn" style="margin-top: 10px;">
+                            <i class="fas fa-plus"></i> Adicionar Módulo
+                        </button>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="curso-ativo">Status do Curso</label>
+                        <select id="curso-ativo" class="form-control">
+                            <option value="true">Ativo</option>
+                            <option value="false">Inativo</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-warning" id="cancel-curso">Cancelar</button>
+                <button class="btn btn-primary" id="save-curso">Salvar Curso</button>
+            </div>
         </div>
     </div>
-</div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal" id="confirm-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Confirmar Ação</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="confirm-message">Tem certeza que deseja realizar esta ação?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-warning" id="cancel-action">Cancelar</button>
+                <button class="btn btn-danger" id="confirm-action">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Global Loading -->
+    <div id="loadingGlobal">
+        <div class="spinner-large"></div>
+        <p>Carregando...</p>
+    </div>
+
+    <!-- Botão Voltar -->
+    <button class="btn-voltar" onclick="voltarParaMenu()" title="Voltar para o Menu">
+        <i class="fas fa-arrow-left"></i>
+    </button>
 
     <script>
+        // Variáveis globais
         const API_BASE_URL = 'https://coliseum-api.onrender.com';
-
-        // State
         let users = [];
         let videos = [];
         let cursos = [];
         let currentTab = 'dashboard';
         let pendingAction = null;
+        let moduloCount = 0;
+        let aulaCount = 0;
 
         // DOM Elements
         const tabs = document.querySelectorAll('.tab');
@@ -1400,6 +1437,19 @@
                 });
             }
 
+            // Cursos buttons
+            const criarExemploBtn = document.getElementById('criar-exemplo-btn');
+            if (criarExemploBtn) {
+                criarExemploBtn.addEventListener('click', criarCursoExemplo);
+            }
+
+            const addModuloBtn = document.getElementById('add-modulo-btn');
+            if (addModuloBtn) {
+                addModuloBtn.addEventListener('click', function() {
+                    addModuloToForm();
+                });
+            }
+
             console.log('✅ Todos os event listeners configurados');
         }
 
@@ -1533,35 +1583,37 @@
             }
         }
 
-      async function loadCursos() {
-    try {
-        document.getElementById('cursos-loading').style.display = 'flex';
+        async function loadCursos() {
+            try {
+                document.getElementById('cursos-loading').style.display = 'flex';
 
-        console.log('📚 Buscando cursos da API...');
-        
-        // Tenta buscar da API
-        const cursosData = await fetchAPI('/api/cursos');
-        cursos = cursosData;
-        
-        console.log('🎯 Cursos carregados:', cursos.map(c => ({ 
-            id: c.id, 
-            titulo: c.titulo,
-            materia: c.materia,
-            ativo: c.ativo 
-        })));
-        
-        displayCursos(cursos);
+                console.log('📚 Buscando cursos da API...');
+                
+                // Tenta buscar da API
+                const cursosData = await fetchAPI('/api/cursos');
+                cursos = cursosData;
+                
+                console.log('🎯 Cursos carregados:', cursos.map(c => ({ 
+                    id: c.id, 
+                    titulo: c.titulo,
+                    materia: c.materia,
+                    ativo: c.ativo 
+                })));
+                
+                displayCursos(cursos);
 
-    } catch (error) {
-        console.error('❌ Erro ao carregar cursos da API:', error);
-        
-        
-        displayCursos(cursos);
-        showAlert('⚠️ Usando dados de exemplo - Erro na API: ' + error.message, 'warning');
-    } finally {
-        document.getElementById('cursos-loading').style.display = 'none';
-    }
-}
+            } catch (error) {
+                console.error('❌ Erro ao carregar cursos da API:', error);
+                
+                // Se não conseguir carregar da API, mostra cursos vazios
+                cursos = [];
+                displayCursos(cursos);
+                showAlert('⚠️ Usando dados de exemplo - Erro na API: ' + error.message, 'warning');
+            } finally {
+                document.getElementById('cursos-loading').style.display = 'none';
+            }
+        }
+
         async function loadFullRanking() {
             try {
                 document.getElementById('full-ranking-loading').style.display = 'flex';
@@ -1721,7 +1773,7 @@
                                     <div class="curso-stat-label">Duração</div>
                                 </div>
                                 <div class="curso-stat">
-                                    <div class="curso-stat-value">${curso.modulos}</div>
+                                    <div class="curso-stat-value">${curso.modulos || 0}</div>
                                     <div class="curso-stat-label">Módulos</div>
                                 </div>
                                 <div class="curso-stat">
@@ -2083,7 +2135,11 @@
         function showCursoModal(curso = null) {
             const modal = document.getElementById('curso-modal');
             const title = document.getElementById('curso-modal-title');
-            const form = document.getElementById('curso-form');
+            
+            // Resetar contadores e interface
+            moduloCount = 0;
+            aulaCount = 0;
+            document.getElementById('modulos-container').innerHTML = '';
 
             if (curso) {
                 title.textContent = 'Editar Curso';
@@ -2094,14 +2150,22 @@
                 document.getElementById('curso-categoria').value = curso.categoria;
                 document.getElementById('curso-nivel').value = curso.nivel;
                 document.getElementById('curso-duracao').value = curso.duracao;
-                document.getElementById('curso-modulos').value = curso.modulos;
-                document.getElementById('curso-alunos').value = curso.alunos || 0;
                 document.getElementById('curso-imagem').value = curso.imagem || '';
                 document.getElementById('curso-ativo').value = curso.ativo.toString();
+
+                // Carregar módulos se existirem
+                if (curso.modulos && curso.modulos.length > 0) {
+                    curso.modulos.forEach(modulo => {
+                        addModuloToForm(modulo);
+                    });
+                } else {
+                    addModuloToForm();
+                }
             } else {
                 title.textContent = 'Criar Curso';
-                form.reset();
+                document.getElementById('curso-form').reset();
                 document.getElementById('curso-ativo').value = 'true';
+                addModuloToForm();
             }
 
             modal.style.display = 'flex';
@@ -2114,8 +2178,138 @@
             }
         }
 
+        // ✅ ADICIONAR MÓDULO AO FORMULÁRIO
+        function addModuloToForm(moduloData = null) {
+            moduloCount++;
+            const moduloId = `modulo_${moduloCount}`;
+            
+            const moduloHTML = `
+                <div class="modulo-item" data-modulo-id="${moduloId}" style="background: rgba(255,207,0,0.05); padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #555;">
+                    <div class="modulo-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <div style="flex: 1;">
+                            <input type="text" class="form-control modulo-titulo" placeholder="Título do Módulo" 
+                                   value="${moduloData?.titulo || ''}" required>
+                        </div>
+                        <button type="button" class="btn btn-danger btn-sm remove-modulo">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="aulas-container" style="margin-top: 15px;">
+                        ${moduloData?.aulas && moduloData.aulas.length > 0 ? 
+                            moduloData.aulas.map(aula => `
+                                <div class="aula-item" style="display: flex; gap: 10px; margin-bottom: 10px; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 6px; border-left: 3px solid #ffcf00;">
+                                    <div style="flex: 1;">
+                                        <input type="text" class="form-control aula-titulo" placeholder="Título da Aula" value="${aula.titulo}" required>
+                                        <input type="text" class="form-control aula-descricao" placeholder="Descrição da aula" value="${aula.descricao || ''}" style="margin-top: 8px;">
+                                        <div style="display: flex; gap: 10px; margin-top: 8px;">
+                                            <input type="number" class="form-control aula-duracao" placeholder="Duração (min)" value="${aula.duracao}" min="1" style="flex: 1;">
+                                            <select class="form-control aula-provedor" style="flex: 1;">
+                                                <option value="youtube" ${aula.provedor === 'youtube' ? 'selected' : ''}>YouTube</option>
+                                                <option value="pandavideo" ${aula.provedor === 'pandavideo' ? 'selected' : ''}>Panda Video</option>
+                                            </select>
+                                        </div>
+                                        <input type="text" class="form-control aula-video-url" placeholder="URL do vídeo" value="${aula.videoUrl}" style="margin-top: 8px;">
+                                        <textarea class="form-control aula-conteudo" placeholder="Conteúdo da aula..." rows="3" style="margin-top: 8px;">${aula.conteudo || ''}</textarea>
+                                    </div>
+                                    <button type="button" class="btn btn-danger btn-sm remove-aula">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            `).join('') 
+                            : 
+                            '<div class="no-aulas" style="text-align: center; padding: 20px; color: #888;">Nenhuma aula adicionada</div>'
+                        }
+                    </div>
+                    
+                    <button type="button" class="btn btn-secondary btn-sm add-aula" style="margin-top: 10px;">
+                        <i class="fas fa-plus"></i> Adicionar Aula
+                    </button>
+                </div>
+            `;
+            
+            document.getElementById('modulos-container').insertAdjacentHTML('beforeend', moduloHTML);
+            
+            // Configurar event listeners
+            const moduloElement = document.querySelector(`[data-modulo-id="${moduloId}"]`);
+            
+            moduloElement.querySelector('.remove-modulo').addEventListener('click', function() {
+                if (document.querySelectorAll('.modulo-item').length > 1) {
+                    moduloElement.remove();
+                } else {
+                    alert('❌ O curso deve ter pelo menos um módulo!');
+                }
+            });
+            
+            moduloElement.querySelector('.add-aula').addEventListener('click', function() {
+                addAulaToModulo(moduloId);
+            });
+            
+            // Configurar botões de remover aula
+            moduloElement.querySelectorAll('.remove-aula').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const aulasContainer = this.closest('.aulas-container');
+                    if (aulasContainer.querySelectorAll('.aula-item').length > 1) {
+                        this.closest('.aula-item').remove();
+                    } else {
+                        alert('❌ Cada módulo deve ter pelo menos uma aula!');
+                    }
+                });
+            });
+        }
+
+        // ✅ ADICIONAR AULA AO MÓDULO
+        function addAulaToModulo(moduloId) {
+            aulaCount++;
+            
+            const aulaHTML = `
+                <div class="aula-item" style="display: flex; gap: 10px; margin-bottom: 10px; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 6px; border-left: 3px solid #4361ee;">
+                    <div style="flex: 1;">
+                        <input type="text" class="form-control aula-titulo" placeholder="Título da Aula" required>
+                        <input type="text" class="form-control aula-descricao" placeholder="Descrição da aula" style="margin-top: 8px;">
+                        <div style="display: flex; gap: 10px; margin-top: 8px;">
+                            <input type="number" class="form-control aula-duracao" placeholder="Duração (min)" value="15" min="1" style="flex: 1;">
+                            <select class="form-control aula-provedor" style="flex: 1;">
+                                <option value="youtube">YouTube</option>
+                                <option value="pandavideo">Panda Video</option>
+                            </select>
+                        </div>
+                        <input type="text" class="form-control aula-video-url" placeholder="URL do vídeo" style="margin-top: 8px;">
+                        <textarea class="form-control aula-conteudo" placeholder="Conteúdo da aula..." rows="3" style="margin-top: 8px;"></textarea>
+                    </div>
+                    <button type="button" class="btn btn-danger btn-sm remove-aula">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            
+            const moduloElement = document.querySelector(`[data-modulo-id="${moduloId}"] .aulas-container`);
+            
+            // Remove mensagem "nenhuma aula" se existir
+            const noAulas = moduloElement.querySelector('.no-aulas');
+            if (noAulas) {
+                noAulas.remove();
+            }
+            
+            moduloElement.insertAdjacentHTML('beforeend', aulaHTML);
+            
+            // Configurar event listener para o novo botão de remover
+            const newAula = moduloElement.lastElementChild;
+            newAula.querySelector('.remove-aula').addEventListener('click', function() {
+                const aulasContainer = this.closest('.aulas-container');
+                if (aulasContainer.querySelectorAll('.aula-item').length > 1) {
+                    this.closest('.aula-item').remove();
+                } else {
+                    alert('❌ Cada módulo deve ter pelo menos uma aula!');
+                }
+            });
+        }
+
+        // ✅ SALVAR CURSO
         async function saveCurso() {
             const cursoId = document.getElementById('curso-id').value;
+            
+            // Coletar dados básicos do curso
             const cursoData = {
                 titulo: document.getElementById('curso-titulo').value,
                 descricao: document.getElementById('curso-descricao').value,
@@ -2123,12 +2317,37 @@
                 categoria: document.getElementById('curso-categoria').value,
                 nivel: document.getElementById('curso-nivel').value,
                 duracao: parseInt(document.getElementById('curso-duracao').value),
-                modulos: parseInt(document.getElementById('curso-modulos').value),
-                alunos: parseInt(document.getElementById('curso-alunos').value) || 0,
                 imagem: document.getElementById('curso-imagem').value || null,
-                ativo: document.getElementById('curso-ativo').value === 'true',
-                avaliacao: 4.5
+                ativo: document.getElementById('curso-ativo').value === 'true'
             };
+
+            // Coletar módulos e aulas
+            const modulos = [];
+            document.querySelectorAll('.modulo-item').forEach((moduloElement, index) => {
+                const modulo = {
+                    titulo: moduloElement.querySelector('.modulo-titulo').value,
+                    ordem: index + 1,
+                    aulas: []
+                };
+
+                // Coletar aulas do módulo
+                moduloElement.querySelectorAll('.aula-item').forEach((aulaElement, aulaIndex) => {
+                    const aula = {
+                        titulo: aulaElement.querySelector('.aula-titulo').value,
+                        descricao: aulaElement.querySelector('.aula-descricao').value,
+                        duracao: parseInt(aulaElement.querySelector('.aula-duracao').value) || 15,
+                        provedor: aulaElement.querySelector('.aula-provedor').value,
+                        videoUrl: aulaElement.querySelector('.aula-video-url').value,
+                        conteudo: aulaElement.querySelector('.aula-conteudo').value,
+                        ordem: aulaIndex + 1
+                    };
+                    modulo.aulas.push(aula);
+                });
+
+                modulos.push(modulo);
+            });
+
+            cursoData.modulos = modulos;
 
             try {
                 showGlobalLoading(true);
@@ -2148,18 +2367,15 @@
                     });
                 }
 
-                if (!response.ok) {
+                if (response.ok) {
+                    const result = await response.json();
+                    showAlert('✅ Curso salvo com sucesso!', 'success');
+                    document.getElementById('curso-modal').style.display = 'none';
+                    await loadCursos();
+                } else {
                     const errorText = await response.text();
                     throw new Error(`Erro ${response.status}: ${errorText}`);
                 }
-
-                const result = await response.json();
-                console.log('✅ Curso salvo:', result);
-
-                showAlert('✅ Curso salvo com sucesso!', 'success');
-                document.getElementById('curso-modal').style.display = 'none';
-
-                await loadCursos();
 
             } catch (error) {
                 console.error('❌ Erro ao salvar curso:', error);
@@ -2169,57 +2385,111 @@
             }
         }
 
-        // ✅ FUNÇÃO DELETE CURSO CORRIGIDA - Com verificação completa
-       // ✅ FUNÇÃO DELETE CORRIGIDA - Versão Simplificada
-async function deleteCurso(cursoId) {
-    const curso = cursos.find(c => c.id == cursoId);
-    if (!curso) {
-        showAlert('❌ Curso não encontrado!', 'error');
-        return;
-    }
+        // ✅ CRIAR CURSO DE EXEMPLO
+        async function criarCursoExemplo() {
+            const cursoExemplo = {
+                titulo: "Matemática Básica - Exemplo",
+                descricao: "Curso completo de matemática básica para iniciantes com exemplos práticos",
+                materia: "matematica",
+                categoria: "algebra",
+                nivel: "fundamental",
+                duracao: 8,
+                imagem: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=400&h=200&fit=crop",
+                ativo: true,
+                modulos: [
+                    {
+                        titulo: "Introdução à Matemática",
+                        ordem: 1,
+                        aulas: [
+                            {
+                                titulo: "O que é Matemática?",
+                                descricao: "Entenda os conceitos básicos da matemática e sua importância no dia a dia",
+                                duracao: 15,
+                                provedor: "youtube",
+                                videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+                                conteudo: "<h2>Introdução à Matemática</h2><p>A matemática é fundamental para o desenvolvimento do raciocínio lógico.</p>",
+                                ordem: 1
+                            }
+                        ]
+                    }
+                ]
+            };
 
-    showConfirmation(`Tem certeza que deseja excluir o curso "${curso.titulo}"?`, async () => {
-        try {
-            showGlobalLoading(true);
-
-            console.log(`🗑️ Tentando excluir curso ID: ${cursoId}`);
-            
-            const response = await fetch(`${API_BASE_URL}/api/cursos/${cursoId}`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            console.log('📡 Status da resposta:', response.status);
-
-            if (response.ok) {
-                const result = await response.json();
-                console.log('✅ Curso excluído:', result);
-                showAlert('✅ Curso excluído com sucesso!', 'success');
+            try {
+                showGlobalLoading(true);
                 
-                // Remove da lista local
-                cursos = cursos.filter(c => c.id != cursoId);
-                displayCursos(cursos);
-                
-            } else {
-                // Se der 404, significa que a rota não existe no backend
-                if (response.status === 404) {
-                    showAlert('❌ Rota DELETE não disponível no servidor. Atualize o backend.', 'error');
+                const response = await fetch(`${API_BASE_URL}/api/cursos`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(cursoExemplo)
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    showAlert('✅ Curso exemplo criado com sucesso!', 'success');
+                    await loadCursos();
                 } else {
-                    const errorText = await response.text();
-                    showAlert(`❌ Erro ${response.status}: ${errorText}`, 'error');
+                    throw new Error('Erro ao criar curso exemplo');
                 }
+            } catch (error) {
+                console.error('Erro ao criar curso exemplo:', error);
+                showAlert('❌ Erro ao criar curso exemplo: ' + error.message, 'error');
+            } finally {
+                showGlobalLoading(false);
+            }
+        }
+
+        // ✅ FUNÇÃO DELETE CURSO CORRIGIDA
+        async function deleteCurso(cursoId) {
+            const curso = cursos.find(c => c.id == cursoId);
+            if (!curso) {
+                showAlert('❌ Curso não encontrado!', 'error');
+                return;
             }
 
-        } catch (error) {
-            console.error('❌ Erro ao excluir curso:', error);
-            showAlert('❌ Erro de conexão: ' + error.message, 'error');
-        } finally {
-            showGlobalLoading(false);
+            showConfirmation(`Tem certeza que deseja excluir o curso "${curso.titulo}"?`, async () => {
+                try {
+                    showGlobalLoading(true);
+
+                    console.log(`🗑️ Tentando excluir curso ID: ${cursoId}`);
+                    
+                    const response = await fetch(`${API_BASE_URL}/api/cursos/${cursoId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    console.log('📡 Status da resposta:', response.status);
+
+                    if (response.ok) {
+                        const result = await response.json();
+                        console.log('✅ Curso excluído:', result);
+                        showAlert('✅ Curso excluído com sucesso!', 'success');
+                        
+                        // Remove da lista local
+                        cursos = cursos.filter(c => c.id != cursoId);
+                        displayCursos(cursos);
+                        
+                    } else {
+                        // Se der 404, significa que a rota não existe no backend
+                        if (response.status === 404) {
+                            showAlert('❌ Rota DELETE não disponível no servidor. Atualize o backend.', 'error');
+                        } else {
+                            const errorText = await response.text();
+                            showAlert(`❌ Erro ${response.status}: ${errorText}`, 'error');
+                        }
+                    }
+
+                } catch (error) {
+                    console.error('❌ Erro ao excluir curso:', error);
+                    showAlert('❌ Erro de conexão: ' + error.message, 'error');
+                } finally {
+                    showGlobalLoading(false);
+                }
+            });
         }
-    });
-}
+
         // System Functions
         function saveSettings() {
             showAlert('Configurações salvas com sucesso!', 'success');
@@ -2339,328 +2609,6 @@ async function deleteCurso(cursoId) {
                 return false;
             }
         };
-        // ✅ FUNÇÕES PARA CURSOS - ADICIONE ESTE CÓDIGO
-
-// ✅ CRIAR CURSO DE EXEMPLO
-async function criarCursoExemplo() {
-    const cursoExemplo = {
-        titulo: "Matemática Básica - Exemplo",
-        descricao: "Curso completo de matemática básica para iniciantes com exemplos práticos",
-        materia: "matematica",
-        categoria: "algebra",
-        nivel: "fundamental",
-        duracao: 8,
-        imagem: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=400&h=200&fit=crop",
-        ativo: true,
-        modulos: [
-            {
-                titulo: "Introdução à Matemática",
-                ordem: 1,
-                aulas: [
-                    {
-                        titulo: "O que é Matemática?",
-                        descricao: "Entenda os conceitos básicos da matemática e sua importância no dia a dia",
-                        duracao: 15,
-                        provedor: "youtube",
-                        videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-                        conteudo: "<h2>Introdução à Matemática</h2><p>A matemática é fundamental para o desenvolvimento do raciocínio lógico.</p>",
-                        ordem: 1
-                    }
-                ]
-            }
-        ]
-    };
-
-    try {
-        showGlobalLoading(true);
-        
-        const response = await fetch(`${API_BASE_URL}/api/cursos`, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(cursoExemplo)
-        });
-
-        if (response.ok) {
-            const result = await response.json();
-            showAlert('✅ Curso exemplo criado com sucesso!', 'success');
-            await loadCursos();
-        } else {
-            throw new Error('Erro ao criar curso exemplo');
-        }
-    } catch (error) {
-        console.error('Erro ao criar curso exemplo:', error);
-        showAlert('❌ Erro ao criar curso exemplo: ' + error.message, 'error');
-    } finally {
-        showGlobalLoading(false);
-    }
-}
-
-// ✅ MOSTRAR MODAL DE CURSO
-function showCursoModal(curso = null) {
-    const modal = document.getElementById('curso-modal');
-    const title = document.getElementById('curso-modal-title');
-    
-    // Resetar contadores e interface
-    moduloCount = 0;
-    aulaCount = 0;
-    document.getElementById('modulos-container').innerHTML = '';
-
-    if (curso) {
-        title.textContent = 'Editar Curso';
-        document.getElementById('curso-id').value = curso.id;
-        document.getElementById('curso-titulo').value = curso.titulo;
-        document.getElementById('curso-descricao').value = curso.descricao || '';
-        document.getElementById('curso-materia').value = curso.materia;
-        document.getElementById('curso-categoria').value = curso.categoria;
-        document.getElementById('curso-nivel').value = curso.nivel;
-        document.getElementById('curso-duracao').value = curso.duracao;
-        document.getElementById('curso-imagem').value = curso.imagem || '';
-        document.getElementById('curso-ativo').value = curso.ativo.toString();
-
-        // Carregar módulos se existirem
-        if (curso.modulos && curso.modulos.length > 0) {
-            curso.modulos.forEach(modulo => {
-                addModuloToForm(modulo);
-            });
-        } else {
-            addModuloToForm();
-        }
-    } else {
-        title.textContent = 'Criar Curso';
-        document.getElementById('curso-form').reset();
-        document.getElementById('curso-ativo').value = 'true';
-        addModuloToForm();
-    }
-
-    modal.style.display = 'flex';
-}
-
-// ✅ ADICIONAR MÓDULO AO FORMULÁRIO
-function addModuloToForm(moduloData = null) {
-    moduloCount++;
-    const moduloId = `modulo_${moduloCount}`;
-    
-    const moduloHTML = `
-        <div class="modulo-item" data-modulo-id="${moduloId}" style="background: rgba(255,207,0,0.05); padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #555;">
-            <div class="modulo-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                <div style="flex: 1;">
-                    <input type="text" class="form-control modulo-titulo" placeholder="Título do Módulo" 
-                           value="${moduloData?.titulo || ''}" required>
-                </div>
-                <button type="button" class="btn btn-danger btn-sm remove-modulo">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </div>
-            
-            <div class="aulas-container" style="margin-top: 15px;">
-                ${moduloData?.aulas && moduloData.aulas.length > 0 ? 
-                    moduloData.aulas.map(aula => `
-                        <div class="aula-item" style="display: flex; gap: 10px; margin-bottom: 10px; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 6px; border-left: 3px solid #ffcf00;">
-                            <div style="flex: 1;">
-                                <input type="text" class="form-control aula-titulo" placeholder="Título da Aula" value="${aula.titulo}" required>
-                                <input type="text" class="form-control aula-descricao" placeholder="Descrição da aula" value="${aula.descricao || ''}" style="margin-top: 8px;">
-                                <div style="display: flex; gap: 10px; margin-top: 8px;">
-                                    <input type="number" class="form-control aula-duracao" placeholder="Duração (min)" value="${aula.duracao}" min="1" style="flex: 1;">
-                                    <select class="form-control aula-provedor" style="flex: 1;">
-                                        <option value="youtube" ${aula.provedor === 'youtube' ? 'selected' : ''}>YouTube</option>
-                                        <option value="pandavideo" ${aula.provedor === 'pandavideo' ? 'selected' : ''}>Panda Video</option>
-                                    </select>
-                                </div>
-                                <input type="text" class="form-control aula-video-url" placeholder="URL do vídeo" value="${aula.videoUrl}" style="margin-top: 8px;">
-                                <textarea class="form-control aula-conteudo" placeholder="Conteúdo da aula..." rows="3" style="margin-top: 8px;">${aula.conteudo || ''}</textarea>
-                            </div>
-                            <button type="button" class="btn btn-danger btn-sm remove-aula">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                    `).join('') 
-                    : 
-                    '<div class="no-aulas" style="text-align: center; padding: 20px; color: #888;">Nenhuma aula adicionada</div>'
-                }
-            </div>
-            
-            <button type="button" class="btn btn-secondary btn-sm add-aula" style="margin-top: 10px;">
-                <i class="fas fa-plus"></i> Adicionar Aula
-            </button>
-        </div>
-    `;
-    
-    document.getElementById('modulos-container').insertAdjacentHTML('beforeend', moduloHTML);
-    
-    // Configurar event listeners
-    const moduloElement = document.querySelector(`[data-modulo-id="${moduloId}"]`);
-    
-    moduloElement.querySelector('.remove-modulo').addEventListener('click', function() {
-        if (document.querySelectorAll('.modulo-item').length > 1) {
-            moduloElement.remove();
-        } else {
-            alert('❌ O curso deve ter pelo menos um módulo!');
-        }
-    });
-    
-    moduloElement.querySelector('.add-aula').addEventListener('click', function() {
-        addAulaToModulo(moduloId);
-    });
-    
-    // Configurar botões de remover aula
-    moduloElement.querySelectorAll('.remove-aula').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const aulasContainer = this.closest('.aulas-container');
-            if (aulasContainer.querySelectorAll('.aula-item').length > 1) {
-                this.closest('.aula-item').remove();
-            } else {
-                alert('❌ Cada módulo deve ter pelo menos uma aula!');
-            }
-        });
-    });
-}
-
-// ✅ ADICIONAR AULA AO MÓDULO
-function addAulaToModulo(moduloId) {
-    aulaCount++;
-    
-    const aulaHTML = `
-        <div class="aula-item" style="display: flex; gap: 10px; margin-bottom: 10px; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 6px; border-left: 3px solid #4361ee;">
-            <div style="flex: 1;">
-                <input type="text" class="form-control aula-titulo" placeholder="Título da Aula" required>
-                <input type="text" class="form-control aula-descricao" placeholder="Descrição da aula" style="margin-top: 8px;">
-                <div style="display: flex; gap: 10px; margin-top: 8px;">
-                    <input type="number" class="form-control aula-duracao" placeholder="Duração (min)" value="15" min="1" style="flex: 1;">
-                    <select class="form-control aula-provedor" style="flex: 1;">
-                        <option value="youtube">YouTube</option>
-                        <option value="pandavideo">Panda Video</option>
-                    </select>
-                </div>
-                <input type="text" class="form-control aula-video-url" placeholder="URL do vídeo" style="margin-top: 8px;">
-                <textarea class="form-control aula-conteudo" placeholder="Conteúdo da aula..." rows="3" style="margin-top: 8px;"></textarea>
-            </div>
-            <button type="button" class="btn btn-danger btn-sm remove-aula">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-    `;
-    
-    const moduloElement = document.querySelector(`[data-modulo-id="${moduloId}"] .aulas-container`);
-    
-    // Remove mensagem "nenhuma aula" se existir
-    const noAulas = moduloElement.querySelector('.no-aulas');
-    if (noAulas) {
-        noAulas.remove();
-    }
-    
-    moduloElement.insertAdjacentHTML('beforeend', aulaHTML);
-    
-    // Configurar event listener para o novo botão de remover
-    const newAula = moduloElement.lastElementChild;
-    newAula.querySelector('.remove-aula').addEventListener('click', function() {
-        const aulasContainer = this.closest('.aulas-container');
-        if (aulasContainer.querySelectorAll('.aula-item').length > 1) {
-            this.closest('.aula-item').remove();
-        } else {
-            alert('❌ Cada módulo deve ter pelo menos uma aula!');
-        }
-    });
-}
-
-// ✅ SALVAR CURSO
-async function saveCurso() {
-    const cursoId = document.getElementById('curso-id').value;
-    
-    // Coletar dados básicos do curso
-    const cursoData = {
-        titulo: document.getElementById('curso-titulo').value,
-        descricao: document.getElementById('curso-descricao').value,
-        materia: document.getElementById('curso-materia').value,
-        categoria: document.getElementById('curso-categoria').value,
-        nivel: document.getElementById('curso-nivel').value,
-        duracao: parseInt(document.getElementById('curso-duracao').value),
-        imagem: document.getElementById('curso-imagem').value || null,
-        ativo: document.getElementById('curso-ativo').value === 'true'
-    };
-
-    // Coletar módulos e aulas
-    const modulos = [];
-    document.querySelectorAll('.modulo-item').forEach((moduloElement, index) => {
-        const modulo = {
-            titulo: moduloElement.querySelector('.modulo-titulo').value,
-            ordem: index + 1,
-            aulas: []
-        };
-
-        // Coletar aulas do módulo
-        moduloElement.querySelectorAll('.aula-item').forEach((aulaElement, aulaIndex) => {
-            const aula = {
-                titulo: aulaElement.querySelector('.aula-titulo').value,
-                descricao: aulaElement.querySelector('.aula-descricao').value,
-                duracao: parseInt(aulaElement.querySelector('.aula-duracao').value) || 15,
-                provedor: aulaElement.querySelector('.aula-provedor').value,
-                videoUrl: aulaElement.querySelector('.aula-video-url').value,
-                conteudo: aulaElement.querySelector('.aula-conteudo').value,
-                ordem: aulaIndex + 1
-            };
-            modulo.aulas.push(aula);
-        });
-
-        modulos.push(modulo);
-    });
-
-    cursoData.modulos = modulos;
-
-    try {
-        showGlobalLoading(true);
-
-        let response;
-        if (cursoId) {
-            response = await fetch(`${API_BASE_URL}/api/cursos/${cursoId}`, {
-                method: 'PUT',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(cursoData)
-            });
-        } else {
-            response = await fetch(`${API_BASE_URL}/api/cursos`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(cursoData)
-            });
-        }
-
-        if (response.ok) {
-            const result = await response.json();
-            showAlert('✅ Curso salvo com sucesso!', 'success');
-            document.getElementById('curso-modal').style.display = 'none';
-            await loadCursos();
-        } else {
-            const errorText = await response.text();
-            throw new Error(`Erro ${response.status}: ${errorText}`);
-        }
-
-    } catch (error) {
-        console.error('❌ Erro ao salvar curso:', error);
-        showAlert('❌ Erro ao salvar curso: ' + error.message, 'error');
-    } finally {
-        showGlobalLoading(false);
-    }
-}
-
-// ✅ ATUALIZAR EVENT LISTENERS - Adicione no setupEventListeners
-function setupEventListeners() {
-    // ... seus event listeners existentes ...
-
-    // ✅ NOVOS EVENT LISTENERS PARA CURSOS
-    document.getElementById('add-curso-btn').addEventListener('click', function() {
-        showCursoModal();
-    });
-
-    document.getElementById('criar-exemplo-btn').addEventListener('click', function() {
-        criarCursoExemplo();
-    });
-
-    document.getElementById('add-modulo-btn').addEventListener('click', function() {
-        addModuloToForm();
-    });
-
-    document.getElementById('save-curso').addEventListener('click', saveCurso);
-}
     </script>
 </body>
 </html>
