@@ -1558,28 +1558,32 @@ async function loadVideos() {
     }
 }
 
+// ✅ FUNÇÃO LOADCURSOS SIMPLES COM PROXY
 async function loadCursos() {
-    const loadingElement = document.getElementById('cursos-loading');
-    
     try {
-        if (loadingElement) loadingElement.style.display = 'flex';
-        console.log('📚 Buscando cursos...');
+        showLoading();
+        console.log('🔄 Carregando cursos...');
         
-        const cursosData = await fetchAPI('/api/cursos');
+        // Usar proxy CORS
+        const proxyURL = `https://corsproxy.io/?${encodeURIComponent(`${API_BASE_URL}/api/cursos`)}`;
         
-        // Validação básica
-        cursos = Array.isArray(cursosData) ? cursosData : [];
+        const response = await fetch(proxyURL);
         
-        console.log(`✅ ${cursos.length} cursos carregados`);
-        displayCursos(cursos);
-        
+        if (response.ok) {
+            const data = await response.json();
+            cursos = Array.isArray(data) ? data : [];
+            console.log(`✅ ${cursos.length} cursos carregados`);
+        } else {
+            throw new Error(`Erro ${response.status}`);
+        }
     } catch (error) {
         console.error('❌ Erro:', error);
         cursos = [];
-        displayCursos(cursos);
-        showAlert('❌ ' + error.message, 'error');
+        showAlert('❌ Erro ao carregar cursos. Tente novamente.', 'error');
     } finally {
-        if (loadingElement) loadingElement.style.display = 'none';
+        filteredCursos = [...cursos];
+        displayCursos();
+        updateStats();
     }
 }
 async function loadFullRanking() {
