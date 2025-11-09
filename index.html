@@ -1260,6 +1260,7 @@
     </button>
 
     <script>// Variáveis globais
+// Variáveis globais
 const API_BASE_URL = 'https://coliseum-api.onrender.com';
 let users = [];
 let videos = [];
@@ -1451,13 +1452,36 @@ function setupEventListeners() {
 function voltarParaMenu() {
     window.location.href = '/menu';
 }
-// ✅ SUBSTITUA APENAS ESTA FUNÇÃO NO SEU CÓDIGO
+
+// Funções auxiliares
+function showLoading() {
+    const currentTab = document.querySelector('.tab-content.active').id;
+    const loadingElement = document.getElementById(`${currentTab}-loading`);
+    if (loadingElement) {
+        loadingElement.style.display = 'flex';
+    }
+}
+
+function hideLoading() {
+    const currentTab = document.querySelector('.tab-content.active').id;
+    const loadingElement = document.getElementById(`${currentTab}-loading`);
+    if (loadingElement) {
+        loadingElement.style.display = 'none';
+    }
+}
+
+function updateStats() {
+    // Função para atualizar estatísticas se necessário
+    console.log('📊 Estatísticas atualizadas');
+}
+
+// API Functions
 async function fetchAPI(endpoint, options = {}) {
     const PROXY_URL = 'https://corsproxy.io/?';
     const targetURL = `${API_BASE_URL}${endpoint}`;
     
     try {
-        console.log(`🌐 Fazendo requisição via proxy para: ${targetURL}`);
+        console.log(`🌐 Fazendo requisição para: ${targetURL}`);
         
         const response = await fetch(`${PROXY_URL}${encodeURIComponent(targetURL)}`, {
             headers: {
@@ -1468,27 +1492,42 @@ async function fetchAPI(endpoint, options = {}) {
             ...options
         });
 
-        if (!response.ok) throw new Error(`Erro ${response.status}`);
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Erro ${response.status}: ${errorText}`);
+        }
         
         return await response.json();
         
     } catch (error) {
-        console.error('❌ Erro com proxy:', error);
+        console.error('❌ Erro na requisição:', error);
+        
+        // Se for erro 500, tenta uma abordagem alternativa
+        if (error.message.includes('500')) {
+            showAlert('⚠️ Servidor temporariamente indisponível. Tente novamente em alguns instantes.', 'error');
+        }
+        
         throw error;
     }
 }
-// ✅ Data Loading Functions atualizadas
+
+// Data Loading Functions
 async function loadDashboardData() {
     try {
         document.getElementById('ranking-loading').style.display = 'flex';
 
         console.log('🔄 Carregando dados do dashboard...');
 
-        const [ranking, cursosData, videosData] = await Promise.all([
-            fetchAPI('/api/ranking').catch(() => []),
-            fetchAPI('/api/cursos').catch(() => []),
-            fetchAPI('/api/videos').catch(() => [])
+        // Use Promise.allSettled para evitar que um erro pare todos os requests
+        const [rankingResult, cursosResult, videosResult] = await Promise.allSettled([
+            fetchAPI('/api/ranking'),
+            fetchAPI('/api/cursos'), 
+            fetchAPI('/api/videos')
         ]);
+
+        const ranking = rankingResult.status === 'fulfilled' ? rankingResult.value : [];
+        const cursosData = cursosResult.status === 'fulfilled' ? cursosResult.value : [];
+        const videosData = videosResult.status === 'fulfilled' ? videosResult.value : [];
 
         console.log('📊 Dados carregados:', {
             usuarios: ranking.length,
@@ -1496,17 +1535,22 @@ async function loadDashboardData() {
             videos: videosData.length
         });
 
-        displayRanking(ranking.slice(0, 10));
+        // Exibe ranking mesmo se outros endpoints falharem
+        if (rankingResult.status === 'fulfilled') {
+            displayRanking(ranking.slice(0, 10));
+        } else {
+            console.warn('⚠️ Não foi possível carregar o ranking');
+            displayRanking([]);
+        }
 
-        // Cálculos para estatísticas
+        // Atualiza estatísticas
         const totalUsers = ranking.length;
         const totalPoints = ranking.reduce((sum, user) => sum + (user.pontuacao || 0), 0);
         const totalChallenges = ranking.reduce((sum, user) => sum + (user.desafiosCompletados || 0), 0);
         const series = [...new Set(ranking.map(user => user.serie || 'N/A'))].length;
-        const totalCursos = cursosData.length;
-        const totalVideos = videosData.length;
+        const totalCursos = cursosData.length || 0;
+        const totalVideos = videosData.length || 0;
 
-        // Atualiza a interface
         document.getElementById('total-users').textContent = totalUsers;
         document.getElementById('total-points').textContent = totalPoints.toLocaleString();
         document.getElementById('total-challenges').textContent = totalChallenges;
@@ -1516,9 +1560,9 @@ async function loadDashboardData() {
 
     } catch (error) {
         console.error('❌ Erro crítico no dashboard:', error);
-        showAlert('Erro ao carregar dashboard: ' + error.message, 'error');
-
-        // Mostra "0" em caso de erro
+        showAlert('Erro ao carregar dashboard. Alguns dados podem estar incompletos.', 'error');
+        
+        // Define valores padrão
         document.getElementById('total-users').textContent = '0';
         document.getElementById('total-points').textContent = '0';
         document.getElementById('total-challenges').textContent = '0';
@@ -1532,7 +1576,7 @@ async function loadDashboardData() {
 
 async function loadUsers() {
     try {
-        document.getElementById('users-loading').style.display = 'flex';
+        showLoading();
         const ranking = await fetchAPI('/api/ranking');
         users = ranking;
         displayUsers(users);
@@ -1540,13 +1584,13 @@ async function loadUsers() {
         console.error('Error loading users:', error);
         showAlert('Erro ao carregar usuários: ' + error.message, 'error');
     } finally {
-        document.getElementById('users-loading').style.display = 'none';
+        hideLoading();
     }
 }
 
 async function loadVideos() {
     try {
-        document.getElementById('videos-loading').style.display = 'flex';
+        showLoading();
         const videosData = await fetchAPI('/api/videos');
         videos = Array.isArray(videosData) ? videosData : [];
         displayVideos(videos);
@@ -1554,51 +1598,45 @@ async function loadVideos() {
         console.error('Error loading videos:', error);
         showAlert('Erro ao carregar vídeos: ' + error.message, 'error');
     } finally {
-        document.getElementById('videos-loading').style.display = 'none';
+        hideLoading();
     }
 }
 
-// ✅ FUNÇÃO LOADCURSOS SIMPLES COM PROXY
 async function loadCursos() {
     try {
         showLoading();
         console.log('🔄 Carregando cursos...');
         
-        // Usar proxy CORS
-        const proxyURL = `https://corsproxy.io/?${encodeURIComponent(`${API_BASE_URL}/api/cursos`)}`;
+        const cursosData = await fetchAPI('/api/cursos');
+        cursos = Array.isArray(cursosData) ? cursosData : [];
+        console.log(`✅ ${cursos.length} cursos carregados`);
         
-        const response = await fetch(proxyURL);
+        displayCursos(cursos);
         
-        if (response.ok) {
-            const data = await response.json();
-            cursos = Array.isArray(data) ? data : [];
-            console.log(`✅ ${cursos.length} cursos carregados`);
-        } else {
-            throw new Error(`Erro ${response.status}`);
-        }
     } catch (error) {
-        console.error('❌ Erro:', error);
+        console.error('❌ Erro ao carregar cursos:', error);
         cursos = [];
-        showAlert('❌ Erro ao carregar cursos. Tente novamente.', 'error');
+        showAlert('❌ Erro ao carregar cursos. Verifique se a API está funcionando.', 'error');
     } finally {
-        filteredCursos = [...cursos];
-        displayCursos();
+        hideLoading();
         updateStats();
     }
 }
+
 async function loadFullRanking() {
     try {
-        document.getElementById('full-ranking-loading').style.display = 'flex';
+        showLoading();
         const ranking = await fetchAPI('/api/ranking');
         displayFullRanking(ranking);
     } catch (error) {
         console.error('Error loading full ranking:', error);
         showAlert('Erro ao carregar ranking: ' + error.message, 'error');
     } finally {
-        document.getElementById('full-ranking-loading').style.display = 'none';
+        hideLoading();
     }
 }
 
+// Display Functions
 function displayRanking(ranking) {
     const tbody = document.getElementById('ranking-body');
     if (!tbody) return;
@@ -1737,7 +1775,7 @@ function displayVideos(videosList) {
     });
 }
 
-function displayCursos(cursosList) {
+function displayCursos(cursosList = []) {
     const container = document.getElementById('cursos-container');
     if (!container) return;
 
@@ -2181,7 +2219,6 @@ function editCurso(cursoId) {
     }
 }
 
-// ✅ ADICIONAR MÓDULO AO FORMULÁRIO
 function addModuloToForm(moduloData = null) {
     moduloCount++;
     const moduloId = `modulo_${moduloCount}`;
@@ -2258,7 +2295,6 @@ function addModuloToForm(moduloData = null) {
     });
 }
 
-// ✅ ADICIONAR AULA AO MÓDULO
 function addAulaToModulo(moduloId) {
     aulaCount++;
     
@@ -2302,7 +2338,6 @@ function addAulaToModulo(moduloId) {
     });
 }
 
-// ✅ SALVAR CURSO
 async function saveCurso() {
     const cursoId = document.getElementById('curso-id').value;
     
@@ -2381,60 +2416,6 @@ async function saveCurso() {
     }
 }
 
-// ✅ CRIAR CURSO DE EXEMPLO
-async function criarCursoExemplo() {
-    const cursoExemplo = {
-        titulo: "Matemática Básica - Exemplo",
-        descricao: "Curso completo de matemática básica para iniciantes com exemplos práticos",
-        materia: "matematica",
-        categoria: "algebra",
-        nivel: "fundamental",
-        duracao: 8,
-        imagem: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=400&h=200&fit=crop",
-        ativo: true,
-        modulos: [
-            {
-                titulo: "Introdução à Matemática",
-                ordem: 1,
-                aulas: [
-                    {
-                        titulo: "O que é Matemática?",
-                        descricao: "Entenda os conceitos básicos da matemática e sua importância no dia a dia",
-                        duracao: 15,
-                        ordem: 1,
-                        videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-                        conteudo: "<h2>Introdução à Matemática</h2><p>A matemática é fundamental para o desenvolvimento do raciocínio lógico.</p>"
-                    }
-                ]
-            }
-        ]
-    };
-
-    try {
-        showGlobalLoading(true);
-        
-        const response = await fetch(`${API_BASE_URL}/api/cursos`, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(cursoExemplo)
-        });
-
-        if (response.ok) {
-            const result = await response.json();
-            showAlert('✅ Curso exemplo criado com sucesso!', 'success');
-            await loadCursos();
-        } else {
-            throw new Error('Erro ao criar curso exemplo');
-        }
-    } catch (error) {
-        console.error('Erro ao criar curso exemplo:', error);
-        showAlert('❌ Erro ao criar curso exemplo: ' + error.message, 'error');
-    } finally {
-        showGlobalLoading(false);
-    }
-}
-
-// ✅ FUNÇÃO DELETE CURSO CORRIGIDA
 async function deleteCurso(cursoId) {
     const curso = cursos.find(c => c.id == cursoId);
     if (!curso) {
@@ -2578,41 +2559,6 @@ function showGlobalLoading(show) {
         loading.style.display = show ? 'flex' : 'none';
     }
 }
-
-// Função para testar a rota DELETE - execute no console do navegador
-window.testDeleteAPI = async function() {
-    try {
-        console.log('🧪 TESTE DA ROTA DELETE');
-        
-        // Testa em um curso que existe
-        const cursoId = 1;
-        console.log(`🔍 Testando DELETE no curso ID: ${cursoId}`);
-        
-        const response = await fetch(`https://coliseum-api.onrender.com/api/cursos/${cursoId}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-        
-        console.log('📡 Status:', response.status);
-        console.log('📡 Headers:', Object.fromEntries(response.headers.entries()));
-        
-        if (response.ok) {
-            const result = await response.json();
-            console.log('✅ DELETE FUNCIONOU:', result);
-            return true;
-        } else {
-            const errorText = await response.text();
-            console.log('❌ DELETE FALHOU:', errorText);
-            return false;
-        }
-        
-    } catch (error) {
-        console.error('❌ ERRO NO TESTE:', error);
-        return false;
-    }
-};
     </script>
 </body>
 </html>
