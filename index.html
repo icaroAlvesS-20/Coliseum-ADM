@@ -1259,1356 +1259,1389 @@
         <i class="fas fa-arrow-left"></i>
     </button>
 
-    <script>
-        // Variáveis globais
-        const API_BASE_URL = 'https://coliseum-api.onrender.com';
-        let users = [];
-        let videos = [];
-        let cursos = [];
-        let currentTab = 'dashboard';
-        let pendingAction = null;
-        let moduloCount = 0;
-        let aulaCount = 0;
+    <script>// Variáveis globais
+const API_BASE_URL = 'https://coliseum-api.onrender.com';
+let users = [];
+let videos = [];
+let cursos = [];
+let currentTab = 'dashboard';
+let pendingAction = null;
+let moduloCount = 0;
+let aulaCount = 0;
 
-        // DOM Elements
-        const tabs = document.querySelectorAll('.tab');
-        const tabContents = document.querySelectorAll('.tab-content');
-        const alertContainer = document.getElementById('alert-container');
+// DOM Elements
+const tabs = document.querySelectorAll('.tab');
+const tabContents = document.querySelectorAll('.tab-content');
+const alertContainer = document.getElementById('alert-container');
 
-        // Initialize the application
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeTabs();
-            loadDashboardData();
-            setupEventListeners();
+// Initialize the application
+document.addEventListener('DOMContentLoaded', function() {
+    initializeTabs();
+    loadDashboardData();
+    setupEventListeners();
+});
+
+// Tab Navigation
+function initializeTabs() {
+    tabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            // Update active tab
+            tabs.forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+
+            // Show corresponding content
+            const tabId = this.getAttribute('data-tab');
+            tabContents.forEach(content => {
+                content.classList.remove('active');
+                if (content.id === tabId) {
+                    content.classList.add('active');
+                    currentTab = tabId;
+
+                    // Load data for the tab
+                    switch(tabId) {
+                        case 'dashboard':
+                            loadDashboardData();
+                            break;
+                        case 'users':
+                            loadUsers();
+                            break;
+                        case 'videos':
+                            loadVideos();
+                            break;
+                        case 'cursos':
+                            loadCursos();
+                            break;
+                        case 'ranking':
+                            loadFullRanking();
+                            break;
+                    }
+                }
+            });
+        });
+    });
+}
+
+// Event Listeners
+function setupEventListeners() {
+    console.log('🔧 Configurando event listeners...');
+
+    // Search functionality
+    const userSearch = document.getElementById('user-search');
+    if (userSearch) {
+        userSearch.addEventListener('input', filterUsers);
+    }
+
+    // Refresh ranking
+    const refreshRanking = document.getElementById('refresh-ranking');
+    if (refreshRanking) {
+        refreshRanking.addEventListener('click', loadFullRanking);
+    }
+
+    // Modal controls
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('modal-close')) {
+            e.target.closest('.modal').style.display = 'none';
+        }
+    });
+
+    // Cancel buttons
+    const cancelEdit = document.getElementById('cancel-edit');
+    if (cancelEdit) {
+        cancelEdit.addEventListener('click', function() {
+            document.getElementById('edit-user-modal').style.display = 'none';
+        });
+    }
+
+    const cancelVideo = document.getElementById('cancel-video');
+    if (cancelVideo) {
+        cancelVideo.addEventListener('click', function() {
+            document.getElementById('video-modal').style.display = 'none';
+        });
+    }
+
+    const cancelCurso = document.getElementById('cancel-curso');
+    if (cancelCurso) {
+        cancelCurso.addEventListener('click', function() {
+            document.getElementById('curso-modal').style.display = 'none';
+        });
+    }
+
+    const cancelAction = document.getElementById('cancel-action');
+    if (cancelAction) {
+        cancelAction.addEventListener('click', function() {
+            document.getElementById('confirm-modal').style.display = 'none';
+        });
+    }
+
+    // Save buttons
+    const saveUserBtn = document.getElementById('save-user');
+    if (saveUserBtn) {
+        saveUserBtn.addEventListener('click', saveUser);
+    }
+
+    const saveVideoBtn = document.getElementById('save-video');
+    if (saveVideoBtn) {
+        saveVideoBtn.addEventListener('click', saveVideo);
+    }
+
+    const saveCursoBtn = document.getElementById('save-curso');
+    if (saveCursoBtn) {
+        saveCursoBtn.addEventListener('click', saveCurso);
+    }
+
+    // Add buttons
+    const addVideoBtn = document.getElementById('add-video-btn');
+    if (addVideoBtn) {
+        addVideoBtn.addEventListener('click', function() {
+            showVideoModal();
+        });
+    }
+
+    const addCursoBtn = document.getElementById('add-curso-btn');
+    if (addCursoBtn) {
+        addCursoBtn.addEventListener('click', function() {
+            showCursoModal();
+        });
+    }
+
+    // Settings buttons
+    const saveSettings = document.getElementById('save-settings');
+    if (saveSettings) {
+        saveSettings.addEventListener('click', saveSettings);
+    }
+
+    const resetPoints = document.getElementById('reset-points');
+    if (resetPoints) {
+        resetPoints.addEventListener('click', function() {
+            showConfirmation('Zerar todas as pontuações?', resetAllPoints);
+        });
+    }
+
+    const resetAll = document.getElementById('reset-all');
+    if (resetAll) {
+        resetAll.addEventListener('click', function() {
+            showConfirmation('Resetar TODOS os dados? Esta ação não pode ser desfeita!', resetAllData);
+        });
+    }
+
+    // Confirm action
+    const confirmAction = document.getElementById('confirm-action');
+    if (confirmAction) {
+        confirmAction.addEventListener('click', function() {
+            if (pendingAction) {
+                pendingAction();
+                document.getElementById('confirm-modal').style.display = 'none';
+                pendingAction = null;
+            }
+        });
+    }
+
+    // Cursos buttons
+    const criarExemploBtn = document.getElementById('criar-exemplo-btn');
+    if (criarExemploBtn) {
+        criarExemploBtn.addEventListener('click', criarCursoExemplo);
+    }
+
+    const addModuloBtn = document.getElementById('add-modulo-btn');
+    if (addModuloBtn) {
+        addModuloBtn.addEventListener('click', function() {
+            addModuloToForm();
+        });
+    }
+
+    console.log('✅ Todos os event listeners configurados');
+}
+
+// Função para voltar ao menu
+function voltarParaMenu() {
+    window.location.href = '/menu';
+}
+
+// ✅ API Functions melhoradas
+async function fetchAPI(endpoint, options = {}) {
+    try {
+        console.log(`🌐 Fazendo requisição para: ${API_BASE_URL}${endpoint}`);
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 segundos timeout
+
+        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                ...options.headers
+            },
+            signal: controller.signal,
+            ...options
         });
 
-        // Tab Navigation
-        function initializeTabs() {
-            tabs.forEach(tab => {
-                tab.addEventListener('click', function() {
-                    // Update active tab
-                    tabs.forEach(t => t.classList.remove('active'));
-                    this.classList.add('active');
+        clearTimeout(timeoutId);
 
-                    // Show corresponding content
-                    const tabId = this.getAttribute('data-tab');
-                    tabContents.forEach(content => {
-                        content.classList.remove('active');
-                        if (content.id === tabId) {
-                            content.classList.add('active');
-                            currentTab = tabId;
+        console.log(`📡 Resposta da API - Status: ${response.status}`);
 
-                            // Load data for the tab
-                            switch(tabId) {
-                                case 'dashboard':
-                                    loadDashboardData();
-                                    break;
-                                case 'users':
-                                    loadUsers();
-                                    break;
-                                case 'videos':
-                                    loadVideos();
-                                    break;
-                                case 'cursos':
-                                    loadCursos();
-                                    break;
-                                case 'ranking':
-                                    loadFullRanking();
-                                    break;
-                            }
-                        }
-                    });
-                });
-            });
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error(`❌ Erro HTTP ${response.status}:`, errorText);
+            throw new Error(`Erro ${response.status}: ${errorText}`);
         }
 
-        // Event Listeners
-        function setupEventListeners() {
-            console.log('🔧 Configurando event listeners...');
+        const data = await response.json();
+        console.log(`✅ Dados recebidos de ${endpoint}:`, data);
 
-            // Search functionality
-            const userSearch = document.getElementById('user-search');
-            if (userSearch) {
-                userSearch.addEventListener('input', filterUsers);
-            }
+        return data;
 
-            // Refresh ranking
-            const refreshRanking = document.getElementById('refresh-ranking');
-            if (refreshRanking) {
-                refreshRanking.addEventListener('click', loadFullRanking);
-            }
+    } catch (error) {
+        console.error('❌ Erro na requisição API:', error);
 
-            // Modal controls
-            document.addEventListener('click', function(e) {
-                if (e.target.classList.contains('modal-close')) {
-                    e.target.closest('.modal').style.display = 'none';
-                }
-            });
-
-            // Cancel buttons
-            const cancelEdit = document.getElementById('cancel-edit');
-            if (cancelEdit) {
-                cancelEdit.addEventListener('click', function() {
-                    document.getElementById('edit-user-modal').style.display = 'none';
-                });
-            }
-
-            const cancelVideo = document.getElementById('cancel-video');
-            if (cancelVideo) {
-                cancelVideo.addEventListener('click', function() {
-                    document.getElementById('video-modal').style.display = 'none';
-                });
-            }
-
-            const cancelCurso = document.getElementById('cancel-curso');
-            if (cancelCurso) {
-                cancelCurso.addEventListener('click', function() {
-                    document.getElementById('curso-modal').style.display = 'none';
-                });
-            }
-
-            const cancelAction = document.getElementById('cancel-action');
-            if (cancelAction) {
-                cancelAction.addEventListener('click', function() {
-                    document.getElementById('confirm-modal').style.display = 'none';
-                });
-            }
-
-            // Save buttons
-            const saveUserBtn = document.getElementById('save-user');
-            if (saveUserBtn) {
-                saveUserBtn.addEventListener('click', saveUser);
-            }
-
-            const saveVideoBtn = document.getElementById('save-video');
-            if (saveVideoBtn) {
-                saveVideoBtn.addEventListener('click', saveVideo);
-            }
-
-            const saveCursoBtn = document.getElementById('save-curso');
-            if (saveCursoBtn) {
-                saveCursoBtn.addEventListener('click', saveCurso);
-            }
-
-            // Add buttons
-            const addVideoBtn = document.getElementById('add-video-btn');
-            if (addVideoBtn) {
-                addVideoBtn.addEventListener('click', function() {
-                    showVideoModal();
-                });
-            }
-
-            const addCursoBtn = document.getElementById('add-curso-btn');
-            if (addCursoBtn) {
-                addCursoBtn.addEventListener('click', function() {
-                    showCursoModal();
-                });
-            }
-
-            // Settings buttons
-            const saveSettings = document.getElementById('save-settings');
-            if (saveSettings) {
-                saveSettings.addEventListener('click', saveSettings);
-            }
-
-            const resetPoints = document.getElementById('reset-points');
-            if (resetPoints) {
-                resetPoints.addEventListener('click', function() {
-                    showConfirmation('Zerar todas as pontuações?', resetAllPoints);
-                });
-            }
-
-            const resetAll = document.getElementById('reset-all');
-            if (resetAll) {
-                resetAll.addEventListener('click', function() {
-                    showConfirmation('Resetar TODOS os dados? Esta ação não pode ser desfeita!', resetAllData);
-                });
-            }
-
-            // Confirm action
-            const confirmAction = document.getElementById('confirm-action');
-            if (confirmAction) {
-                confirmAction.addEventListener('click', function() {
-                    if (pendingAction) {
-                        pendingAction();
-                        document.getElementById('confirm-modal').style.display = 'none';
-                        pendingAction = null;
-                    }
-                });
-            }
-
-            // Cursos buttons
-            const criarExemploBtn = document.getElementById('criar-exemplo-btn');
-            if (criarExemploBtn) {
-                criarExemploBtn.addEventListener('click', criarCursoExemplo);
-            }
-
-            const addModuloBtn = document.getElementById('add-modulo-btn');
-            if (addModuloBtn) {
-                addModuloBtn.addEventListener('click', function() {
-                    addModuloToForm();
-                });
-            }
-
-            console.log('✅ Todos os event listeners configurados');
+        if (error.name === 'AbortError') {
+            showAlert('⏰ Tempo esgotado. Servidor está lento.', 'warning');
+        } else if (error.message.includes('Failed to fetch') || error.name === 'TypeError') {
+            showAlert('🚨 ERRO: Não foi possível conectar com a API. Verifique a URL e CORS.', 'error');
+        } else {
+            showAlert('Erro na API: ' + error.message, 'error');
         }
 
-        // Função para voltar ao menu
-        function voltarParaMenu() {
-            // Tenta voltar para a página anterior (menu)
-            if (document.referrer && document.referrer.includes(window.location.hostname)) {
-                window.history.back();
-            } else {
-                // Se não houver referência, redireciona para a raiz
-                window.location.href = '/';
-            }
+        throw error;
+    }
+}
+
+// ✅ Data Loading Functions atualizadas
+async function loadDashboardData() {
+    try {
+        document.getElementById('ranking-loading').style.display = 'flex';
+
+        console.log('🔄 Carregando dados do dashboard...');
+
+        const [ranking, cursosData, videosData] = await Promise.all([
+            fetchAPI('/api/ranking').catch(() => []),
+            fetchAPI('/api/cursos').catch(() => []),
+            fetchAPI('/api/videos').catch(() => [])
+        ]);
+
+        console.log('📊 Dados carregados:', {
+            usuarios: ranking.length,
+            cursos: cursosData.length,
+            videos: videosData.length
+        });
+
+        displayRanking(ranking.slice(0, 10));
+
+        // Cálculos para estatísticas
+        const totalUsers = ranking.length;
+        const totalPoints = ranking.reduce((sum, user) => sum + (user.pontuacao || 0), 0);
+        const totalChallenges = ranking.reduce((sum, user) => sum + (user.desafiosCompletados || 0), 0);
+        const series = [...new Set(ranking.map(user => user.serie || 'N/A'))].length;
+        const totalCursos = cursosData.length;
+        const totalVideos = videosData.length;
+
+        // Atualiza a interface
+        document.getElementById('total-users').textContent = totalUsers;
+        document.getElementById('total-points').textContent = totalPoints.toLocaleString();
+        document.getElementById('total-challenges').textContent = totalChallenges;
+        document.getElementById('total-series').textContent = series;
+        document.getElementById('total-cursos').textContent = totalCursos;
+        document.getElementById('total-videos').textContent = totalVideos;
+
+    } catch (error) {
+        console.error('❌ Erro crítico no dashboard:', error);
+        showAlert('Erro ao carregar dashboard: ' + error.message, 'error');
+
+        // Mostra "0" em caso de erro
+        document.getElementById('total-users').textContent = '0';
+        document.getElementById('total-points').textContent = '0';
+        document.getElementById('total-challenges').textContent = '0';
+        document.getElementById('total-series').textContent = '0';
+        document.getElementById('total-cursos').textContent = '0';
+        document.getElementById('total-videos').textContent = '0';
+    } finally {
+        document.getElementById('ranking-loading').style.display = 'none';
+    }
+}
+
+async function loadUsers() {
+    try {
+        document.getElementById('users-loading').style.display = 'flex';
+        const ranking = await fetchAPI('/api/ranking');
+        users = ranking;
+        displayUsers(users);
+    } catch (error) {
+        console.error('Error loading users:', error);
+        showAlert('Erro ao carregar usuários: ' + error.message, 'error');
+    } finally {
+        document.getElementById('users-loading').style.display = 'none';
+    }
+}
+
+async function loadVideos() {
+    try {
+        document.getElementById('videos-loading').style.display = 'flex';
+        const videosData = await fetchAPI('/api/videos');
+        videos = Array.isArray(videosData) ? videosData : [];
+        displayVideos(videos);
+    } catch (error) {
+        console.error('Error loading videos:', error);
+        showAlert('Erro ao carregar vídeos: ' + error.message, 'error');
+    } finally {
+        document.getElementById('videos-loading').style.display = 'none';
+    }
+}
+
+async function loadCursos() {
+    try {
+        document.getElementById('cursos-loading').style.display = 'flex';
+
+        console.log('📚 Buscando cursos da API...');
+        
+        const cursosData = await fetchAPI('/api/cursos');
+        cursos = Array.isArray(cursosData) ? cursosData : [];
+        
+        console.log('🎯 Cursos carregados:', cursos.map(c => ({ 
+            id: c.id, 
+            titulo: c.titulo,
+            materia: c.materia,
+            ativo: c.ativo 
+        })));
+        
+        displayCursos(cursos);
+
+    } catch (error) {
+        console.error('❌ Erro ao carregar cursos da API:', error);
+        
+        cursos = [];
+        displayCursos(cursos);
+        showAlert('❌ Erro ao carregar cursos: ' + error.message, 'error');
+    } finally {
+        document.getElementById('cursos-loading').style.display = 'none';
+    }
+}
+
+async function loadFullRanking() {
+    try {
+        document.getElementById('full-ranking-loading').style.display = 'flex';
+        const ranking = await fetchAPI('/api/ranking');
+        displayFullRanking(ranking);
+    } catch (error) {
+        console.error('Error loading full ranking:', error);
+        showAlert('Erro ao carregar ranking: ' + error.message, 'error');
+    } finally {
+        document.getElementById('full-ranking-loading').style.display = 'none';
+    }
+}
+
+function displayRanking(ranking) {
+    const tbody = document.getElementById('ranking-body');
+    if (!tbody) return;
+
+    tbody.innerHTML = '';
+
+    if (!ranking || ranking.length === 0) {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td colspan="6" style="text-align: center; color: #888; padding: 20px;">
+                <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
+                Nenhum usuário encontrado
+            </td>
+        `;
+        tbody.appendChild(row);
+        return;
+    }
+
+    ranking.forEach((user, index) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td><strong>${index + 1}º</strong></td>
+            <td>${user.nome}</td>
+            <td><code>${user.ra}</code></td>
+            <td>${user.serie}</td>
+            <td><span style="color: #ffcf00; font-weight: bold;">${user.pontuacao}</span></td>
+            <td>${user.desafiosCompletados}</td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+function displayUsers(users) {
+    const tbody = document.getElementById('users-body');
+    if (!tbody) return;
+
+    tbody.innerHTML = '';
+
+    if (!users || users.length === 0) {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td colspan="7" style="text-align: center; color: #888; padding: 20px;">
+                <i class="fas fa-users" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
+                Nenhum usuário encontrado
+            </td>
+        `;
+        tbody.appendChild(row);
+        return;
+    }
+
+    users.forEach(user => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${user.id}</td>
+            <td>${user.nome}</td>
+            <td>${user.ra}</td>
+            <td>${user.serie}</td>
+            <td>${user.pontuacao}</td>
+            <td>${user.desafiosCompletados}</td>
+            <td class="actions">
+                <button class="btn btn-primary btn-sm edit-user" data-id="${user.id}">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn btn-danger btn-sm delete-user" data-id="${user.id}">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+
+    // Add event listeners usando event delegation
+    tbody.addEventListener('click', function(e) {
+        if (e.target.closest('.edit-user')) {
+            const userId = e.target.closest('.edit-user').getAttribute('data-id');
+            editUser(userId);
         }
-
-        // API Functions
-        async function fetchAPI(endpoint, options = {}) {
-            try {
-                console.log(`🌐 Fazendo requisição para: ${API_BASE_URL}${endpoint}`);
-
-                const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        ...options.headers
-                    },
-                    ...options
-                });
-
-                console.log(`📡 Resposta da API - Status: ${response.status}`);
-
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    console.error(`❌ Erro HTTP ${response.status}:`, errorText);
-                    throw new Error(`Erro ${response.status}: ${errorText}`);
-                }
-
-                const data = await response.json();
-                console.log(`✅ Dados recebidos de ${endpoint}:`, data);
-
-                return data;
-
-            } catch (error) {
-                console.error('❌ Erro na requisição API:', error);
-
-                if (error.message.includes('Failed to fetch') || error.name === 'TypeError') {
-                    showAlert('🚨 ERRO: Não foi possível conectar com a API. Verifique a URL e CORS.', 'error');
-                } else {
-                    showAlert('Erro na API: ' + error.message, 'error');
-                }
-
-                throw error;
-            }
+        if (e.target.closest('.delete-user')) {
+            const userId = e.target.closest('.delete-user').getAttribute('data-id');
+            deleteUser(userId);
         }
+    });
+}
 
-        // Data Loading Functions
-        async function loadDashboardData() {
-            try {
-                document.getElementById('ranking-loading').style.display = 'flex';
+function displayVideos(videosList) {
+    const tbody = document.getElementById('videos-body');
+    if (!tbody) return;
 
-                console.log('🔄 Carregando dados do dashboard...');
+    tbody.innerHTML = '';
 
-                const [ranking, cursosData, videosData] = await Promise.all([
-                    fetchAPI('/api/ranking').catch(() => []),
-                    fetchAPI('/api/cursos').catch(() => []),
-                    fetchAPI('/api/videos').catch(() => [])
-                ]);
+    if (!videosList || videosList.length === 0) {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td colspan="7" style="text-align: center; color: #888; padding: 20px;">
+                <i class="fas fa-video" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
+                Nenhum vídeo encontrado
+            </td>
+        `;
+        tbody.appendChild(row);
+        return;
+    }
 
-                console.log('📊 Dados carregados:', {
-                    usuarios: ranking.length,
-                    cursos: cursosData.length,
-                    videos: videosData.length
-                });
+    videosList.forEach(video => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${video.id}</td>
+            <td>${video.titulo}</td>
+            <td>${getMateriaNome(video.materia)}</td>
+            <td>${video.categoria}</td>
+            <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                ${video.url}
+            </td>
+            <td>${video.duracao} min</td>
+            <td class="actions">
+                <button class="btn btn-primary btn-sm edit-video" data-id="${video.id}">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn btn-danger btn-sm delete-video" data-id="${video.id}">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
 
-                displayRanking(ranking.slice(0, 10));
-
-                // Cálculos para estatísticas
-                const totalUsers = ranking.length;
-                const totalPoints = ranking.reduce((sum, user) => sum + (user.pontuacao || 0), 0);
-                const totalChallenges = ranking.reduce((sum, user) => sum + (user.desafiosCompletados || 0), 0);
-                const series = [...new Set(ranking.map(user => user.serie || 'N/A'))].length;
-                const totalCursos = cursosData.length;
-                const totalVideos = videosData.length;
-
-                // Atualiza a interface
-                document.getElementById('total-users').textContent = totalUsers;
-                document.getElementById('total-points').textContent = totalPoints;
-                document.getElementById('total-challenges').textContent = totalChallenges;
-                document.getElementById('total-series').textContent = series;
-                document.getElementById('total-cursos').textContent = totalCursos;
-                document.getElementById('total-videos').textContent = totalVideos;
-
-            } catch (error) {
-                console.error('❌ Erro crítico no dashboard:', error);
-                showAlert('Erro ao carregar dashboard: ' + error.message, 'error');
-
-                // Mostra "0" em caso de erro
-                document.getElementById('total-users').textContent = '0';
-                document.getElementById('total-points').textContent = '0';
-                document.getElementById('total-challenges').textContent = '0';
-                document.getElementById('total-series').textContent = '0';
-                document.getElementById('total-cursos').textContent = '0';
-                document.getElementById('total-videos').textContent = '0';
-            } finally {
-                document.getElementById('ranking-loading').style.display = 'none';
-            }
+    // Add event listeners usando event delegation
+    tbody.addEventListener('click', function(e) {
+        if (e.target.closest('.edit-video')) {
+            const videoId = e.target.closest('.edit-video').getAttribute('data-id');
+            editVideo(videoId);
         }
-
-        async function loadUsers() {
-            try {
-                document.getElementById('users-loading').style.display = 'flex';
-                const ranking = await fetchAPI('/api/ranking');
-                users = ranking;
-                displayUsers(users);
-            } catch (error) {
-                console.error('Error loading users:', error);
-            } finally {
-                document.getElementById('users-loading').style.display = 'none';
-            }
+        if (e.target.closest('.delete-video')) {
+            const videoId = e.target.closest('.delete-video').getAttribute('data-id');
+            deleteVideo(videoId);
         }
+    });
+}
 
-        async function loadVideos() {
-            try {
-                document.getElementById('videos-loading').style.display = 'flex';
-                const videosData = await fetchAPI('/api/videos');
-                videos = videosData;
-                displayVideos(videos);
-            } catch (error) {
-                console.error('Error loading videos:', error);
-                showAlert('Erro ao carregar vídeos: ' + error.message, 'error');
-            } finally {
-                document.getElementById('videos-loading').style.display = 'none';
-            }
-        }
+function displayCursos(cursosList) {
+    const container = document.getElementById('cursos-container');
+    if (!container) return;
 
-        async function loadCursos() {
-            try {
-                document.getElementById('cursos-loading').style.display = 'flex';
+    container.innerHTML = '';
 
-                console.log('📚 Buscando cursos da API...');
-                
-                // Tenta buscar da API
-                const cursosData = await fetchAPI('/api/cursos');
-                cursos = cursosData;
-                
-                console.log('🎯 Cursos carregados:', cursos.map(c => ({ 
-                    id: c.id, 
-                    titulo: c.titulo,
-                    materia: c.materia,
-                    ativo: c.ativo 
-                })));
-                
-                displayCursos(cursos);
+    if (!cursosList || cursosList.length === 0) {
+        container.innerHTML = `
+            <div class="no-data" style="text-align: center; padding: 40px;">
+                <i class="fas fa-graduation-cap" style="font-size: 3rem; margin-bottom: 15px; color: #ffcf00;"></i>
+                <h3 style="color: #ffcf00; margin-bottom: 10px;">Nenhum curso encontrado</h3>
+                <p style="color: #aaa;">Clique em "Criar Curso" para adicionar o primeiro curso ao sistema.</p>
+            </div>
+        `;
+        return;
+    }
 
-            } catch (error) {
-                console.error('❌ Erro ao carregar cursos da API:', error);
-                
-                // Se não conseguir carregar da API, mostra cursos vazios
-                cursos = [];
-                displayCursos(cursos);
-                showAlert('⚠️ Usando dados de exemplo - Erro na API: ' + error.message, 'warning');
-            } finally {
-                document.getElementById('cursos-loading').style.display = 'none';
-            }
-        }
+    cursosList.forEach(curso => {
+        const cursoCard = document.createElement('div');
+        cursoCard.className = 'curso-card';
 
-        async function loadFullRanking() {
-            try {
-                document.getElementById('full-ranking-loading').style.display = 'flex';
-                const ranking = await fetchAPI('/api/ranking');
-                displayFullRanking(ranking);
-            } catch (error) {
-                console.error('Error loading full ranking:', error);
-            } finally {
-                document.getElementById('full-ranking-loading').style.display = 'none';
-            }
-        }
+        const totalAulas = curso.modulos ? curso.modulos.reduce((total, modulo) => 
+            total + (modulo.aulas ? modulo.aulas.length : 0), 0) : 0;
 
-        function displayRanking(ranking) {
-            const tbody = document.getElementById('ranking-body');
-            if (!tbody) return;
-
-            tbody.innerHTML = '';
-
-            if (!ranking || ranking.length === 0) {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td colspan="6" style="text-align: center; color: #888; padding: 20px;">
-                        <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
-                        Nenhum usuário encontrado
-                    </td>
-                `;
-                tbody.appendChild(row);
-                return;
-            }
-
-            ranking.forEach((user, index) => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td><strong>${index + 1}º</strong></td>
-                    <td>${user.nome}</td>
-                    <td><code>${user.ra}</code></td>
-                    <td>${user.serie}</td>
-                    <td><span style="color: #ffcf00; font-weight: bold;">${user.pontuacao}</span></td>
-                    <td>${user.desafiosCompletados}</td>
-                `;
-                tbody.appendChild(row);
-            });
-        }
-
-        function displayUsers(users) {
-            const tbody = document.getElementById('users-body');
-            if (!tbody) return;
-
-            tbody.innerHTML = '';
-
-            users.forEach(user => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${user.id}</td>
-                    <td>${user.nome}</td>
-                    <td>${user.ra}</td>
-                    <td>${user.serie}</td>
-                    <td>${user.pontuacao}</td>
-                    <td>${user.desafiosCompletados}</td>
-                    <td class="actions">
-                        <button class="btn btn-primary btn-sm edit-user" data-id="${user.id}">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="btn btn-danger btn-sm delete-user" data-id="${user.id}">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </td>
-                `;
-                tbody.appendChild(row);
-            });
-
-            // Add event listeners usando event delegation
-            tbody.addEventListener('click', function(e) {
-                if (e.target.closest('.edit-user')) {
-                    const userId = e.target.closest('.edit-user').getAttribute('data-id');
-                    editUser(userId);
-                }
-                if (e.target.closest('.delete-user')) {
-                    const userId = e.target.closest('.delete-user').getAttribute('data-id');
-                    deleteUser(userId);
-                }
-            });
-        }
-
-        function displayVideos(videosList) {
-            const tbody = document.getElementById('videos-body');
-            if (!tbody) return;
-
-            tbody.innerHTML = '';
-
-            videosList.forEach(video => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${video.id}</td>
-                    <td>${video.titulo}</td>
-                    <td>${video.materia}</td>
-                    <td>${video.categoria}</td>
-                    <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                        ${video.url}
-                    </td>
-                    <td>${video.duracao} min</td>
-                    <td class="actions">
-                        <button class="btn btn-primary btn-sm edit-video" data-id="${video.id}">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="btn btn-danger btn-sm delete-video" data-id="${video.id}">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </td>
-                `;
-                tbody.appendChild(row);
-            });
-
-            // Add event listeners usando event delegation
-            tbody.addEventListener('click', function(e) {
-                if (e.target.closest('.edit-video')) {
-                    const videoId = e.target.closest('.edit-video').getAttribute('data-id');
-                    editVideo(videoId);
-                }
-                if (e.target.closest('.delete-video')) {
-                    const videoId = e.target.closest('.delete-video').getAttribute('data-id');
-                    deleteVideo(videoId);
-                }
-            });
-        }
-
-        function displayCursos(cursosList) {
-            const container = document.getElementById('cursos-container');
-            if (!container) return;
-
-            container.innerHTML = '';
-
-            if (!cursosList || cursosList.length === 0) {
-                container.innerHTML = `
-                    <div class="no-data" style="text-align: center; padding: 40px;">
-                        <i class="fas fa-graduation-cap" style="font-size: 3rem; margin-bottom: 15px; color: #ffcf00;"></i>
-                        <h3 style="color: #ffcf00; margin-bottom: 10px;">Nenhum curso encontrado</h3>
-                        <p style="color: #aaa;">Clique em "Criar Curso" para adicionar o primeiro curso ao sistema.</p>
+        cursoCard.innerHTML = `
+            <div class="curso-header">
+                <div class="curso-info">
+                    <h4>${curso.titulo}</h4>
+                    <div class="badge ${getMateriaBadgeClass(curso.materia)}">${getMateriaNome(curso.materia)}</div>
+                    <div class="badge ${getNivelClass(curso.nivel)}" style="margin-left: 5px;">${getNivelNome(curso.nivel)}</div>
+                    <div class="curso-meta">
+                        <div class="curso-stat">
+                            <div class="curso-stat-value">${curso.duracao}h</div>
+                            <div class="curso-stat-label">Duração</div>
+                        </div>
+                        <div class="curso-stat">
+                            <div class="curso-stat-value">${curso.modulos ? curso.modulos.length : 0}</div>
+                            <div class="curso-stat-label">Módulos</div>
+                        </div>
+                        <div class="curso-stat">
+                            <div class="curso-stat-value">${totalAulas}</div>
+                            <div class="curso-stat-label">Aulas</div>
+                        </div>
                     </div>
-                `;
-                return;
-            }
+                </div>
+                <div class="actions">
+                    <button class="btn btn-primary btn-sm edit-curso" data-id="${curso.id}">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-danger btn-sm delete-curso" data-id="${curso.id}">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="curso-description">
+                ${curso.descricao || 'Sem descrição disponível.'}
+            </div>
+            <div class="curso-category">
+                <small style="color: #ffcf00;">Categoria: ${getCategoriaNome(curso.categoria)}</small>
+            </div>
+            <div class="curso-status">
+                <span class="badge ${curso.ativo ? 'success' : 'danger'}">
+                    ${curso.ativo ? 'Ativo' : 'Inativo'}
+                </span>
+            </div>
+        `;
 
-            cursosList.forEach(curso => {
-                const cursoCard = document.createElement('div');
-                cursoCard.className = 'curso-card';
+        container.appendChild(cursoCard);
+    });
 
-                cursoCard.innerHTML = `
-                    <div class="curso-header">
-                        <div class="curso-info">
-                            <h4>${curso.titulo}</h4>
-                            <div class="badge ${getMateriaBadgeClass(curso.materia)}">${getMateriaNome(curso.materia)}</div>
-                            <div class="badge ${getNivelClass(curso.nivel)}" style="margin-left: 5px;">${getNivelNome(curso.nivel)}</div>
-                            <div class="curso-meta">
-                                <div class="curso-stat">
-                                    <div class="curso-stat-value">${curso.duracao}h</div>
-                                    <div class="curso-stat-label">Duração</div>
+    // Add event listeners para cursos
+    container.addEventListener('click', function(e) {
+        if (e.target.closest('.edit-curso')) {
+            const cursoId = e.target.closest('.edit-curso').getAttribute('data-id');
+            editCurso(cursoId);
+        }
+        if (e.target.closest('.delete-curso')) {
+            const cursoId = e.target.closest('.delete-curso').getAttribute('data-id');
+            deleteCurso(cursoId);
+        }
+    });
+}
+
+function displayFullRanking(ranking) {
+    const tbody = document.getElementById('full-ranking-body');
+    if (!tbody) return;
+
+    tbody.innerHTML = '';
+
+    if (!ranking || ranking.length === 0) {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td colspan="6" style="text-align: center; color: #888; padding: 20px;">
+                <i class="fas fa-trophy" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
+                Nenhum usuário no ranking
+            </td>
+        `;
+        tbody.appendChild(row);
+        return;
+    }
+
+    ranking.forEach((user, index) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${user.nome}</td>
+            <td>${user.ra}</td>
+            <td>${user.serie}</td>
+            <td>${user.pontuacao}</td>
+            <td>${user.desafiosCompletados}</td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+// Helper functions para cursos
+function getMateriaBadgeClass(materia) {
+    const classes = {
+        'matematica': 'primary',
+        'csn': 'success',
+        'csh': 'warning',
+        'portugues': 'danger',
+        'programacao': 'primary'
+    };
+    return classes[materia] || 'primary';
+}
+
+function getMateriaNome(materia) {
+    const nomes = {
+        'matematica': 'Matemática',
+        'csn': 'CSN',
+        'csh': 'CSH',
+        'portugues': 'Português',
+        'programacao': 'Programação'
+    };
+    return nomes[materia] || materia;
+}
+
+function getNivelClass(nivel) {
+    const classes = {
+        'fundamental': 'success',
+        'medio': 'warning',
+        'vestibular': 'danger',
+        'iniciante': 'primary',
+        'intermediario': 'warning',
+        'avancado': 'danger'
+    };
+    return classes[nivel] || 'primary';
+}
+
+function getNivelNome(nivel) {
+    const nomes = {
+        'fundamental': 'Fundamental',
+        'medio': 'Ensino Médio',
+        'vestibular': 'Vestibular',
+        'iniciante': 'Iniciante',
+        'intermediario': 'Intermediário',
+        'avancado': 'Avançado'
+    };
+    return nomes[nivel] || nivel;
+}
+
+function getCategoriaNome(categoria) {
+    const nomes = {
+        'algebra': 'Álgebra',
+        'geometria': 'Geometria',
+        'quimica': 'Química',
+        'fisica': 'Física',
+        'historia': 'História',
+        'geografia': 'Geografia',
+        'gramatica': 'Gramática',
+        'interpretacao': 'Interpretação',
+        'python': 'Python',
+        'javascript': 'JavaScript',
+        'web': 'Desenvolvimento Web'
+    };
+    return nomes[categoria] || categoria;
+}
+
+// User Management
+function filterUsers() {
+    const searchTerm = document.getElementById('user-search').value.toLowerCase();
+    const filteredUsers = users.filter(user => 
+        user.nome.toLowerCase().includes(searchTerm) || 
+        user.ra.toLowerCase().includes(searchTerm) ||
+        (user.serie && user.serie.toLowerCase().includes(searchTerm))
+    );
+    displayUsers(filteredUsers);
+}
+
+function editUser(userId) {
+    const user = users.find(u => u.id == userId);
+    if (!user) {
+        console.error('❌ Usuário não encontrado:', userId);
+        return;
+    }
+
+    console.log('✏️ Editando usuário:', user);
+
+    document.getElementById('edit-user-id').value = user.id;
+    document.getElementById('edit-user-name').value = user.nome;
+    document.getElementById('edit-user-ra').value = user.ra;
+    document.getElementById('edit-user-serie').value = user.serie || '';
+    document.getElementById('edit-user-pontuacao').value = user.pontuacao || 0;
+    document.getElementById('edit-user-desafios').value = user.desafiosCompletados || 0;
+
+    document.getElementById('edit-user-modal').style.display = 'flex';
+}
+
+async function deleteUser(userId) {
+    const user = users.find(u => u.id == userId);
+    if (!user) {
+        console.error('❌ Usuário não encontrado:', userId);
+        return;
+    }
+
+    showConfirmation(`Tem certeza que deseja excluir o usuário "${user.nome}" (RA: ${user.ra})? Esta ação não pode ser desfeita.`, async () => {
+        try {
+            showGlobalLoading(true);
+
+            console.log(`🗑️ Excluindo usuário ${userId}...`);
+
+            const response = await fetch(`${API_BASE_URL}/api/usuarios/${userId}`, {
+                method: 'DELETE'
+            });
+
+            if (!response.ok) throw new Error(`Erro ${response.status}`);
+
+            const result = await response.json();
+            console.log('✅ Usuário excluído:', result);
+
+            showAlert('✅ Usuário excluído com sucesso!', 'success');
+
+            // Recarrega os dados
+            await loadUsers();
+
+        } catch (error) {
+            console.error('❌ Erro ao excluir usuário:', error);
+            showAlert('❌ Erro ao excluir usuário: ' + error.message, 'error');
+        } finally {
+            showGlobalLoading(false);
+        }
+    });
+}
+
+async function saveUser() {
+    const userId = document.getElementById('edit-user-id').value;
+    const userData = {
+        nome: document.getElementById('edit-user-name').value,
+        ra: document.getElementById('edit-user-ra').value,
+        serie: document.getElementById('edit-user-serie').value,
+        pontuacao: parseInt(document.getElementById('edit-user-pontuacao').value),
+        desafiosCompletados: parseInt(document.getElementById('edit-user-desafios').value)
+    };
+
+    console.log('💾 Salvando usuário...', userId, userData);
+
+    try {
+        showGlobalLoading(true);
+
+        const response = await fetch(`${API_BASE_URL}/api/usuarios/${userId}`, {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(userData)
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Erro ${response.status}: ${errorText}`);
+        }
+
+        const result = await response.json();
+        console.log('✅ Usuário salvo:', result);
+
+        showAlert('✅ Usuário atualizado com sucesso!', 'success');
+        document.getElementById('edit-user-modal').style.display = 'none';
+
+        await loadUsers();
+
+    } catch (error) {
+        console.error('❌ Erro ao salvar usuário:', error);
+        showAlert('❌ Erro ao salvar usuário: ' + error.message, 'error');
+    } finally {
+        showGlobalLoading(false);
+    }
+}
+
+// Video Management
+function showVideoModal(video = null) {
+    const modal = document.getElementById('video-modal');
+    const title = document.getElementById('video-modal-title');
+    const form = document.getElementById('video-form');
+
+    if (video) {
+        title.textContent = 'Editar Vídeo';
+        document.getElementById('video-id').value = video.id;
+        document.getElementById('video-title').value = video.titulo;
+        document.getElementById('video-materia').value = video.materia;
+        document.getElementById('video-categoria').value = video.categoria;
+        document.getElementById('video-url').value = video.url;
+        document.getElementById('video-descricao').value = video.descricao || '';
+        document.getElementById('video-duracao').value = video.duracao;
+    } else {
+        title.textContent = 'Adicionar Vídeo';
+        form.reset();
+    }
+
+    modal.style.display = 'flex';
+}
+
+function editVideo(videoId) {
+    const video = videos.find(v => v.id == videoId);
+    if (video) {
+        showVideoModal(video);
+    }
+}
+
+async function saveVideo() {
+    const videoId = document.getElementById('video-id').value;
+    const videoData = {
+        titulo: document.getElementById('video-title').value,
+        materia: document.getElementById('video-materia').value,
+        categoria: document.getElementById('video-categoria').value,
+        url: document.getElementById('video-url').value,
+        descricao: document.getElementById('video-descricao').value,
+        duracao: parseInt(document.getElementById('video-duracao').value)
+    };
+
+    try {
+        showGlobalLoading(true);
+
+        let response;
+        if (videoId) {
+            response = await fetch(`${API_BASE_URL}/api/videos/${videoId}`, {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(videoData)
+            });
+        } else {
+            response = await fetch(`${API_BASE_URL}/api/videos`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(videoData)
+            });
+        }
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Erro ${response.status}: ${errorText}`);
+        }
+
+        const result = await response.json();
+        console.log('✅ Vídeo salvo:', result);
+
+        showAlert('✅ Vídeo salvo com sucesso!', 'success');
+        document.getElementById('video-modal').style.display = 'none';
+
+        await loadVideos();
+
+    } catch (error) {
+        console.error('❌ Erro ao salvar vídeo:', error);
+        showAlert('❌ Erro ao salvar vídeo: ' + error.message, 'error');
+    } finally {
+        showGlobalLoading(false);
+    }
+}
+
+async function deleteVideo(videoId) {
+    const video = videos.find(v => v.id == videoId);
+    if (!video) return;
+
+    showConfirmation(`Tem certeza que deseja excluir o vídeo "${video.titulo}"?`, async () => {
+        try {
+            showGlobalLoading(true);
+
+            const response = await fetch(`${API_BASE_URL}/api/videos/${videoId}`, {
+                method: 'DELETE'
+            });
+
+            if (!response.ok) throw new Error(`Erro ${response.status}`);
+
+            const result = await response.json();
+            console.log('✅ Vídeo excluído:', result);
+
+            showAlert('✅ Vídeo excluído com sucesso!', 'success');
+
+            await loadVideos();
+
+        } catch (error) {
+            console.error('❌ Erro ao excluir vídeo:', error);
+            showAlert('❌ Erro ao excluir vídeo: ' + error.message, 'error');
+        } finally {
+            showGlobalLoading(false);
+        }
+    });
+}
+
+// Curso Management
+function showCursoModal(curso = null) {
+    const modal = document.getElementById('curso-modal');
+    const title = document.getElementById('curso-modal-title');
+    
+    // Resetar contadores e interface
+    moduloCount = 0;
+    aulaCount = 0;
+    document.getElementById('modulos-container').innerHTML = '';
+
+    if (curso) {
+        title.textContent = 'Editar Curso';
+        document.getElementById('curso-id').value = curso.id;
+        document.getElementById('curso-titulo').value = curso.titulo;
+        document.getElementById('curso-descricao').value = curso.descricao || '';
+        document.getElementById('curso-materia').value = curso.materia;
+        document.getElementById('curso-categoria').value = curso.categoria;
+        document.getElementById('curso-nivel').value = curso.nivel;
+        document.getElementById('curso-duracao').value = curso.duracao;
+        document.getElementById('curso-imagem').value = curso.imagem || '';
+        document.getElementById('curso-ativo').value = curso.ativo ? 'true' : 'false';
+
+        // Carregar módulos se existirem
+        if (curso.modulos && curso.modulos.length > 0) {
+            curso.modulos.forEach(modulo => {
+                addModuloToForm(modulo);
+            });
+        } else {
+            addModuloToForm();
+        }
+    } else {
+        title.textContent = 'Criar Curso';
+        document.getElementById('curso-form').reset();
+        document.getElementById('curso-ativo').value = 'true';
+        addModuloToForm();
+    }
+
+    modal.style.display = 'flex';
+}
+
+function editCurso(cursoId) {
+    const curso = cursos.find(c => c.id == cursoId);
+    if (curso) {
+        showCursoModal(curso);
+    }
+}
+
+// ✅ ADICIONAR MÓDULO AO FORMULÁRIO
+function addModuloToForm(moduloData = null) {
+    moduloCount++;
+    const moduloId = `modulo_${moduloCount}`;
+    
+    const moduloHTML = `
+        <div class="modulo-item" data-modulo-id="${moduloId}" style="background: rgba(255,207,0,0.05); padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #555;">
+            <div class="modulo-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <div style="flex: 1;">
+                    <input type="text" class="form-control modulo-titulo" placeholder="Título do Módulo" 
+                           value="${moduloData?.titulo || ''}" required>
+                </div>
+                <button type="button" class="btn btn-danger btn-sm remove-modulo">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+            
+            <div class="aulas-container" style="margin-top: 15px;">
+                ${moduloData?.aulas && moduloData.aulas.length > 0 ? 
+                    moduloData.aulas.map(aula => `
+                        <div class="aula-item" style="display: flex; gap: 10px; margin-bottom: 10px; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 6px; border-left: 3px solid #ffcf00;">
+                            <div style="flex: 1;">
+                                <input type="text" class="form-control aula-titulo" placeholder="Título da Aula" value="${aula.titulo}" required>
+                                <input type="text" class="form-control aula-descricao" placeholder="Descrição da aula" value="${aula.descricao || ''}" style="margin-top: 8px;">
+                                <div style="display: flex; gap: 10px; margin-top: 8px;">
+                                    <input type="number" class="form-control aula-duracao" placeholder="Duração (min)" value="${aula.duracao || 15}" min="1" style="flex: 1;">
+                                    <input type="number" class="form-control aula-ordem" placeholder="Ordem" value="${aula.ordem || 1}" min="1" style="flex: 1;">
                                 </div>
-                                <div class="curso-stat">
-                                    <div class="curso-stat-value">${curso.modulos || 0}</div>
-                                    <div class="curso-stat-label">Módulos</div>
-                                </div>
-                                <div class="curso-stat">
-                                    <div class="curso-stat-value">${curso.alunos || 0}</div>
-                                    <div class="curso-stat-label">Alunos</div>
-                                </div>
-                                <div class="curso-stat">
-                                    <div class="curso-stat-value">${curso.avaliacao || 'N/A'}</div>
-                                    <div class="curso-stat-label">Avaliação</div>
-                                </div>
+                                <input type="text" class="form-control aula-video-url" placeholder="URL do vídeo (opcional)" value="${aula.videoUrl || ''}" style="margin-top: 8px;">
+                                <textarea class="form-control aula-conteudo" placeholder="Conteúdo da aula..." rows="3" style="margin-top: 8px;">${aula.conteudo || ''}</textarea>
                             </div>
-                        </div>
-                        <div class="actions">
-                            <button class="btn btn-primary btn-sm edit-curso" data-id="${curso.id}">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="btn btn-danger btn-sm delete-curso" data-id="${curso.id}">
-                                <i class="fas fa-trash"></i>
+                            <button type="button" class="btn btn-danger btn-sm remove-aula">
+                                <i class="fas fa-times"></i>
                             </button>
                         </div>
-                    </div>
-                    <div class="curso-description">
-                        ${curso.descricao || 'Sem descrição disponível.'}
-                    </div>
-                    <div class="curso-category">
-                        <small style="color: #ffcf00;">Categoria: ${getCategoriaNome(curso.categoria)}</small>
-                    </div>
-                    <div class="curso-status">
-                        <span class="badge ${curso.ativo ? 'success' : 'danger'}">
-                            ${curso.ativo ? 'Ativo' : 'Inativo'}
-                        </span>
-                    </div>
-                `;
-
-                container.appendChild(cursoCard);
-            });
-
-            // Add event listeners para cursos
-            container.addEventListener('click', function(e) {
-                if (e.target.closest('.edit-curso')) {
-                    const cursoId = e.target.closest('.edit-curso').getAttribute('data-id');
-                    editCurso(cursoId);
+                    `).join('') 
+                    : 
+                    '<div class="no-aulas" style="text-align: center; padding: 20px; color: #888;">Nenhuma aula adicionada</div>'
                 }
-                if (e.target.closest('.delete-curso')) {
-                    const cursoId = e.target.closest('.delete-curso').getAttribute('data-id');
-                    deleteCurso(cursoId);
-                }
-            });
+            </div>
+            
+            <button type="button" class="btn btn-secondary btn-sm add-aula" style="margin-top: 10px;">
+                <i class="fas fa-plus"></i> Adicionar Aula
+            </button>
+        </div>
+    `;
+    
+    document.getElementById('modulos-container').insertAdjacentHTML('beforeend', moduloHTML);
+    
+    // Configurar event listeners
+    const moduloElement = document.querySelector(`[data-modulo-id="${moduloId}"]`);
+    
+    moduloElement.querySelector('.remove-modulo').addEventListener('click', function() {
+        if (document.querySelectorAll('.modulo-item').length > 1) {
+            moduloElement.remove();
+        } else {
+            alert('❌ O curso deve ter pelo menos um módulo!');
         }
-
-        function displayFullRanking(ranking) {
-            const tbody = document.getElementById('full-ranking-body');
-            if (!tbody) return;
-
-            tbody.innerHTML = '';
-
-            ranking.forEach((user, index) => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${index + 1}</td>
-                    <td>${user.nome}</td>
-                    <td>${user.ra}</td>
-                    <td>${user.serie}</td>
-                    <td>${user.pontuacao}</td>
-                    <td>${user.desafiosCompletados}</td>
-                `;
-                tbody.appendChild(row);
-            });
-        }
-
-        // Helper functions para cursos
-        function getMateriaBadgeClass(materia) {
-            const classes = {
-                'matematica': 'primary',
-                'csn': 'success',
-                'csh': 'warning',
-                'portugues': 'danger'
-            };
-            return classes[materia] || 'primary';
-        }
-
-        function getMateriaNome(materia) {
-            const nomes = {
-                'matematica': 'Matemática',
-                'csn': 'CSN',
-                'csh': 'CSH',
-                'portugues': 'Português'
-            };
-            return nomes[materia] || materia;
-        }
-
-        function getNivelClass(nivel) {
-            const classes = {
-                'fundamental': 'success',
-                'medio': 'warning',
-                'vestibular': 'danger'
-            };
-            return classes[nivel] || 'primary';
-        }
-
-        function getNivelNome(nivel) {
-            const nomes = {
-                'fundamental': 'Fundamental',
-                'medio': 'Ensino Médio',
-                'vestibular': 'Vestibular'
-            };
-            return nomes[nivel] || nivel;
-        }
-
-        function getCategoriaNome(categoria) {
-            const nomes = {
-                'algebra': 'Álgebra',
-                'geometria': 'Geometria',
-                'quimica': 'Química',
-                'fisica': 'Física',
-                'historia': 'História',
-                'geografia': 'Geografia',
-                'gramatica': 'Gramática',
-                'interpretacao': 'Interpretação'
-            };
-            return nomes[categoria] || categoria;
-        }
-
-        // User Management
-        function filterUsers() {
-            const searchTerm = document.getElementById('user-search').value.toLowerCase();
-            const filteredUsers = users.filter(user => 
-                user.nome.toLowerCase().includes(searchTerm) || 
-                user.ra.toLowerCase().includes(searchTerm) ||
-                user.serie.toLowerCase().includes(searchTerm)
-            );
-            displayUsers(filteredUsers);
-        }
-
-        function editUser(userId) {
-            const user = users.find(u => u.id == userId);
-            if (!user) {
-                console.error('❌ Usuário não encontrado:', userId);
-                return;
-            }
-
-            console.log('✏️ Editando usuário:', user);
-
-            document.getElementById('edit-user-id').value = user.id;
-            document.getElementById('edit-user-name').value = user.nome;
-            document.getElementById('edit-user-ra').value = user.ra;
-            document.getElementById('edit-user-serie').value = user.serie;
-            document.getElementById('edit-user-pontuacao').value = user.pontuacao;
-            document.getElementById('edit-user-desafios').value = user.desafiosCompletados;
-
-            document.getElementById('edit-user-modal').style.display = 'flex';
-        }
-
-        async function deleteUser(userId) {
-            const user = users.find(u => u.id == userId);
-            if (!user) {
-                console.error('❌ Usuário não encontrado:', userId);
-                return;
-            }
-
-            showConfirmation(`Tem certeza que deseja excluir o usuário "${user.nome}" (RA: ${user.ra})? Esta ação não pode ser desfeita.`, async () => {
-                try {
-                    showGlobalLoading(true);
-
-                    console.log(`🗑️ Excluindo usuário ${userId}...`);
-
-                    const response = await fetch(`${API_BASE_URL}/api/usuarios/${userId}`, {
-                        method: 'DELETE'
-                    });
-
-                    if (!response.ok) throw new Error(`Erro ${response.status}`);
-
-                    const result = await response.json();
-                    console.log('✅ Usuário excluído:', result);
-
-                    showAlert('✅ Usuário excluído com sucesso!', 'success');
-
-                    // Recarrega os dados
-                    users = [];
-                    if (currentTab === 'dashboard') {
-                        await loadDashboardData();
-                    } else if (currentTab === 'users') {
-                        await loadUsers();
-                    } else if (currentTab === 'ranking') {
-                        await loadFullRanking();
-                    }
-
-                } catch (error) {
-                    console.error('❌ Erro ao excluir usuário:', error);
-                    showAlert('❌ Erro ao excluir usuário: ' + error.message, 'error');
-                } finally {
-                    showGlobalLoading(false);
-                }
-            });
-        }
-
-        async function saveUser() {
-            const userId = document.getElementById('edit-user-id').value;
-            const userData = {
-                nome: document.getElementById('edit-user-name').value,
-                ra: document.getElementById('edit-user-ra').value,
-                serie: document.getElementById('edit-user-serie').value,
-                pontuacao: parseInt(document.getElementById('edit-user-pontuacao').value),
-                desafiosCompletados: parseInt(document.getElementById('edit-user-desafios').value)
-            };
-
-            console.log('💾 Salvando usuário COMPLETO...', userId, userData);
-
-            try {
-                showGlobalLoading(true);
-
-                const response = await fetch(`${API_BASE_URL}/api/usuarios/${userId}`, {
-                    method: 'PUT',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(userData)
-                });
-
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`Erro ${response.status}: ${errorText}`);
-                }
-
-                const result = await response.json();
-                console.log('✅ Usuário COMPLETAMENTE salvo na API:', result);
-
-                showAlert('✅ Usuário COMPLETAMENTE atualizado no banco!', 'success');
-                document.getElementById('edit-user-modal').style.display = 'none';
-
-                // Recarrega os dados
-                users = [];
-
-                if (currentTab === 'dashboard') {
-                    await loadDashboardData();
-                } else if (currentTab === 'users') {
-                    await loadUsers();
-                } else if (currentTab === 'ranking') {
-                    await loadFullRanking();
-                }
-
-            } catch (error) {
-                console.error('❌ Erro CRÍTICO ao salvar usuário:', error);
-                showAlert('❌ ERRO: Não foi possível salvar no banco: ' + error.message, 'error');
-            } finally {
-                showGlobalLoading(false);
-            }
-        }
-
-        // Video Management
-        function showVideoModal(video = null) {
-            const modal = document.getElementById('video-modal');
-            const title = document.getElementById('video-modal-title');
-            const form = document.getElementById('video-form');
-
-            if (video) {
-                title.textContent = 'Editar Vídeo';
-                document.getElementById('video-id').value = video.id;
-                document.getElementById('video-title').value = video.titulo;
-                document.getElementById('video-materia').value = video.materia;
-                document.getElementById('video-categoria').value = video.categoria;
-                document.getElementById('video-url').value = video.url;
-                document.getElementById('video-descricao').value = video.descricao || '';
-                document.getElementById('video-duracao').value = video.duracao;
+    });
+    
+    moduloElement.querySelector('.add-aula').addEventListener('click', function() {
+        addAulaToModulo(moduloId);
+    });
+    
+    // Configurar botões de remover aula
+    moduloElement.querySelectorAll('.remove-aula').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const aulasContainer = this.closest('.aulas-container');
+            if (aulasContainer.querySelectorAll('.aula-item').length > 1) {
+                this.closest('.aula-item').remove();
             } else {
-                title.textContent = 'Adicionar Vídeo';
-                form.reset();
+                alert('❌ Cada módulo deve ter pelo menos uma aula!');
             }
+        });
+    });
+}
 
-            modal.style.display = 'flex';
-        }
-
-        function editVideo(videoId) {
-            const video = videos.find(v => v.id == videoId);
-            if (video) {
-                showVideoModal(video);
-            }
-        }
-
-        async function saveVideo() {
-            const videoId = document.getElementById('video-id').value;
-            const videoData = {
-                titulo: document.getElementById('video-title').value,
-                materia: document.getElementById('video-materia').value,
-                categoria: document.getElementById('video-categoria').value,
-                url: document.getElementById('video-url').value,
-                descricao: document.getElementById('video-descricao').value,
-                duracao: parseInt(document.getElementById('video-duracao').value)
-            };
-
-            try {
-                showGlobalLoading(true);
-
-                let response;
-                if (videoId) {
-                    response = await fetch(`${API_BASE_URL}/api/videos/${videoId}`, {
-                        method: 'PUT',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify(videoData)
-                    });
-                } else {
-                    response = await fetch(`${API_BASE_URL}/api/videos`, {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify(videoData)
-                    });
-                }
-
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`Erro ${response.status}: ${errorText}`);
-                }
-
-                const result = await response.json();
-                console.log('✅ Vídeo salvo:', result);
-
-                showAlert('✅ Vídeo salvo com sucesso!', 'success');
-                document.getElementById('video-modal').style.display = 'none';
-
-                await loadVideos();
-
-            } catch (error) {
-                console.error('❌ Erro ao salvar vídeo:', error);
-                showAlert('❌ Erro ao salvar vídeo: ' + error.message, 'error');
-            } finally {
-                showGlobalLoading(false);
-            }
-        }
-
-        async function deleteVideo(videoId) {
-            const video = videos.find(v => v.id == videoId);
-            if (!video) return;
-
-            showConfirmation(`Tem certeza que deseja excluir o vídeo "${video.titulo}"?`, async () => {
-                try {
-                    showGlobalLoading(true);
-
-                    const response = await fetch(`${API_BASE_URL}/api/videos/${videoId}`, {
-                        method: 'DELETE'
-                    });
-
-                    if (!response.ok) throw new Error(`Erro ${response.status}`);
-
-                    const result = await response.json();
-                    console.log('✅ Vídeo excluído:', result);
-
-                    showAlert('✅ Vídeo excluído com sucesso!', 'success');
-
-                    await loadVideos();
-
-                } catch (error) {
-                    console.error('❌ Erro ao excluir vídeo:', error);
-                    showAlert('❌ Erro ao excluir vídeo: ' + error.message, 'error');
-                } finally {
-                    showGlobalLoading(false);
-                }
-            });
-        }
-
-        // Curso Management
-        function showCursoModal(curso = null) {
-            const modal = document.getElementById('curso-modal');
-            const title = document.getElementById('curso-modal-title');
-            
-            // Resetar contadores e interface
-            moduloCount = 0;
-            aulaCount = 0;
-            document.getElementById('modulos-container').innerHTML = '';
-
-            if (curso) {
-                title.textContent = 'Editar Curso';
-                document.getElementById('curso-id').value = curso.id;
-                document.getElementById('curso-titulo').value = curso.titulo;
-                document.getElementById('curso-descricao').value = curso.descricao || '';
-                document.getElementById('curso-materia').value = curso.materia;
-                document.getElementById('curso-categoria').value = curso.categoria;
-                document.getElementById('curso-nivel').value = curso.nivel;
-                document.getElementById('curso-duracao').value = curso.duracao;
-                document.getElementById('curso-imagem').value = curso.imagem || '';
-                document.getElementById('curso-ativo').value = curso.ativo.toString();
-
-                // Carregar módulos se existirem
-                if (curso.modulos && curso.modulos.length > 0) {
-                    curso.modulos.forEach(modulo => {
-                        addModuloToForm(modulo);
-                    });
-                } else {
-                    addModuloToForm();
-                }
-            } else {
-                title.textContent = 'Criar Curso';
-                document.getElementById('curso-form').reset();
-                document.getElementById('curso-ativo').value = 'true';
-                addModuloToForm();
-            }
-
-            modal.style.display = 'flex';
-        }
-
-        function editCurso(cursoId) {
-            const curso = cursos.find(c => c.id == cursoId);
-            if (curso) {
-                showCursoModal(curso);
-            }
-        }
-
-        // ✅ ADICIONAR MÓDULO AO FORMULÁRIO
-        function addModuloToForm(moduloData = null) {
-            moduloCount++;
-            const moduloId = `modulo_${moduloCount}`;
-            
-            const moduloHTML = `
-                <div class="modulo-item" data-modulo-id="${moduloId}" style="background: rgba(255,207,0,0.05); padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #555;">
-                    <div class="modulo-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                        <div style="flex: 1;">
-                            <input type="text" class="form-control modulo-titulo" placeholder="Título do Módulo" 
-                                   value="${moduloData?.titulo || ''}" required>
-                        </div>
-                        <button type="button" class="btn btn-danger btn-sm remove-modulo">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                    
-                    <div class="aulas-container" style="margin-top: 15px;">
-                        ${moduloData?.aulas && moduloData.aulas.length > 0 ? 
-                            moduloData.aulas.map(aula => `
-                                <div class="aula-item" style="display: flex; gap: 10px; margin-bottom: 10px; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 6px; border-left: 3px solid #ffcf00;">
-                                    <div style="flex: 1;">
-                                        <input type="text" class="form-control aula-titulo" placeholder="Título da Aula" value="${aula.titulo}" required>
-                                        <input type="text" class="form-control aula-descricao" placeholder="Descrição da aula" value="${aula.descricao || ''}" style="margin-top: 8px;">
-                                        <div style="display: flex; gap: 10px; margin-top: 8px;">
-                                            <input type="number" class="form-control aula-duracao" placeholder="Duração (min)" value="${aula.duracao}" min="1" style="flex: 1;">
-                                            <select class="form-control aula-provedor" style="flex: 1;">
-                                                <option value="youtube" ${aula.provedor === 'youtube' ? 'selected' : ''}>YouTube</option>
-                                                <option value="pandavideo" ${aula.provedor === 'pandavideo' ? 'selected' : ''}>Panda Video</option>
-                                            </select>
-                                        </div>
-                                        <input type="text" class="form-control aula-video-url" placeholder="URL do vídeo" value="${aula.videoUrl}" style="margin-top: 8px;">
-                                        <textarea class="form-control aula-conteudo" placeholder="Conteúdo da aula..." rows="3" style="margin-top: 8px;">${aula.conteudo || ''}</textarea>
-                                    </div>
-                                    <button type="button" class="btn btn-danger btn-sm remove-aula">
-                                        <i class="fas fa-times"></i>
-                                    </button>
-                                </div>
-                            `).join('') 
-                            : 
-                            '<div class="no-aulas" style="text-align: center; padding: 20px; color: #888;">Nenhuma aula adicionada</div>'
-                        }
-                    </div>
-                    
-                    <button type="button" class="btn btn-secondary btn-sm add-aula" style="margin-top: 10px;">
-                        <i class="fas fa-plus"></i> Adicionar Aula
-                    </button>
+// ✅ ADICIONAR AULA AO MÓDULO
+function addAulaToModulo(moduloId) {
+    aulaCount++;
+    
+    const aulaHTML = `
+        <div class="aula-item" style="display: flex; gap: 10px; margin-bottom: 10px; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 6px; border-left: 3px solid #4361ee;">
+            <div style="flex: 1;">
+                <input type="text" class="form-control aula-titulo" placeholder="Título da Aula" required>
+                <input type="text" class="form-control aula-descricao" placeholder="Descrição da aula" style="margin-top: 8px;">
+                <div style="display: flex; gap: 10px; margin-top: 8px;">
+                    <input type="number" class="form-control aula-duracao" placeholder="Duração (min)" value="15" min="1" style="flex: 1;">
+                    <input type="number" class="form-control aula-ordem" placeholder="Ordem" value="1" min="1" style="flex: 1;">
                 </div>
-            `;
-            
-            document.getElementById('modulos-container').insertAdjacentHTML('beforeend', moduloHTML);
-            
-            // Configurar event listeners
-            const moduloElement = document.querySelector(`[data-modulo-id="${moduloId}"]`);
-            
-            moduloElement.querySelector('.remove-modulo').addEventListener('click', function() {
-                if (document.querySelectorAll('.modulo-item').length > 1) {
-                    moduloElement.remove();
-                } else {
-                    alert('❌ O curso deve ter pelo menos um módulo!');
-                }
-            });
-            
-            moduloElement.querySelector('.add-aula').addEventListener('click', function() {
-                addAulaToModulo(moduloId);
-            });
-            
-            // Configurar botões de remover aula
-            moduloElement.querySelectorAll('.remove-aula').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const aulasContainer = this.closest('.aulas-container');
-                    if (aulasContainer.querySelectorAll('.aula-item').length > 1) {
-                        this.closest('.aula-item').remove();
-                    } else {
-                        alert('❌ Cada módulo deve ter pelo menos uma aula!');
-                    }
-                });
-            });
+                <input type="text" class="form-control aula-video-url" placeholder="URL do vídeo (opcional)" style="margin-top: 8px;">
+                <textarea class="form-control aula-conteudo" placeholder="Conteúdo da aula..." rows="3" style="margin-top: 8px;"></textarea>
+            </div>
+            <button type="button" class="btn btn-danger btn-sm remove-aula">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    `;
+    
+    const moduloElement = document.querySelector(`[data-modulo-id="${moduloId}"] .aulas-container`);
+    
+    // Remove mensagem "nenhuma aula" se existir
+    const noAulas = moduloElement.querySelector('.no-aulas');
+    if (noAulas) {
+        noAulas.remove();
+    }
+    
+    moduloElement.insertAdjacentHTML('beforeend', aulaHTML);
+    
+    // Configurar event listener para o novo botão de remover
+    const newAula = moduloElement.lastElementChild;
+    newAula.querySelector('.remove-aula').addEventListener('click', function() {
+        const aulasContainer = this.closest('.aulas-container');
+        if (aulasContainer.querySelectorAll('.aula-item').length > 1) {
+            this.closest('.aula-item').remove();
+        } else {
+            alert('❌ Cada módulo deve ter pelo menos uma aula!');
         }
+    });
+}
 
-        // ✅ ADICIONAR AULA AO MÓDULO
-        function addAulaToModulo(moduloId) {
-            aulaCount++;
-            
-            const aulaHTML = `
-                <div class="aula-item" style="display: flex; gap: 10px; margin-bottom: 10px; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 6px; border-left: 3px solid #4361ee;">
-                    <div style="flex: 1;">
-                        <input type="text" class="form-control aula-titulo" placeholder="Título da Aula" required>
-                        <input type="text" class="form-control aula-descricao" placeholder="Descrição da aula" style="margin-top: 8px;">
-                        <div style="display: flex; gap: 10px; margin-top: 8px;">
-                            <input type="number" class="form-control aula-duracao" placeholder="Duração (min)" value="15" min="1" style="flex: 1;">
-                            <select class="form-control aula-provedor" style="flex: 1;">
-                                <option value="youtube">YouTube</option>
-                                <option value="pandavideo">Panda Video</option>
-                            </select>
-                        </div>
-                        <input type="text" class="form-control aula-video-url" placeholder="URL do vídeo" style="margin-top: 8px;">
-                        <textarea class="form-control aula-conteudo" placeholder="Conteúdo da aula..." rows="3" style="margin-top: 8px;"></textarea>
-                    </div>
-                    <button type="button" class="btn btn-danger btn-sm remove-aula">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-            `;
-            
-            const moduloElement = document.querySelector(`[data-modulo-id="${moduloId}"] .aulas-container`);
-            
-            // Remove mensagem "nenhuma aula" se existir
-            const noAulas = moduloElement.querySelector('.no-aulas');
-            if (noAulas) {
-                noAulas.remove();
-            }
-            
-            moduloElement.insertAdjacentHTML('beforeend', aulaHTML);
-            
-            // Configurar event listener para o novo botão de remover
-            const newAula = moduloElement.lastElementChild;
-            newAula.querySelector('.remove-aula').addEventListener('click', function() {
-                const aulasContainer = this.closest('.aulas-container');
-                if (aulasContainer.querySelectorAll('.aula-item').length > 1) {
-                    this.closest('.aula-item').remove();
-                } else {
-                    alert('❌ Cada módulo deve ter pelo menos uma aula!');
-                }
-            });
-        }
+// ✅ SALVAR CURSO
+async function saveCurso() {
+    const cursoId = document.getElementById('curso-id').value;
+    
+    // Coletar dados básicos do curso
+    const cursoData = {
+        titulo: document.getElementById('curso-titulo').value,
+        descricao: document.getElementById('curso-descricao').value,
+        materia: document.getElementById('curso-materia').value,
+        categoria: document.getElementById('curso-categoria').value,
+        nivel: document.getElementById('curso-nivel').value,
+        duracao: parseInt(document.getElementById('curso-duracao').value),
+        imagem: document.getElementById('curso-imagem').value || null,
+        ativo: document.getElementById('curso-ativo').value === 'true'
+    };
 
-        // ✅ SALVAR CURSO
-        async function saveCurso() {
-            const cursoId = document.getElementById('curso-id').value;
-            
-            // Coletar dados básicos do curso
-            const cursoData = {
-                titulo: document.getElementById('curso-titulo').value,
-                descricao: document.getElementById('curso-descricao').value,
-                materia: document.getElementById('curso-materia').value,
-                categoria: document.getElementById('curso-categoria').value,
-                nivel: document.getElementById('curso-nivel').value,
-                duracao: parseInt(document.getElementById('curso-duracao').value),
-                imagem: document.getElementById('curso-imagem').value || null,
-                ativo: document.getElementById('curso-ativo').value === 'true'
+    // Coletar módulos e aulas
+    const modulos = [];
+    document.querySelectorAll('.modulo-item').forEach((moduloElement, index) => {
+        const modulo = {
+            titulo: moduloElement.querySelector('.modulo-titulo').value,
+            ordem: index + 1,
+            aulas: []
+        };
+
+        // Coletar aulas do módulo
+        moduloElement.querySelectorAll('.aula-item').forEach((aulaElement, aulaIndex) => {
+            const aula = {
+                titulo: aulaElement.querySelector('.aula-titulo').value,
+                descricao: aulaElement.querySelector('.aula-descricao').value,
+                duracao: parseInt(aulaElement.querySelector('.aula-duracao').value) || 15,
+                ordem: parseInt(aulaElement.querySelector('.aula-ordem').value) || (aulaIndex + 1),
+                videoUrl: aulaElement.querySelector('.aula-video-url').value || null,
+                conteudo: aulaElement.querySelector('.aula-conteudo').value || ''
             };
+            modulo.aulas.push(aula);
+        });
 
-            // Coletar módulos e aulas
-            const modulos = [];
-            document.querySelectorAll('.modulo-item').forEach((moduloElement, index) => {
-                const modulo = {
-                    titulo: moduloElement.querySelector('.modulo-titulo').value,
-                    ordem: index + 1,
-                    aulas: []
-                };
+        modulos.push(modulo);
+    });
 
-                // Coletar aulas do módulo
-                moduloElement.querySelectorAll('.aula-item').forEach((aulaElement, aulaIndex) => {
-                    const aula = {
-                        titulo: aulaElement.querySelector('.aula-titulo').value,
-                        descricao: aulaElement.querySelector('.aula-descricao').value,
-                        duracao: parseInt(aulaElement.querySelector('.aula-duracao').value) || 15,
-                        provedor: aulaElement.querySelector('.aula-provedor').value,
-                        videoUrl: aulaElement.querySelector('.aula-video-url').value,
-                        conteudo: aulaElement.querySelector('.aula-conteudo').value,
-                        ordem: aulaIndex + 1
-                    };
-                    modulo.aulas.push(aula);
-                });
+    cursoData.modulos = modulos;
 
-                modulos.push(modulo);
+    try {
+        showGlobalLoading(true);
+
+        let response;
+        if (cursoId) {
+            response = await fetch(`${API_BASE_URL}/api/cursos/${cursoId}`, {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(cursoData)
             });
-
-            cursoData.modulos = modulos;
-
-            try {
-                showGlobalLoading(true);
-
-                let response;
-                if (cursoId) {
-                    response = await fetch(`${API_BASE_URL}/api/cursos/${cursoId}`, {
-                        method: 'PUT',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify(cursoData)
-                    });
-                } else {
-                    response = await fetch(`${API_BASE_URL}/api/cursos`, {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify(cursoData)
-                    });
-                }
-
-                if (response.ok) {
-                    const result = await response.json();
-                    showAlert('✅ Curso salvo com sucesso!', 'success');
-                    document.getElementById('curso-modal').style.display = 'none';
-                    await loadCursos();
-                } else {
-                    const errorText = await response.text();
-                    throw new Error(`Erro ${response.status}: ${errorText}`);
-                }
-
-            } catch (error) {
-                console.error('❌ Erro ao salvar curso:', error);
-                showAlert('❌ Erro ao salvar curso: ' + error.message, 'error');
-            } finally {
-                showGlobalLoading(false);
-            }
+        } else {
+            response = await fetch(`${API_BASE_URL}/api/cursos`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(cursoData)
+            });
         }
 
-        // ✅ CRIAR CURSO DE EXEMPLO
-        async function criarCursoExemplo() {
-            const cursoExemplo = {
-                titulo: "Matemática Básica - Exemplo",
-                descricao: "Curso completo de matemática básica para iniciantes com exemplos práticos",
-                materia: "matematica",
-                categoria: "algebra",
-                nivel: "fundamental",
-                duracao: 8,
-                imagem: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=400&h=200&fit=crop",
-                ativo: true,
-                modulos: [
+        if (response.ok) {
+            const result = await response.json();
+            showAlert('✅ Curso salvo com sucesso!', 'success');
+            document.getElementById('curso-modal').style.display = 'none';
+            await loadCursos();
+        } else {
+            const errorText = await response.text();
+            throw new Error(`Erro ${response.status}: ${errorText}`);
+        }
+
+    } catch (error) {
+        console.error('❌ Erro ao salvar curso:', error);
+        showAlert('❌ Erro ao salvar curso: ' + error.message, 'error');
+    } finally {
+        showGlobalLoading(false);
+    }
+}
+
+// ✅ CRIAR CURSO DE EXEMPLO
+async function criarCursoExemplo() {
+    const cursoExemplo = {
+        titulo: "Matemática Básica - Exemplo",
+        descricao: "Curso completo de matemática básica para iniciantes com exemplos práticos",
+        materia: "matematica",
+        categoria: "algebra",
+        nivel: "fundamental",
+        duracao: 8,
+        imagem: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=400&h=200&fit=crop",
+        ativo: true,
+        modulos: [
+            {
+                titulo: "Introdução à Matemática",
+                ordem: 1,
+                aulas: [
                     {
-                        titulo: "Introdução à Matemática",
+                        titulo: "O que é Matemática?",
+                        descricao: "Entenda os conceitos básicos da matemática e sua importância no dia a dia",
+                        duracao: 15,
                         ordem: 1,
-                        aulas: [
-                            {
-                                titulo: "O que é Matemática?",
-                                descricao: "Entenda os conceitos básicos da matemática e sua importância no dia a dia",
-                                duracao: 15,
-                                provedor: "youtube",
-                                videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-                                conteudo: "<h2>Introdução à Matemática</h2><p>A matemática é fundamental para o desenvolvimento do raciocínio lógico.</p>",
-                                ordem: 1
-                            }
-                        ]
+                        videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+                        conteudo: "<h2>Introdução à Matemática</h2><p>A matemática é fundamental para o desenvolvimento do raciocínio lógico.</p>"
                     }
                 ]
-            };
-
-            try {
-                showGlobalLoading(true);
-                
-                const response = await fetch(`${API_BASE_URL}/api/cursos`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(cursoExemplo)
-                });
-
-                if (response.ok) {
-                    const result = await response.json();
-                    showAlert('✅ Curso exemplo criado com sucesso!', 'success');
-                    await loadCursos();
-                } else {
-                    throw new Error('Erro ao criar curso exemplo');
-                }
-            } catch (error) {
-                console.error('Erro ao criar curso exemplo:', error);
-                showAlert('❌ Erro ao criar curso exemplo: ' + error.message, 'error');
-            } finally {
-                showGlobalLoading(false);
             }
+        ]
+    };
+
+    try {
+        showGlobalLoading(true);
+        
+        const response = await fetch(`${API_BASE_URL}/api/cursos`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(cursoExemplo)
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            showAlert('✅ Curso exemplo criado com sucesso!', 'success');
+            await loadCursos();
+        } else {
+            throw new Error('Erro ao criar curso exemplo');
         }
+    } catch (error) {
+        console.error('Erro ao criar curso exemplo:', error);
+        showAlert('❌ Erro ao criar curso exemplo: ' + error.message, 'error');
+    } finally {
+        showGlobalLoading(false);
+    }
+}
 
-        // ✅ FUNÇÃO DELETE CURSO CORRIGIDA
-        async function deleteCurso(cursoId) {
-            const curso = cursos.find(c => c.id == cursoId);
-            if (!curso) {
-                showAlert('❌ Curso não encontrado!', 'error');
-                return;
-            }
+// ✅ FUNÇÃO DELETE CURSO CORRIGIDA
+async function deleteCurso(cursoId) {
+    const curso = cursos.find(c => c.id == cursoId);
+    if (!curso) {
+        showAlert('❌ Curso não encontrado!', 'error');
+        return;
+    }
 
-            showConfirmation(`Tem certeza que deseja excluir o curso "${curso.titulo}"?`, async () => {
-                try {
-                    showGlobalLoading(true);
+    showConfirmation(`Tem certeza que deseja excluir o curso "${curso.titulo}"?`, async () => {
+        try {
+            showGlobalLoading(true);
 
-                    console.log(`🗑️ Tentando excluir curso ID: ${cursoId}`);
-                    
-                    const response = await fetch(`${API_BASE_URL}/api/cursos/${cursoId}`, {
-                        method: 'DELETE',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    });
-
-                    console.log('📡 Status da resposta:', response.status);
-
-                    if (response.ok) {
-                        const result = await response.json();
-                        console.log('✅ Curso excluído:', result);
-                        showAlert('✅ Curso excluído com sucesso!', 'success');
-                        
-                        // Remove da lista local
-                        cursos = cursos.filter(c => c.id != cursoId);
-                        displayCursos(cursos);
-                        
-                    } else {
-                        // Se der 404, significa que a rota não existe no backend
-                        if (response.status === 404) {
-                            showAlert('❌ Rota DELETE não disponível no servidor. Atualize o backend.', 'error');
-                        } else {
-                            const errorText = await response.text();
-                            showAlert(`❌ Erro ${response.status}: ${errorText}`, 'error');
-                        }
-                    }
-
-                } catch (error) {
-                    console.error('❌ Erro ao excluir curso:', error);
-                    showAlert('❌ Erro de conexão: ' + error.message, 'error');
-                } finally {
-                    showGlobalLoading(false);
+            console.log(`🗑️ Tentando excluir curso ID: ${cursoId}`);
+            
+            const response = await fetch(`${API_BASE_URL}/api/cursos/${cursoId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
                 }
             });
-        }
 
-        // System Functions
-        function saveSettings() {
-            showAlert('Configurações salvas com sucesso!', 'success');
-        }
+            console.log('📡 Status da resposta:', response.status);
 
-        async function resetAllPoints() {
-            try {
-                showGlobalLoading(true);
-
-                for (const user of users) {
-                    await fetchAPI(`/api/usuarios/${user.id}`, {
-                        method: 'PUT',
-                        body: JSON.stringify({
-                            pontuacao: 0,
-                            desafiosCompletados: 0
-                        })
-                    });
-                }
-
-                showAlert('Pontuações zeradas com sucesso!', 'success');
-                loadDashboardData();
-
-            } catch (error) {
-                showAlert('Erro ao zerar pontuações: ' + error.message, 'error');
-            } finally {
-                showGlobalLoading(false);
-            }
-        }
-
-        async function resetAllData() {
-            try {
-                showGlobalLoading(true);
-
-                await fetchAPI('/api/usuarios', {
-                    method: 'DELETE'
-                });
-
-                showAlert('Todos os dados foram resetados!', 'success');
-                loadDashboardData();
-
-            } catch (error) {
-                showAlert('Erro ao resetar dados: ' + error.message, 'error');
-            } finally {
-                showGlobalLoading(false);
-            }
-        }
-
-        // UI Helper Functions
-        function showAlert(message, type = 'success') {
-            if (!alertContainer) return;
-
-            const alert = document.createElement('div');
-            alert.className = `alert alert-${type}`;
-            alert.innerHTML = `
-                <span>${message}</span>
-                <button class="alert-close">&times;</button>
-            `;
-
-            alertContainer.appendChild(alert);
-
-            setTimeout(() => {
-                alert.remove();
-            }, 5000);
-
-            alert.querySelector('.alert-close').addEventListener('click', function() {
-                alert.remove();
-            });
-        }
-
-        function showConfirmation(message, action) {
-            const confirmMessage = document.getElementById('confirm-message');
-            if (confirmMessage) {
-                confirmMessage.textContent = message;
-            }
-            pendingAction = action;
-            document.getElementById('confirm-modal').style.display = 'flex';
-        }
-
-        function showGlobalLoading(show) {
-            const loading = document.getElementById('loadingGlobal');
-            if (loading) {
-                loading.style.display = show ? 'flex' : 'none';
-            }
-        }
-
-        // Função para testar a rota DELETE - execute no console do navegador
-        window.testDeleteAPI = async function() {
-            try {
-                console.log('🧪 TESTE DA ROTA DELETE');
+            if (response.ok) {
+                const result = await response.json();
+                console.log('✅ Curso excluído:', result);
+                showAlert('✅ Curso excluído com sucesso!', 'success');
                 
-                // Testa em um curso que existe
-                const cursoId = 1;
-                console.log(`🔍 Testando DELETE no curso ID: ${cursoId}`);
+                // Remove da lista local
+                cursos = cursos.filter(c => c.id != cursoId);
+                displayCursos(cursos);
                 
-                const response = await fetch(`https://coliseum-api.onrender.com/api/cursos/${cursoId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-                
-                console.log('📡 Status:', response.status);
-                console.log('📡 Headers:', Object.fromEntries(response.headers.entries()));
-                
-                if (response.ok) {
-                    const result = await response.json();
-                    console.log('✅ DELETE FUNCIONOU:', result);
-                    return true;
+            } else {
+                // Se der 404, significa que a rota não existe no backend
+                if (response.status === 404) {
+                    showAlert('❌ Rota DELETE não disponível no servidor. Atualize o backend.', 'error');
                 } else {
                     const errorText = await response.text();
-                    console.log('❌ DELETE FALHOU:', errorText);
-                    return false;
+                    showAlert(`❌ Erro ${response.status}: ${errorText}`, 'error');
                 }
-                
-            } catch (error) {
-                console.error('❌ ERRO NO TESTE:', error);
-                return false;
             }
-        };
+
+        } catch (error) {
+            console.error('❌ Erro ao excluir curso:', error);
+            showAlert('❌ Erro de conexão: ' + error.message, 'error');
+        } finally {
+            showGlobalLoading(false);
+        }
+    });
+}
+
+// System Functions
+function saveSettings() {
+    showAlert('Configurações salvas com sucesso!', 'success');
+}
+
+async function resetAllPoints() {
+    try {
+        showGlobalLoading(true);
+
+        for (const user of users) {
+            await fetch(`${API_BASE_URL}/api/usuarios/${user.id}`, {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    pontuacao: 0,
+                    desafiosCompletados: 0
+                })
+            });
+        }
+
+        showAlert('Pontuações zeradas com sucesso!', 'success');
+        loadDashboardData();
+
+    } catch (error) {
+        showAlert('Erro ao zerar pontuações: ' + error.message, 'error');
+    } finally {
+        showGlobalLoading(false);
+    }
+}
+
+async function resetAllData() {
+    try {
+        showGlobalLoading(true);
+
+        // Resetar todos os usuários
+        for (const user of users) {
+            await fetch(`${API_BASE_URL}/api/usuarios/${user.id}`, {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    pontuacao: 0,
+                    desafiosCompletados: 0
+                })
+            });
+        }
+
+        showAlert('Todos os dados foram resetados!', 'success');
+        loadDashboardData();
+
+    } catch (error) {
+        showAlert('Erro ao resetar dados: ' + error.message, 'error');
+    } finally {
+        showGlobalLoading(false);
+    }
+}
+
+// UI Helper Functions
+function showAlert(message, type = 'success') {
+    if (!alertContainer) return;
+
+    const alert = document.createElement('div');
+    alert.className = `alert alert-${type}`;
+    alert.innerHTML = `
+        <span>${message}</span>
+        <button class="alert-close">&times;</button>
+    `;
+
+    alertContainer.appendChild(alert);
+
+    setTimeout(() => {
+        alert.remove();
+    }, 5000);
+
+    alert.querySelector('.alert-close').addEventListener('click', function() {
+        alert.remove();
+    });
+}
+
+function showConfirmation(message, action) {
+    const confirmMessage = document.getElementById('confirm-message');
+    if (confirmMessage) {
+        confirmMessage.textContent = message;
+    }
+    pendingAction = action;
+    document.getElementById('confirm-modal').style.display = 'flex';
+}
+
+function showGlobalLoading(show) {
+    const loading = document.getElementById('loadingGlobal');
+    if (loading) {
+        loading.style.display = show ? 'flex' : 'none';
+    }
+}
+
+// Função para testar a rota DELETE - execute no console do navegador
+window.testDeleteAPI = async function() {
+    try {
+        console.log('🧪 TESTE DA ROTA DELETE');
+        
+        // Testa em um curso que existe
+        const cursoId = 1;
+        console.log(`🔍 Testando DELETE no curso ID: ${cursoId}`);
+        
+        const response = await fetch(`https://coliseum-api.onrender.com/api/cursos/${cursoId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        console.log('📡 Status:', response.status);
+        console.log('📡 Headers:', Object.fromEntries(response.headers.entries()));
+        
+        if (response.ok) {
+            const result = await response.json();
+            console.log('✅ DELETE FUNCIONOU:', result);
+            return true;
+        } else {
+            const errorText = await response.text();
+            console.log('❌ DELETE FALHOU:', errorText);
+            return false;
+        }
+        
+    } catch (error) {
+        console.error('❌ ERRO NO TESTE:', error);
+        return false;
+    }
+};
     </script>
 </body>
 </html>
