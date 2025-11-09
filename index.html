@@ -1436,12 +1436,7 @@ function setupEventListeners() {
         });
     }
 
-    // Cursos buttons
-    const criarExemploBtn = document.getElementById('criar-exemplo-btn');
-    if (criarExemploBtn) {
-        criarExemploBtn.addEventListener('click', criarCursoExemplo);
-    }
-
+    // Cursos button
     const addModuloBtn = document.getElementById('add-modulo-btn');
     if (addModuloBtn) {
         addModuloBtn.addEventListener('click', function() {
@@ -1456,9 +1451,6 @@ function setupEventListeners() {
 function voltarParaMenu() {
     window.location.href = '/menu';
 }
-
-// ✅ API Functions melhoradas
-// ✅ API Functions com proxy CORS
 // ✅ SUBSTITUA APENAS ESTA FUNÇÃO NO SEU CÓDIGO
 async function fetchAPI(endpoint, options = {}) {
     const PROXY_URL = 'https://corsproxy.io/?';
@@ -1567,34 +1559,29 @@ async function loadVideos() {
 }
 
 async function loadCursos() {
+    const loadingElement = document.getElementById('cursos-loading');
+    
     try {
-        document.getElementById('cursos-loading').style.display = 'flex';
-
-        console.log('📚 Buscando cursos da API...');
+        if (loadingElement) loadingElement.style.display = 'flex';
+        console.log('📚 Buscando cursos...');
         
         const cursosData = await fetchAPI('/api/cursos');
+        
+        // Validação básica
         cursos = Array.isArray(cursosData) ? cursosData : [];
         
-        console.log('🎯 Cursos carregados:', cursos.map(c => ({ 
-            id: c.id, 
-            titulo: c.titulo,
-            materia: c.materia,
-            ativo: c.ativo 
-        })));
-        
+        console.log(`✅ ${cursos.length} cursos carregados`);
         displayCursos(cursos);
-
-    } catch (error) {
-        console.error('❌ Erro ao carregar cursos da API:', error);
         
+    } catch (error) {
+        console.error('❌ Erro:', error);
         cursos = [];
         displayCursos(cursos);
-        showAlert('❌ Erro ao carregar cursos: ' + error.message, 'error');
+        showAlert('❌ ' + error.message, 'error');
     } finally {
-        document.getElementById('cursos-loading').style.display = 'none';
+        if (loadingElement) loadingElement.style.display = 'none';
     }
 }
-
 async function loadFullRanking() {
     try {
         document.getElementById('full-ranking-loading').style.display = 'flex';
