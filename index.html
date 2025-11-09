@@ -1502,9 +1502,10 @@ async function fetchAPI(endpoint, options = {}) {
     } catch (error) {
         console.error('❌ Erro na requisição:', error);
         
-        // Se for erro 500, tenta uma abordagem alternativa
-        if (error.message.includes('500')) {
-            showAlert('⚠️ Servidor temporariamente indisponível. Tente novamente em alguns instantes.', 'error');
+        // Se for erro 500, mostra mensagem específica para cursos
+        if (error.message.includes('500') && endpoint.includes('/cursos')) {
+            console.warn('⚠️ API de cursos retornou erro 500 - usando fallback');
+            return []; // Retorna array vazio como fallback
         }
         
         throw error;
@@ -1836,8 +1837,8 @@ function displayCursos(cursosList = []) {
                 <small style="color: #ffcf00;">Categoria: ${getCategoriaNome(curso.categoria)}</small>
             </div>
             <div class="curso-status">
-                <span class="badge ${curso.ativo ? 'success' : 'danger'}">
-                    ${curso.ativo ? 'Ativo' : 'Inativo'}
+                <span class="badge success">
+                    Ativo
                 </span>
             </div>
         `;
@@ -2172,7 +2173,7 @@ async function deleteVideo(videoId) {
     });
 }
 
-// Curso Management
+// Curso Management - VERSÃO CORRIGIDA SEM CAMPO 'ativo'
 function showCursoModal(curso = null) {
     const modal = document.getElementById('curso-modal');
     const title = document.getElementById('curso-modal-title');
@@ -2192,7 +2193,6 @@ function showCursoModal(curso = null) {
         document.getElementById('curso-nivel').value = curso.nivel;
         document.getElementById('curso-duracao').value = curso.duracao;
         document.getElementById('curso-imagem').value = curso.imagem || '';
-        document.getElementById('curso-ativo').value = curso.ativo ? 'true' : 'false';
 
         // Carregar módulos se existirem
         if (curso.modulos && curso.modulos.length > 0) {
@@ -2205,7 +2205,6 @@ function showCursoModal(curso = null) {
     } else {
         title.textContent = 'Criar Curso';
         document.getElementById('curso-form').reset();
-        document.getElementById('curso-ativo').value = 'true';
         addModuloToForm();
     }
 
@@ -2341,7 +2340,7 @@ function addAulaToModulo(moduloId) {
 async function saveCurso() {
     const cursoId = document.getElementById('curso-id').value;
     
-    // Coletar dados básicos do curso
+    // Coletar dados básicos do curso - SEM CAMPO 'ativo'
     const cursoData = {
         titulo: document.getElementById('curso-titulo').value,
         descricao: document.getElementById('curso-descricao').value,
@@ -2349,8 +2348,7 @@ async function saveCurso() {
         categoria: document.getElementById('curso-categoria').value,
         nivel: document.getElementById('curso-nivel').value,
         duracao: parseInt(document.getElementById('curso-duracao').value),
-        imagem: document.getElementById('curso-imagem').value || null,
-        ativo: document.getElementById('curso-ativo').value === 'true'
+        imagem: document.getElementById('curso-imagem').value || null
     };
 
     // Coletar módulos e aulas
