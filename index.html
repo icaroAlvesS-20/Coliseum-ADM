@@ -1458,14 +1458,20 @@ function voltarParaMenu() {
 }
 
 // ✅ API Functions melhoradas
+// ✅ API Functions com proxy CORS
 async function fetchAPI(endpoint, options = {}) {
     try {
-        console.log(`🌐 Fazendo requisição para: ${API_BASE_URL}${endpoint}`);
+        // ✅ USAR PROXY CORS PARA CONTORNAR O PROBLEMA
+        const PROXY_URL = 'https://corsproxy.io/?';
+        const targetURL = `${API_BASE_URL}${endpoint}`;
+        const proxyURL = `${PROXY_URL}${encodeURIComponent(targetURL)}`;
+
+        console.log(`🌐 Fazendo requisição via proxy para: ${targetURL}`);
 
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 segundos timeout
+        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 segundos timeout
 
-        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        const response = await fetch(proxyURL, {
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
@@ -1477,7 +1483,7 @@ async function fetchAPI(endpoint, options = {}) {
 
         clearTimeout(timeoutId);
 
-        console.log(`📡 Resposta da API - Status: ${response.status}`);
+        console.log(`📡 Resposta da API via proxy - Status: ${response.status}`);
 
         if (!response.ok) {
             const errorText = await response.text();
@@ -1486,17 +1492,19 @@ async function fetchAPI(endpoint, options = {}) {
         }
 
         const data = await response.json();
-        console.log(`✅ Dados recebidos de ${endpoint}:`, data);
+        console.log(`✅ Dados recebidos de ${endpoint} via proxy:`, data);
 
         return data;
 
     } catch (error) {
-        console.error('❌ Erro na requisição API:', error);
+        console.error('❌ Erro na requisição API com proxy:', error);
 
         if (error.name === 'AbortError') {
             showAlert('⏰ Tempo esgotado. Servidor está lento.', 'warning');
         } else if (error.message.includes('Failed to fetch') || error.name === 'TypeError') {
-            showAlert('🚨 ERRO: Não foi possível conectar com a API. Verifique a URL e CORS.', 'error');
+            // ✅ TENTAR MÉTODO ALTERNATIVO SEM PROXY
+            console.log('🔄 Tentando método alternativo sem proxy...');
+            return await fetchAPIDirect(endpoint, options);
         } else {
             showAlert('Erro na API: ' + error.message, 'error');
         }
@@ -1505,6 +1513,39 @@ async function fetchAPI(endpoint, options = {}) {
     }
 }
 
+// ✅ MÉTODO ALTERNATIVO DIRETO (SEM PROXY)
+async function fetchAPIDirect(endpoint, options = {}) {
+    try {
+        console.log(`🌐 Tentando requisição direta para: ${API_BASE_URL}${endpoint}`);
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+            method: 'GET', // Força GET para evitar preflight
+            headers: {
+                'Accept': 'application/json',
+                ...options.headers
+            },
+            signal: controller.signal,
+            ...options
+        });
+
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+            throw new Error(`Erro ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log(`✅ Dados recebidos diretamente de ${endpoint}:`, data);
+        return data;
+
+    } catch (error) {
+        console.error('❌ Erro na requisição direta:', error);
+        throw error;
+    }
+}
 // ✅ Data Loading Functions atualizadas
 async function loadDashboardData() {
     try {
