@@ -1526,8 +1526,6 @@ if (saveNewUserBtn) {
 
 function showAddUserModal() {
     document.getElementById('add-user-form').reset();
-    document.getElementById('new-user-pontuacao').value = 0;
-    document.getElementById('new-user-desafios').value = 0;
     document.getElementById('add-user-modal').style.display = 'flex';
 }
 
@@ -1536,9 +1534,6 @@ async function saveNewUser() {
         nome: document.getElementById('new-user-name').value,
         ra: document.getElementById('new-user-ra').value,
         serie: document.getElementById('new-user-serie').value,
-        email: document.getElementById('new-user-email').value || null,
-        pontuacao: parseInt(document.getElementById('new-user-pontuacao').value) || 0,
-        desafiosCompletados: parseInt(document.getElementById('new-user-desafios').value) || 0
     };
 
     if (!userData.nome || !userData.ra || !userData.serie) {
