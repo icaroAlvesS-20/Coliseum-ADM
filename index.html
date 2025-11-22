@@ -433,7 +433,30 @@
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
+/* Adicione este CSS ao estilo existente */
+        .table-header {
+            padding: 18px 25px;
+            background: rgba(255, 207, 0, 0.1);
+            color: #ffcf00;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #555;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
 
+    @media (max-width: 768px) {
+        .table-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    
+        .table-header > div {
+            width: 100%;
+            justify-content: space-between;
+        }
+    }
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
@@ -861,18 +884,23 @@
         </div>
 
         <!-- Users Tab -->
-        <div id="users" class="tab-content">
-            <div class="table-container">
-                <div class="table-header">
-                    <h3>Gerenciar Usuários</h3>
-                    <div class="search-box">
-                        <i class="fas fa-search"></i>
-                        <input type="text" id="user-search" placeholder="Buscar usuários...">
-                    </div>
+<div id="users" class="tab-content">
+    <div class="table-container">
+        <div class="table-header">
+            <h3>Gerenciar Usuários</h3>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="user-search" placeholder="Buscar usuários...">
                 </div>
-                <div class="loading" id="users-loading">
-                    <div class="spinner"></div>
-                </div>
+                <button class="btn btn-primary" id="add-user-btn">
+                    <i class="fas fa-plus"></i> Adicionar Usuário
+                </button>
+            </div>
+        </div>
+        <div class="loading" id="users-loading">
+            <div class="spinner"></div>
+        </div>
                 <table id="users-table">
                     <thead>
                         <tr>
@@ -1255,7 +1283,63 @@
     <button class="btn-voltar" onclick="voltarParaMenu()" title="Voltar para o Menu">
         <i class="fas fa-arrow-left"></i>
     </button>
-
+<!-- Add User Modal -->
+<div class="modal" id="add-user-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Adicionar Novo Usuário</h3>
+            <button class="modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="add-user-form">
+                <div class="form-group">
+                    <label for="new-user-name">Nome Completo *</label>
+                    <input type="text" id="new-user-name" class="form-control" placeholder="Ex: João Silva" required>
+                </div>
+                <div class="form-group">
+                    <label for="new-user-ra">RA (Registro Acadêmico) *</label>
+                    <input type="text" id="new-user-ra" class="form-control" placeholder="Ex: 123456" required>
+                </div>
+                <div class="form-group">
+                    <label for="new-user-serie">Série *</label>
+                    <select id="new-user-serie" class="form-control" required>
+                        <option value="">Selecione a série</option>
+                        <option value="1º Ano">1º Ano</option>
+                        <option value="2º Ano">2º Ano</option>
+                        <option value="3º Ano">3º Ano</option>
+                        <option value="4º Ano">4º Ano</option>
+                        <option value="5º Ano">5º Ano</option>
+                        <option value="6º Ano">6º Ano</option>
+                        <option value="7º Ano">7º Ano</option>
+                        <option value="8º Ano">8º Ano</option>
+                        <option value="9º Ano">9º Ano</option>
+                        <option value="1º EM">1º Ensino Médio</option>
+                        <option value="2º EM">2º Ensino Médio</option>
+                        <option value="3º EM">3º Ensino Médio</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="new-user-email">E-mail (opcional)</label>
+                    <input type="email" id="new-user-email" class="form-control" placeholder="exemplo@escola.com">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="new-user-pontuacao">Pontuação Inicial</label>
+                        <input type="number" id="new-user-pontuacao" class="form-control" value="0" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="new-user-desafios">Desafios Completos</label>
+                        <input type="number" id="new-user-desafios" class="form-control" value="0" min="0">
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-warning" id="cancel-add-user">Cancelar</button>
+            <button class="btn btn-primary" id="save-new-user">Salvar Usuário</button>
+        </div>
+    </div>
+</div>
     <script>// Variáveis globais
 // Variáveis globais
 const API_BASE_URL = 'https://coliseum-api.onrender.com';
@@ -1371,7 +1455,6 @@ function setupEventListeners() {
         });
     }
 
-    // Save buttons
     const saveUserBtn = document.getElementById('save-user');
     if (saveUserBtn) {
         saveUserBtn.addEventListener('click', saveUser);
@@ -1387,7 +1470,6 @@ function setupEventListeners() {
         saveCursoBtn.addEventListener('click', saveCurso);
     }
 
-    // Add buttons
     const addVideoBtn = document.getElementById('add-video-btn');
     if (addVideoBtn) {
         addVideoBtn.addEventListener('click', function() {
@@ -1402,7 +1484,6 @@ function setupEventListeners() {
         });
     }
 
-    // Settings buttons
     const saveSettings = document.getElementById('save-settings');
     if (saveSettings) {
         saveSettings.addEventListener('click', saveSettings);
@@ -1422,7 +1503,6 @@ function setupEventListeners() {
         });
     }
 
-    // Confirm action
     const confirmAction = document.getElementById('confirm-action');
     if (confirmAction) {
         confirmAction.addEventListener('click', function() {
@@ -1434,22 +1514,93 @@ function setupEventListeners() {
         });
     }
 
-    // Cursos button
     const addModuloBtn = document.getElementById('add-modulo-btn');
     if (addModuloBtn) {
         addModuloBtn.addEventListener('click', function() {
             addModuloToForm();
         });
     }
+const addUserBtn = document.getElementById('add-user-btn');
+if (addUserBtn) {
+    addUserBtn.addEventListener('click', function() {
+        showAddUserModal();
+    });
+}
 
+const cancelAddUser = document.getElementById('cancel-add-user');
+if (cancelAddUser) {
+    cancelAddUser.addEventListener('click', function() {
+        document.getElementById('add-user-modal').style.display = 'none';
+    });
+}
+
+const saveNewUserBtn = document.getElementById('save-new-user');
+if (saveNewUserBtn) {
+    saveNewUserBtn.addEventListener('click', saveNewUser);
+}
+
+function showAddUserModal() {
+    document.getElementById('add-user-form').reset();
+    document.getElementById('new-user-pontuacao').value = 0;
+    document.getElementById('new-user-desafios').value = 0;
+    document.getElementById('add-user-modal').style.display = 'flex';
+}
+
+async function saveNewUser() {
+    const userData = {
+        nome: document.getElementById('new-user-name').value,
+        ra: document.getElementById('new-user-ra').value,
+        serie: document.getElementById('new-user-serie').value,
+        email: document.getElementById('new-user-email').value || null,
+        pontuacao: parseInt(document.getElementById('new-user-pontuacao').value) || 0,
+        desafiosCompletados: parseInt(document.getElementById('new-user-desafios').value) || 0
+    };
+
+    if (!userData.nome || !userData.ra || !userData.serie) {
+        showAlert('❌ Preencha todos os campos obrigatórios!', 'error');
+        return;
+    }
+
+    try {
+        showGlobalLoading(true);
+
+        console.log('💾 Criando novo usuário...', userData);
+
+        const response = await fetch(`${API_BASE_URL}/api/usuarios`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(userData)
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Erro ${response.status}: ${errorText}`);
+        }
+
+        const result = await response.json();
+        console.log('✅ Usuário criado:', result);
+
+        showAlert('✅ Usuário criado com sucesso!', 'success');
+        document.getElementById('add-user-modal').style.display = 'none';
+
+        await loadUsers();
+
+    } catch (error) {
+        console.error('❌ Erro ao criar usuário:', error);
+        
+        if (error.message.includes('409') || error.message.includes('já existe')) {
+            showAlert('❌ Já existe um usuário com este RA!', 'error');
+        } else {
+            showAlert('❌ Erro ao criar usuário: ' + error.message, 'error');
+        }
+    } finally {
+        showGlobalLoading(false);
+    }
+}
     console.log('✅ Todos os event listeners configurados');
 }
-
-// Função para voltar ao menu
-function voltarParaMenu() {
-    window.location.href = '/menu';
-}
-
 // Funções auxiliares
 function showLoading() {
     const currentTab = document.querySelector('.tab-content.active').id;
@@ -2554,6 +2705,7 @@ function showGlobalLoading(show) {
         loading.style.display = show ? 'flex' : 'none';
     }
 }
+        
     </script>
 </body>
 </html>
