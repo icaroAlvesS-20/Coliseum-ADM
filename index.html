@@ -1531,14 +1531,15 @@ function showAddUserModal() {
 
 async function saveNewUser() {
     const userData = {
-        nome: document.getElementById('new-user-name').value,
-        ra: document.getElementById('new-user-ra').value,
+        nome: document.getElementById('new-user-name').value.trim(),
+        ra: document.getElementById('new-user-ra').value.trim(),
         serie: document.getElementById('new-user-serie').value,
-        senha: document.getElementById('new-user-senha').value
-
+        senha: document.getElementById('new-user-senha').value,
+        action: 'cadastro' // ✅ ESTA É A CHAVE QUE ESTAVA FALTANDO!
     };
 
-    if (!userData.nome || !userData.ra || !userData.serie) {
+    // Validações básicas
+    if (!userData.nome || !userData.ra || !userData.serie || !userData.senha) {
         showAlert('❌ Preencha todos os campos obrigatórios!', 'error');
         return;
     }
@@ -1580,8 +1581,6 @@ async function saveNewUser() {
     } finally {
         showGlobalLoading(false);
     }
-}
-    console.log('✅ Todos os event listeners configurados');
 }
 // Funções auxiliares
 function showLoading() {
