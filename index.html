@@ -1325,7 +1325,7 @@
         </div>
     </div>
 </div>
-    <script>// Variáveis globais
+    <script>
 // Variáveis globais
 const API_BASE_URL = 'https://coliseum-api.onrender.com';
 let users = [];
@@ -2681,7 +2681,9 @@ function showGlobalLoading(show) {
         loading.style.display = show ? 'flex' : 'none';
     }
 }
-        
+    function saveSettings() {
+    showAlert('Configurações salvas com sucesso!', 'success');
+}
     </script>
 </body>
 </html>
