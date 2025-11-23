@@ -911,6 +911,8 @@
                             <th>Pontuação</th>
                             <th>Desafios</th>
                             <th>Ações</th>
+                            <th>Curso</th>
+
                         </tr>
                     </thead>
                     <tbody id="users-body">
@@ -1034,43 +1036,61 @@
     </div>
 
     <!-- Edit User Modal -->
-    <div class="modal" id="edit-user-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Editar Usuário</h3>
-                <button class="modal-close">&times;</button>
-            </div>
-            <div class="modal-body">
-                <form id="edit-user-form">
-                    <input type="hidden" id="edit-user-id">
-                    <div class="form-group">
-                        <label for="edit-user-name">Nome</label>
-                        <input type="text" id="edit-user-name" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="edit-user-ra">RA</label>
-                        <input type="text" id="edit-user-ra" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="edit-user-serie">Série</label>
-                        <input type="text" id="edit-user-serie" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="edit-user-pontuacao">Pontuação</label>
-                        <input type="number" id="edit-user-pontuacao" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="edit-user-desafios">Desafios Completos</label>
-                        <input type="number" id="edit-user-desafios" class="form-control" required>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-warning" id="cancel-edit">Cancelar</button>
-                <button class="btn btn-primary" id="save-user">Salvar</button>
-            </div>
+   <!-- Edit User Modal - CURSO OBRIGATÓRIO -->
+<div class="modal" id="edit-user-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Editar Usuário</h3>
+            <button class="modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="edit-user-form">
+                <input type="hidden" id="edit-user-id">
+                <div class="form-group">
+                    <label for="edit-user-name">Nome *</label>
+                    <input type="text" id="edit-user-name" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-user-ra">RA *</label>
+                    <input type="text" id="edit-user-ra" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-user-serie">Série *</label>
+                    <input type="text" id="edit-user-serie" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-user-curso">Curso *</label>
+                    <select id="edit-user-curso" class="form-control" required>
+                                <option value="algebra">Álgebra</option>
+                                <option value="geometria">Geometria</option>
+                                <option value="quimica">Química</option>
+                                <option value="fisica">Física</option>
+                                <option value="historia">História</option>
+                                <option value="geografia">Geografia</option>
+                                <option value="gramatica">Gramática</option>
+                                <option value="interpretacao">Interpretação</option>
+                                <option value="python">Python</option>
+                                <option value="javascript">JavaScript</option>
+                                <option value="Robótica">Robótica</option>
+                               <option value="web">Desenvolvimento Web</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="edit-user-pontuacao">Pontuação *</label>
+                    <input type="number" id="edit-user-pontuacao" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-user-desafios">Desafios Completos *</label>
+                    <input type="number" id="edit-user-desafios" class="form-control" required>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-warning" id="cancel-edit">Cancelar</button>
+            <button class="btn btn-primary" id="save-user">Salvar</button>
         </div>
     </div>
+</div>
 
     <!-- Video Modal -->
     <div class="modal" id="video-modal">
@@ -1188,7 +1208,8 @@
                                 <option value="interpretacao">Interpretação</option>
                                 <option value="python">Python</option>
                                 <option value="javascript">JavaScript</option>
-                                <option value="web">Desenvolvimento Web</option>
+                                <option value="Robótica">Robótica</option>
+                               <option value="web">Desenvolvimento Web</option>
                             </select>
                         </div>
                     </div>
@@ -1279,6 +1300,7 @@
         <p>Carregando...</p>
     </div>
     
+<!-- Modal de Adicionar Usuário - CURSO OBRIGATÓRIO -->
 <div class="modal" id="add-user-modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -1313,9 +1335,26 @@
                         <option value="3º EM">3º Ensino Médio</option>
                     </select>
                 </div>
-                    <div class="form-group">
-                    <label for="new-user-senha">Senha</label>
+                <div class="form-group">
+                    <label for="new-user-senha">Senha *</label>
                     <input type="text" id="new-user-senha" class="form-control" placeholder="Ex: 123456" required>
+                </div>
+                <div class="form-group">
+                    <label for="new-user-curso">Curso *</label>
+                    <select id="new-user-curso" class="form-control" required>
+                                <option value="algebra">Álgebra</option>
+                                <option value="geometria">Geometria</option>
+                                <option value="quimica">Química</option>
+                                <option value="fisica">Física</option>
+                                <option value="historia">História</option>
+                                <option value="geografia">Geografia</option>
+                                <option value="gramatica">Gramática</option>
+                                <option value="interpretacao">Interpretação</option>
+                                <option value="python">Python</option>
+                                <option value="javascript">JavaScript</option>
+                                <option value="Robótica">Robótica</option>
+                               <option value="web">Desenvolvimento Web</option>
+                    </select>
                 </div>
             </form>
         </div>
@@ -1536,11 +1575,12 @@ async function saveNewUser() {
         ra: document.getElementById('new-user-ra').value.trim(),
         serie: document.getElementById('new-user-serie').value,
         senha: document.getElementById('new-user-senha').value,
+        curso: document.getElementById('new-user-curso').value,
         action: 'cadastro'
     };
 
-    // Validações básicas
-    if (!userData.nome || !userData.ra || !userData.serie || !userData.senha) {
+    // Validações básicas - CURSO É OBRIGATÓRIO
+    if (!userData.nome || !userData.ra || !userData.serie || !userData.senha || !userData.curso) {
         showAlert('❌ Preencha todos os campos obrigatórios!', 'error');
         return;
     }
@@ -1804,7 +1844,7 @@ function displayUsers(users) {
     if (!users || users.length === 0) {
         const row = document.createElement('tr');
         row.innerHTML = `
-            <td colspan="7" style="text-align: center; color: #888; padding: 20px;">
+            <td colspan="8" style="text-align: center; color: #888; padding: 20px;">
                 <i class="fas fa-users" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
                 Nenhum usuário encontrado
             </td>
@@ -1822,6 +1862,7 @@ function displayUsers(users) {
             <td>${user.serie}</td>
             <td>${user.pontuacao}</td>
             <td>${user.desafiosCompletados}</td>
+            <td>${user.curso || 'Não informado'}</td>
             <td class="actions">
                 <button class="btn btn-primary btn-sm edit-user" data-id="${user.id}">
                     <i class="fas fa-edit"></i>
@@ -2101,45 +2142,11 @@ function editUser(userId) {
     document.getElementById('edit-user-name').value = user.nome;
     document.getElementById('edit-user-ra').value = user.ra;
     document.getElementById('edit-user-serie').value = user.serie || '';
+    document.getElementById('edit-user-curso').value = user.curso || '';
     document.getElementById('edit-user-pontuacao').value = user.pontuacao || 0;
     document.getElementById('edit-user-desafios').value = user.desafiosCompletados || 0;
 
     document.getElementById('edit-user-modal').style.display = 'flex';
-}
-
-async function deleteUser(userId) {
-    const user = users.find(u => u.id == userId);
-    if (!user) {
-        console.error('❌ Usuário não encontrado:', userId);
-        return;
-    }
-
-    showConfirmation(`Tem certeza que deseja excluir o usuário "${user.nome}" (RA: ${user.ra})? Esta ação não pode ser desfeita.`, async () => {
-        try {
-            showGlobalLoading(true);
-
-            console.log(`🗑️ Excluindo usuário ${userId}...`);
-
-            const response = await fetch(`${API_BASE_URL}/api/usuarios/${userId}`, {
-                method: 'DELETE'
-            });
-
-            if (!response.ok) throw new Error(`Erro ${response.status}`);
-
-            const result = await response.json();
-            console.log('✅ Usuário excluído:', result);
-
-            showAlert('✅ Usuário excluído com sucesso!', 'success');
-
-            await loadUsers();
-
-        } catch (error) {
-            console.error('❌ Erro ao excluir usuário:', error);
-            showAlert('❌ Erro ao excluir usuário: ' + error.message, 'error');
-        } finally {
-            showGlobalLoading(false);
-        }
-    });
 }
 
 async function saveUser() {
@@ -2148,9 +2155,16 @@ async function saveUser() {
         nome: document.getElementById('edit-user-name').value,
         ra: document.getElementById('edit-user-ra').value,
         serie: document.getElementById('edit-user-serie').value,
+        curso: document.getElementById('edit-user-curso').value,
         pontuacao: parseInt(document.getElementById('edit-user-pontuacao').value),
         desafiosCompletados: parseInt(document.getElementById('edit-user-desafios').value)
     };
+
+    // Validação - CURSO É OBRIGATÓRIO
+    if (!userData.curso) {
+        showAlert('❌ O campo curso é obrigatório!', 'error');
+        return;
+    }
 
     console.log('💾 Salvando usuário...', userId, userData);
 
@@ -2183,7 +2197,6 @@ async function saveUser() {
         showGlobalLoading(false);
     }
 }
-
 // Video Management
 function showVideoModal(video = null) {
     const modal = document.getElementById('video-modal');
