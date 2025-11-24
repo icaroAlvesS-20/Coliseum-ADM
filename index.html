@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - Coliseum API</title>
+    <title>Admin - Coliseum </title>
     <meta name="description" content="Sistema administrativo para gerenciar usuários do Coliseum">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -1568,29 +1568,33 @@ function showAddUserModal() {
     document.getElementById('add-user-modal').style.display = 'flex';
 }
 
-async function saveNewUser() {
+async function saveUser() {
+    const userId = document.getElementById('edit-user-id').value;
     const userData = {
-        nome: document.getElementById('new-user-name').value.trim(),
-        ra: document.getElementById('new-user-ra').value.trim(),
-        serie: document.getElementById('new-user-serie').value,
-        senha: document.getElementById('new-user-senha').value,
-        curso: document.getElementById('new-user-curso').value,
-        action: 'cadastro'
+        nome: document.getElementById('edit-user-name').value,
+        ra: document.getElementById('edit-user-ra').value,
+        serie: document.getElementById('edit-user-serie').value,
+        curso: document.getElementById('edit-user-curso').value,
+        pontuacao: parseInt(document.getElementById('edit-user-pontuacao').value),
+        desafiosCompletados: parseInt(document.getElementById('edit-user-desafios').value)
     };
 
-    // Validações básicas - CURSO É OBRIGATÓRIO
-    if (!userData.nome || !userData.ra || !userData.serie || !userData.senha || !userData.curso) {
-        showAlert('❌ Preencha todos os campos obrigatórios!', 'error');
+    // Validação - CURSO É OBRIGATÓRIO
+    if (!userData.curso) {
+        showAlert('❌ O campo curso é obrigatório!', 'error');
         return;
     }
+
+    console.log('💾 Salvando usuário...', userId, userData);
 
     try {
         showGlobalLoading(true);
 
-        console.log('💾 Criando novo usuário...', userData);
+        // DEBUG: Log dos dados que serão enviados
+        console.log('📤 Dados enviados para a API:', userData);
 
-        const response = await fetch(`${API_BASE_URL}/api/usuarios`, {
-            method: 'POST',
+        const response = await fetch(`${API_BASE_URL}/api/usuarios/${userId}`, {
+            method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
             },
@@ -1599,30 +1603,27 @@ async function saveNewUser() {
 
         if (!response.ok) {
             const errorText = await response.text();
+            console.error('❌ Resposta de erro da API:', errorText);
             throw new Error(`Erro ${response.status}: ${errorText}`);
         }
 
         const result = await response.json();
-        console.log('✅ Usuário criado:', result);
+        console.log('✅ Resposta da API:', result);
 
-        showAlert('✅ Usuário criado com sucesso!', 'success');
-        document.getElementById('add-user-modal').style.display = 'none';
+        showAlert('✅ Usuário atualizado com sucesso!', 'success');
+        document.getElementById('edit-user-modal').style.display = 'none';
 
+        // Recarregar os dados
         await loadUsers();
+        await loadDashboardData(); // Atualizar o dashboard também
 
     } catch (error) {
-        console.error('❌ Erro ao criar usuário:', error);
-        
-        if (error.message.includes('409') || error.message.includes('já existe')) {
-            showAlert('❌ Já existe um usuário com este RA!', 'error');
-        } else {
-            showAlert('❌ Erro ao criar usuário: ' + error.message, 'error');
-        }
+        console.error('❌ Erro completo ao salvar usuário:', error);
+        showAlert('❌ Erro ao salvar usuário: ' + error.message, 'error');
     } finally {
         showGlobalLoading(false);
     }
 }
-
 // Funções auxiliares
 function showLoading() {
     const currentTab = document.querySelector('.tab-content.active').id;
