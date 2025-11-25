@@ -2170,7 +2170,7 @@ async function deleteUser(userId) {
 
             console.log(`🗑️ Excluindo usuário ${userId}...`);
 
-            const response = await fetch(`${API_BASE_URL}/api/usuarios/${userId}`, {
+            const response = await fetch(`${API_BASE_URL}/api/usuarios${userId}`, {
                 method: 'DELETE'
             });
 
@@ -2214,7 +2214,7 @@ async function saveUser() {
         showGlobalLoading(true);
 
         // ✅ ROTA CORRETA: SEM BARRA NO FINAL
-        const response = await fetch(`${API_BASE_URL}/api/usuarios/${userId}`, {
+        const response = await fetch(`${API_BASE_URL}/api/usuarios${userId}`, {
             method: 'PUT',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(userData)
