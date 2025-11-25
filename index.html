@@ -1852,14 +1852,14 @@ function displayUsers(users) {
     tbody.innerHTML = '';
 
     if (!users || users.length === 0) {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td colspan="8" style="text-align: center; color: #888; padding: 20px;">
-                <i class="fas fa-users" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
-                Nenhum usuário encontrado
-            </td>
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="8" style="text-align: center; color: #888; padding: 20px;">
+                    <i class="fas fa-users" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
+                    Nenhum usuário encontrado
+                </td>
+            </tr>
         `;
-        tbody.appendChild(row);
         return;
     }
 
@@ -1872,7 +1872,7 @@ function displayUsers(users) {
             <td>${user.serie}</td>
             <td>${user.pontuacao}</td>
             <td>${user.desafiosCompletados}</td>
-            <td>${user.curso || 'Não informado'}</td> <!-- ✅ AGORA MOSTRANDO O CURSO -->
+            <td>${user.curso || 'Não informado'}</td> <!-- ✅ CURSO AQUI -->
             <td class="actions">
                 <button class="btn btn-primary btn-sm edit-user" data-id="${user.id}">
                     <i class="fas fa-edit"></i>
@@ -1885,6 +1885,16 @@ function displayUsers(users) {
         tbody.appendChild(row);
     });
 
+    tbody.addEventListener('click', function(e) {
+        if (e.target.closest('.edit-user')) {
+            const userId = e.target.closest('.edit-user').getAttribute('data-id');
+            editUser(userId);
+        }
+        if (e.target.closest('.delete-user')) {
+            const userId = e.target.closest('.delete-user').getAttribute('data-id');
+            deleteUser(userId);
+        }
+    });
 }
 function displayVideos(videosList) {
     const tbody = document.getElementById('videos-body');
