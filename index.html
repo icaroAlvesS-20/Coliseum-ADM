@@ -1364,6 +1364,7 @@
     </div>
 </div>
     <script>// Variáveis globais
+// Variáveis globais
 const API_BASE_URL = 'https://coliseum-api.onrender.com';
 let users = [];
 let videos = [];
@@ -1574,8 +1575,7 @@ async function saveNewUser() {
         ra: document.getElementById('new-user-ra').value,
         serie: document.getElementById('new-user-serie').value,
         senha: document.getElementById('new-user-senha').value,
-        curso: document.getElementById('new-user-curso').value,
-        action: 'cadastro' // ✅ ADICIONAR ACTION
+        curso: document.getElementById('new-user-curso').value
     };
 
     // Validação
@@ -1589,7 +1589,7 @@ async function saveNewUser() {
     try {
         showGlobalLoading(true);
 
-        // ✅ ROTA CORRETA: SEM BARRA NO FINAL
+        // ✅ ROTA CORRETA: POST para /api/usuarios
         const response = await fetch(`${API_BASE_URL}/api/usuarios`, {
             method: 'POST',
             headers: {
@@ -1599,14 +1599,8 @@ async function saveNewUser() {
         });
 
         if (!response.ok) {
-            const errorText = await response.text();
-            console.error('❌ Resposta de erro da API:', errorText);
-            
-            if (errorText.includes('já existe') || response.status === 409) {
-                throw new Error('RA já cadastrado no sistema!');
-            }
-            
-            throw new Error(`Erro ${response.status}: ${errorText}`);
+            const errorData = await response.json();
+            throw new Error(errorData.error || `Erro ${response.status}`);
         }
 
         const result = await response.json();
@@ -1634,6 +1628,7 @@ async function saveNewUser() {
         showGlobalLoading(false);
     }
 }
+
 // Funções auxiliares
 function showLoading() {
     const currentTab = document.querySelector('.tab-content.active').id;
@@ -1657,13 +1652,10 @@ function updateStats() {
 
 // API Functions
 async function fetchAPI(endpoint, options = {}) {
-    const PROXY_URL = 'https://corsproxy.io/?';
-    const targetURL = `${API_BASE_URL}${endpoint}`;
-    
     try {
-        console.log(`🌐 Fazendo requisição para: ${targetURL}`);
+        console.log(`🌐 Fazendo requisição para: ${API_BASE_URL}${endpoint}`);
         
-        const response = await fetch(`${PROXY_URL}${encodeURIComponent(targetURL)}`, {
+        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
@@ -1682,12 +1674,30 @@ async function fetchAPI(endpoint, options = {}) {
     } catch (error) {
         console.error('❌ Erro na requisição:', error);
         
-        if (error.message.includes('500') && endpoint.includes('/cursos')) {
-            console.warn('⚠️ API de cursos retornou erro 500 - usando fallback');
-            return [];
+        // Fallback para CORS
+        try {
+            const PROXY_URL = 'https://corsproxy.io/?';
+            const targetURL = `${API_BASE_URL}${endpoint}`;
+            
+            console.log(`🔄 Tentando com proxy CORS: ${targetURL}`);
+            
+            const proxyResponse = await fetch(`${PROXY_URL}${encodeURIComponent(targetURL)}`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                },
+                ...options
+            });
+
+            if (!proxyResponse.ok) {
+                throw new Error(`Erro ${proxyResponse.status}`);
+            }
+            
+            return await proxyResponse.json();
+        } catch (proxyError) {
+            console.error('❌ Erro também com proxy CORS:', proxyError);
+            throw error;
         }
-        
-        throw error;
     }
 }
 
@@ -1753,8 +1763,8 @@ async function loadDashboardData() {
 async function loadUsers() {
     try {
         showLoading();
-        const ranking = await fetchAPI('/api/usuarios');
-        users = ranking;
+        const usuarios = await fetchAPI('/api/usuarios');
+        users = usuarios;
         displayUsers(users);
     } catch (error) {
         console.error('Error loading users:', error);
@@ -1872,7 +1882,7 @@ function displayUsers(users) {
             <td>${user.serie}</td>
             <td>${user.pontuacao}</td>
             <td>${user.desafiosCompletados}</td>
-            <td>${user.curso || 'Não informado'}</td> <!-- ✅ CURSO AQUI -->
+            <td>${user.curso || 'Não informado'}</td>
             <td class="actions">
                 <button class="btn btn-primary btn-sm edit-user" data-id="${user.id}">
                     <i class="fas fa-edit"></i>
@@ -1896,6 +1906,7 @@ function displayUsers(users) {
         }
     });
 }
+
 function displayVideos(videosList) {
     const tbody = document.getElementById('videos-body');
     if (!tbody) return;
@@ -2157,6 +2168,7 @@ function editUser(userId) {
 
     document.getElementById('edit-user-modal').style.display = 'flex';
 }
+
 async function deleteUser(userId) {
     const user = users.find(u => u.id == userId);
     if (!user) {
@@ -2191,65 +2203,56 @@ async function deleteUser(userId) {
         }
     });
 }
-async function saveNewUser() {
-  const userData = {
-    nome: document.getElementById('new-user-name').value,
-    ra: document.getElementById('new-user-ra').value,
-    serie: document.getElementById('new-user-serie').value,
-    senha: document.getElementById('new-user-senha').value,
-    curso: document.getElementById('new-user-curso').value
-  };
 
-  // Validação
-  if (!userData.curso) {
-    showAlert('❌ O campo curso é obrigatório!', 'error');
-    return;
-  }
+async function saveUser() {
+    const userId = document.getElementById('edit-user-id').value;
+    const userData = {
+        nome: document.getElementById('edit-user-name').value,
+        ra: document.getElementById('edit-user-ra').value,
+        serie: document.getElementById('edit-user-serie').value,
+        curso: document.getElementById('edit-user-curso').value,
+        pontuacao: parseInt(document.getElementById('edit-user-pontuacao').value),
+        desafiosCompletados: parseInt(document.getElementById('edit-user-desafios').value)
+    };
 
-  console.log('💾 Tentando cadastrar usuário:', userData);
-
-  try {
-    showGlobalLoading(true);
-
-    // ✅ ROTA CORRETA: POST para /api/usuarios
-    const response = await fetch(`${API_BASE_URL}/api/usuarios`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(userData)
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || `Erro ${response.status}`);
+    // Validação
+    if (!userData.curso) {
+        showAlert('❌ O campo curso é obrigatório!', 'error');
+        return;
     }
 
-    const result = await response.json();
-    console.log('✅ Usuário cadastrado com sucesso:', result);
+    console.log('💾 Salvando usuário...', userId, userData);
 
-    showAlert('✅ Usuário cadastrado com sucesso!', 'success');
-    document.getElementById('add-user-modal').style.display = 'none';
+    try {
+        showGlobalLoading(true);
 
-    // Recarregar os dados
-    await loadUsers();
-    await loadDashboardData();
+        const response = await fetch(`${API_BASE_URL}/api/usuarios/${userId}`, {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(userData)
+        });
 
-  } catch (error) {
-    console.error('❌ Erro completo ao cadastrar usuário:', error);
-    
-    let errorMessage = error.message;
-    if (errorMessage.includes('já existe') || errorMessage.includes('RA já')) {
-      errorMessage = '❌ RA já cadastrado no sistema!';
-    } else if (errorMessage.includes('404')) {
-      errorMessage = '❌ Serviço temporariamente indisponível. Tente novamente.';
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Erro ${response.status}: ${errorText}`);
+        }
+
+        const result = await response.json();
+        console.log('✅ Usuário salvo:', result);
+
+        showAlert('✅ Usuário atualizado com sucesso!', 'success');
+        document.getElementById('edit-user-modal').style.display = 'none';
+
+        await loadUsers();
+
+    } catch (error) {
+        console.error('❌ Erro ao salvar usuário:', error);
+        showAlert('❌ Erro ao salvar usuário: ' + error.message, 'error');
+    } finally {
+        showGlobalLoading(false);
     }
-    
-    showAlert(errorMessage, 'error');
-  } finally {
-    showGlobalLoading(false);
-  }
 }
+
 // Video Management
 function showVideoModal(video = null) {
     const modal = document.getElementById('video-modal');
