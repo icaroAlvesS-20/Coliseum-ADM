@@ -1571,16 +1571,16 @@ function showAddUserModal() {
 
 async function saveNewUser() {
     const userData = {
-        nome: document.getElementById('new-user-name').value,
-        ra: document.getElementById('new-user-ra').value,
+        nome: document.getElementById('new-user-name').value.trim(),
+        ra: document.getElementById('new-user-ra').value.trim(),
         serie: document.getElementById('new-user-serie').value,
-        senha: document.getElementById('new-user-senha').value,
+        senha: document.getElementById('new-user-senha').value.trim(),
         curso: document.getElementById('new-user-curso').value
     };
 
-    // Validação
-    if (!userData.curso) {
-        showAlert('❌ O campo curso é obrigatório!', 'error');
+    // Validação completa
+    if (!userData.nome || !userData.ra || !userData.serie || !userData.senha || !userData.curso) {
+        showAlert('❌ Todos os campos são obrigatórios!', 'error');
         return;
     }
 
@@ -1589,22 +1589,49 @@ async function saveNewUser() {
     try {
         showGlobalLoading(true);
 
-        // ✅ ROTA CORRETA: POST para /api/usuarios
-        const response = await fetch(`${API_BASE_URL}/api/usuarios`, {
+        // ✅ TENTATIVA DIRETA PRIMEIRO (sem proxy)
+        try {
+            console.log('🔄 Tentando requisição direta...');
+            const directResponse = await fetch(`${API_BASE_URL}/api/usuarios`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(userData)
+            });
+
+            if (directResponse.ok) {
+                const result = await directResponse.json();
+                console.log('✅ Usuário cadastrado com sucesso (direto):', result);
+                showAlert('✅ Usuário cadastrado com sucesso!', 'success');
+                document.getElementById('add-user-modal').style.display = 'none';
+                await loadUsers();
+                await loadDashboardData();
+                return;
+            }
+        } catch (directError) {
+            console.log('🔄 Direto falhou, tentando com proxy...');
+        }
+
+        // ✅ FALLBACK COM PROXY
+        const PROXY_URL = 'https://corsproxy.io/?';
+        const proxyResponse = await fetch(`${PROXY_URL}${encodeURIComponent(API_BASE_URL + '/api/usuarios')}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'Accept': 'application/json'
             },
             body: JSON.stringify(userData)
         });
 
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || `Erro ${response.status}`);
+        if (!proxyResponse.ok) {
+            const errorText = await proxyResponse.text();
+            throw new Error(`Erro ${proxyResponse.status}: ${errorText}`);
         }
 
-        const result = await response.json();
-        console.log('✅ Usuário cadastrado com sucesso:', result);
+        const result = await proxyResponse.json();
+        console.log('✅ Usuário cadastrado com sucesso (proxy):', result);
 
         showAlert('✅ Usuário cadastrado com sucesso!', 'success');
         document.getElementById('add-user-modal').style.display = 'none';
@@ -1616,11 +1643,16 @@ async function saveNewUser() {
     } catch (error) {
         console.error('❌ Erro completo ao cadastrar usuário:', error);
         
-        let errorMessage = error.message;
-        if (errorMessage.includes('já existe') || errorMessage.includes('RA já')) {
+        let errorMessage = '❌ Erro ao cadastrar usuário';
+        
+        if (error.message.includes('já existe') || error.message.includes('RA já')) {
             errorMessage = '❌ RA já cadastrado no sistema!';
-        } else if (errorMessage.includes('404')) {
-            errorMessage = '❌ Serviço temporariamente indisponível. Tente novamente.';
+        } else if (error.message.includes('500')) {
+            errorMessage = '❌ Erro no servidor. Verifique se o backend está funcionando.';
+        } else if (error.message.includes('JSON')) {
+            errorMessage = '❌ Dados inválidos. Verifique os campos.';
+        } else if (error.message.includes('Cannot destructure')) {
+            errorMessage = '❌ Problema de comunicação com o servidor. Tente novamente.';
         }
         
         showAlert(errorMessage, 'error');
@@ -1651,12 +1683,33 @@ function updateStats() {
 }
 
 async function fetchAPI(endpoint, options = {}) {
-    const PROXY_URL = 'https://corsproxy.io/?';
     const targetURL = `${API_BASE_URL}${endpoint}`;
     
     try {
-        console.log(`🌐 Fazendo requisição via proxy para: ${targetURL}`);
+        console.log(`🌐 Fazendo requisição para: ${targetURL}`);
         
+        // Para requisições POST, tente primeiro sem proxy
+        if (options.method === 'POST') {
+            try {
+                const directResponse = await fetch(targetURL, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        ...options.headers
+                    },
+                    ...options
+                });
+
+                if (directResponse.ok) {
+                    return await directResponse.json();
+                }
+            } catch (directError) {
+                console.log('🔄 Tentando com proxy devido a CORS...');
+            }
+        }
+
+        // Fallback para proxy CORS
+        const PROXY_URL = 'https://corsproxy.io/?';
         const response = await fetch(`${PROXY_URL}${encodeURIComponent(targetURL)}`, {
             headers: {
                 'Content-Type': 'application/json',
@@ -1674,7 +1727,7 @@ async function fetchAPI(endpoint, options = {}) {
         return await response.json();
         
     } catch (error) {
-        console.error('❌ Erro na requisição com proxy:', error);
+        console.error('❌ Erro na requisição:', error);
         throw error;
     }
 }
