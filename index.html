@@ -1650,12 +1650,14 @@ function updateStats() {
     console.log('📊 Estatísticas atualizadas');
 }
 
-// API Functions
 async function fetchAPI(endpoint, options = {}) {
+    const PROXY_URL = 'https://corsproxy.io/?';
+    const targetURL = `${API_BASE_URL}${endpoint}`;
+    
     try {
-        console.log(`🌐 Fazendo requisição para: ${API_BASE_URL}${endpoint}`);
+        console.log(`🌐 Fazendo requisição via proxy para: ${targetURL}`);
         
-        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        const response = await fetch(`${PROXY_URL}${encodeURIComponent(targetURL)}`, {
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
@@ -1672,35 +1674,10 @@ async function fetchAPI(endpoint, options = {}) {
         return await response.json();
         
     } catch (error) {
-        console.error('❌ Erro na requisição:', error);
-        
-        // Fallback para CORS
-        try {
-            const PROXY_URL = 'https://corsproxy.io/?';
-            const targetURL = `${API_BASE_URL}${endpoint}`;
-            
-            console.log(`🔄 Tentando com proxy CORS: ${targetURL}`);
-            
-            const proxyResponse = await fetch(`${PROXY_URL}${encodeURIComponent(targetURL)}`, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                },
-                ...options
-            });
-
-            if (!proxyResponse.ok) {
-                throw new Error(`Erro ${proxyResponse.status}`);
-            }
-            
-            return await proxyResponse.json();
-        } catch (proxyError) {
-            console.error('❌ Erro também com proxy CORS:', proxyError);
-            throw error;
-        }
+        console.error('❌ Erro na requisição com proxy:', error);
+        throw error;
     }
 }
-
 // Data Loading Functions
 async function loadDashboardData() {
     try {
@@ -2252,7 +2229,40 @@ async function saveUser() {
         showGlobalLoading(false);
     }
 }
+async function saveNewUser() {
+    const userData = {
+        nome: document.getElementById('new-user-name').value,
+        ra: document.getElementById('new-user-ra').value,
+        serie: document.getElementById('new-user-serie').value,
+        senha: document.getElementById('new-user-senha').value,
+        curso: document.getElementById('new-user-curso').value
+    };
 
+    if (!userData.curso) {
+        showAlert('❌ O campo curso é obrigatório!', 'error');
+        return;
+    }
+
+    try {
+        showGlobalLoading(true);
+        const response = await fetchAPI('/api/usuarios', {
+            method: 'POST',
+            body: JSON.stringify(userData)
+        });
+
+        showAlert('✅ Usuário cadastrado com sucesso!', 'success');
+        hideModal('add-user-modal');
+        await loadUsers();
+        await loadDashboardData();
+
+    } catch (error) {
+        console.error('❌ Erro ao cadastrar usuário:', error);
+        let errorMessage = error.message.includes('já existe') ? '❌ RA já cadastrado!' : '❌ Erro ao cadastrar usuário';
+        showAlert(errorMessage, 'error');
+    } finally {
+        showGlobalLoading(false);
+    }
+}
 // Video Management
 function showVideoModal(video = null) {
     const modal = document.getElementById('video-modal');
@@ -2708,42 +2718,27 @@ async function resetAllData() {
     }
 }
 
-// UI Helper Functions
 function showAlert(message, type = 'success') {
     if (!alertContainer) return;
 
     const alert = document.createElement('div');
     alert.className = `alert alert-${type}`;
-    alert.innerHTML = `
-        <span>${message}</span>
-        <button class="alert-close">&times;</button>
-    `;
-
+    alert.innerHTML = `<span>${message}</span><button class="alert-close">&times;</button>`;
     alertContainer.appendChild(alert);
 
-    setTimeout(() => {
-        alert.remove();
-    }, 5000);
-
-    alert.querySelector('.alert-close').addEventListener('click', function() {
-        alert.remove();
-    });
+    setTimeout(() => alert.remove(), 5000);
+    alert.querySelector('.alert-close').addEventListener('click', () => alert.remove());
 }
 
 function showConfirmation(message, action) {
-    const confirmMessage = document.getElementById('confirm-message');
-    if (confirmMessage) {
-        confirmMessage.textContent = message;
-    }
+    document.getElementById('confirm-message').textContent = message;
     pendingAction = action;
     document.getElementById('confirm-modal').style.display = 'flex';
 }
 
 function showGlobalLoading(show) {
     const loading = document.getElementById('loadingGlobal');
-    if (loading) {
-        loading.style.display = show ? 'flex' : 'none';
-    }
+    if (loading) loading.style.display = show ? 'flex' : 'none';
 }
     </script>
 </body>
