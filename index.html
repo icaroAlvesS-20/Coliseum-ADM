@@ -1872,7 +1872,7 @@ function displayUsers(users) {
             <td>${user.serie}</td>
             <td>${user.pontuacao}</td>
             <td>${user.desafiosCompletados}</td>
-            <td>${user.curso || 'Não informado'}</td>
+            <td>${user.curso || 'Não informado'}</td> <!-- ✅ AGORA MOSTRANDO O CURSO -->
             <td class="actions">
                 <button class="btn btn-primary btn-sm edit-user" data-id="${user.id}">
                     <i class="fas fa-edit"></i>
@@ -1885,18 +1885,7 @@ function displayUsers(users) {
         tbody.appendChild(row);
     });
 
-    tbody.addEventListener('click', function(e) {
-        if (e.target.closest('.edit-user')) {
-            const userId = e.target.closest('.edit-user').getAttribute('data-id');
-            editUser(userId);
-        }
-        if (e.target.closest('.delete-user')) {
-            const userId = e.target.closest('.delete-user').getAttribute('data-id');
-            deleteUser(userId);
-        }
-    });
 }
-
 function displayVideos(videosList) {
     const tbody = document.getElementById('videos-body');
     if (!tbody) return;
