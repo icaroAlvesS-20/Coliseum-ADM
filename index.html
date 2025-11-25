@@ -2191,54 +2191,64 @@ async function deleteUser(userId) {
         }
     });
 }
-async function saveUser() {
-    const userId = document.getElementById('edit-user-id').value;
-    const userData = {
-        nome: document.getElementById('edit-user-name').value,
-        ra: document.getElementById('edit-user-ra').value,
-        serie: document.getElementById('edit-user-serie').value,
-        curso: document.getElementById('edit-user-curso').value,
-        pontuacao: parseInt(document.getElementById('edit-user-pontuacao').value),
-        desafiosCompletados: parseInt(document.getElementById('edit-user-desafios').value)
-    };
+async function saveNewUser() {
+  const userData = {
+    nome: document.getElementById('new-user-name').value,
+    ra: document.getElementById('new-user-ra').value,
+    serie: document.getElementById('new-user-serie').value,
+    senha: document.getElementById('new-user-senha').value,
+    curso: document.getElementById('new-user-curso').value
+  };
 
-    // Validação
-    if (!userData.curso) {
-        showAlert('❌ O campo curso é obrigatório!', 'error');
-        return;
+  // Validação
+  if (!userData.curso) {
+    showAlert('❌ O campo curso é obrigatório!', 'error');
+    return;
+  }
+
+  console.log('💾 Tentando cadastrar usuário:', userData);
+
+  try {
+    showGlobalLoading(true);
+
+    // ✅ ROTA CORRETA: POST para /api/usuarios
+    const response = await fetch(`${API_BASE_URL}/api/usuarios`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(userData)
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || `Erro ${response.status}`);
     }
 
-    console.log('💾 Salvando usuário...', userId, userData);
+    const result = await response.json();
+    console.log('✅ Usuário cadastrado com sucesso:', result);
 
-    try {
-        showGlobalLoading(true);
+    showAlert('✅ Usuário cadastrado com sucesso!', 'success');
+    document.getElementById('add-user-modal').style.display = 'none';
 
-        // ✅ ROTA CORRETA: SEM BARRA NO FINAL
-        const response = await fetch(`${API_BASE_URL}/api/usuarios/${userId}`, {
-            method: 'PUT',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(userData)
-        });
+    // Recarregar os dados
+    await loadUsers();
+    await loadDashboardData();
 
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`Erro ${response.status}: ${errorText}`);
-        }
-
-        const result = await response.json();
-        console.log('✅ Usuário salvo:', result);
-
-        showAlert('✅ Usuário atualizado com sucesso!', 'success');
-        document.getElementById('edit-user-modal').style.display = 'none';
-
-        await loadUsers();
-
-    } catch (error) {
-        console.error('❌ Erro ao salvar usuário:', error);
-        showAlert('❌ Erro ao salvar usuário: ' + error.message, 'error');
-    } finally {
-        showGlobalLoading(false);
+  } catch (error) {
+    console.error('❌ Erro completo ao cadastrar usuário:', error);
+    
+    let errorMessage = error.message;
+    if (errorMessage.includes('já existe') || errorMessage.includes('RA já')) {
+      errorMessage = '❌ RA já cadastrado no sistema!';
+    } else if (errorMessage.includes('404')) {
+      errorMessage = '❌ Serviço temporariamente indisponível. Tente novamente.';
     }
+    
+    showAlert(errorMessage, 'error');
+  } finally {
+    showGlobalLoading(false);
+  }
 }
 // Video Management
 function showVideoModal(video = null) {
