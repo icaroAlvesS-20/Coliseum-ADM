@@ -1753,7 +1753,7 @@ async function loadDashboardData() {
 async function loadUsers() {
     try {
         showLoading();
-        const ranking = await fetchAPI('/api/ranking');
+        const ranking = await fetchAPI('/api/usuarios');
         users = ranking;
         displayUsers(users);
     } catch (error) {
