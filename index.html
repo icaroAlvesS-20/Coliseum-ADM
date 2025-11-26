@@ -1681,36 +1681,14 @@ function hideLoading() {
 function updateStats() {
     console.log('📊 Estatísticas atualizadas');
 }
-
 async function fetchAPI(endpoint, options = {}) {
     const targetURL = `${API_BASE_URL}${endpoint}`;
     
     try {
         console.log(`🌐 Fazendo requisição para: ${targetURL}`);
         
-        // Para requisições POST, tente primeiro sem proxy
-        if (options.method === 'POST') {
-            try {
-                const directResponse = await fetch(targetURL, {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        ...options.headers
-                    },
-                    ...options
-                });
-
-                if (directResponse.ok) {
-                    return await directResponse.json();
-                }
-            } catch (directError) {
-                console.log('🔄 Tentando com proxy devido a CORS...');
-            }
-        }
-
-        // Fallback para proxy CORS
-        const PROXY_URL = 'https://corsproxy.io/?';
-        const response = await fetch(`${PROXY_URL}${encodeURIComponent(targetURL)}`, {
+        // Tentar requisição direta primeiro
+        const response = await fetch(targetURL, {
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
@@ -1727,7 +1705,34 @@ async function fetchAPI(endpoint, options = {}) {
         return await response.json();
         
     } catch (error) {
-        console.error('❌ Erro na requisição:', error);
+        console.error('❌ Erro na requisição direta:', error);
+        
+        // Fallback para proxy apenas se for erro de CORS
+        if (error.message.includes('Failed to fetch') || error.message.includes('CORS')) {
+            console.log('🔄 Tentando com proxy CORS...');
+            try {
+                const PROXY_URL = 'https://corsproxy.io/?';
+                const proxyResponse = await fetch(`${PROXY_URL}${encodeURIComponent(targetURL)}`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        ...options.headers
+                    },
+                    ...options
+                });
+
+                if (!proxyResponse.ok) {
+                    const errorText = await proxyResponse.text();
+                    throw new Error(`Erro ${proxyResponse.status}: ${errorText}`);
+                }
+                
+                return await proxyResponse.json();
+            } catch (proxyError) {
+                console.error('❌ Erro também com proxy:', proxyError);
+                throw error; // Lança o erro original
+            }
+        }
+        
         throw error;
     }
 }
@@ -2212,14 +2217,12 @@ async function deleteUser(userId) {
 
             console.log(`🗑️ Excluindo usuário ${userId}...`);
 
-            const response = await fetch(`${API_BASE_URL}/api/usuarios/${userId}`, {
+            // ✅ USANDO fetchAPI CORRIGIDA
+            const response = await fetchAPI(`/api/usuarios/${userId}`, {
                 method: 'DELETE'
             });
 
-            if (!response.ok) throw new Error(`Erro ${response.status}`);
-
-            const result = await response.json();
-            console.log('✅ Usuário excluído:', result);
+            console.log('✅ Usuário excluído:', response);
 
             showAlert('✅ Usuário excluído com sucesso!', 'success');
 
@@ -2256,19 +2259,13 @@ async function saveUser() {
     try {
         showGlobalLoading(true);
 
-        const response = await fetch(`${API_BASE_URL}/api/usuarios/${userId}`, {
+        // ✅ USANDO fetchAPI CORRIGIDA
+        const response = await fetchAPI(`/api/usuarios/${userId}`, {
             method: 'PUT',
-            headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(userData)
         });
 
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`Erro ${response.status}: ${errorText}`);
-        }
-
-        const result = await response.json();
-        console.log('✅ Usuário salvo:', result);
+        console.log('✅ Usuário salvo:', response);
 
         showAlert('✅ Usuário atualizado com sucesso!', 'success');
         document.getElementById('edit-user-modal').style.display = 'none';
@@ -2282,6 +2279,7 @@ async function saveUser() {
         showGlobalLoading(false);
     }
 }
+
 // Video Management
 function showVideoModal(video = null) {
     const modal = document.getElementById('video-modal');
