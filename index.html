@@ -605,33 +605,6 @@
             margin-top: 3px;
         }
 
-        /* Botão Voltar */
-        .btn-voltar {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: #ffcf00;
-            color: #000;
-            font-size: 24px;
-            font-weight: bold;
-            border: none;
-            cursor: pointer;
-            z-index: 1000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 4px 15px rgba(255, 207, 0, 0.4);
-            transition: all 0.3s ease;
-        }
-
-        .btn-voltar:hover {
-            background: #e6b800;
-            transform: scale(1.1);
-            box-shadow: 0 6px 20px rgba(255, 207, 0, 0.6);
-        }
 
         @media (max-width: 768px) {
             body {
@@ -709,13 +682,6 @@
                 width: 100%;
             }
 
-            .btn-voltar {
-                width: 50px;
-                height: 50px;
-                font-size: 20px;
-                bottom: 20px;
-                right: 20px;
-            }
         }
 
         @media (max-width: 480px) {
@@ -755,13 +721,6 @@
                 padding: 20px;
             }
 
-            .btn-voltar {
-                width: 45px;
-                height: 45px;
-                font-size: 18px;
-                bottom: 15px;
-                right: 15px;
-            }
         }
     </style>
 </head>
@@ -1384,7 +1343,24 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeTabs();
     loadDashboardData();
     setupEventListeners();
+    
+    // Adicionar tratamento de erro global
+    setupErrorHandling();
 });
+
+// Configurar tratamento de erro global
+function setupErrorHandling() {
+    window.addEventListener('error', function(e) {
+        console.error('❌ Erro global:', e.error);
+        showAlert('Ocorreu um erro inesperado. Verifique o console.', 'error');
+    });
+
+    window.addEventListener('unhandledrejection', function(e) {
+        console.error('❌ Promise rejeitada:', e.reason);
+        showAlert('Erro de carregamento. Tente novamente.', 'error');
+        e.preventDefault();
+    });
+}
 
 // Tab Navigation
 function initializeTabs() {
@@ -1564,9 +1540,107 @@ function setupEventListeners() {
     }
 }
 
+// Função fetchAPI corrigida
+async function fetchAPI(endpoint, options = {}) {
+    const url = `${API_BASE_URL}${endpoint}`;
+    
+    try {
+        console.log(`🌐 Fazendo requisição para: ${url}`);
+        
+        const config = {
+            method: options.method || 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                ...options.headers
+            }
+        };
+        
+        if (options.body) {
+            config.body = typeof options.body === 'string' ? options.body : JSON.stringify(options.body);
+        }
+        
+        const response = await fetch(url, config);
+        
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Erro ${response.status}: ${errorText}`);
+        }
+        
+        // Verificar se a resposta tem conteúdo
+        const contentLength = response.headers.get('content-length');
+        if (contentLength === '0' || response.status === 204) {
+            return { success: true, message: 'Operação realizada com sucesso' };
+        }
+        
+        const text = await response.text();
+        if (!text) {
+            return { success: true, message: 'Operação realizada com sucesso' };
+        }
+        
+        return JSON.parse(text);
+        
+    } catch (error) {
+        console.error('❌ Erro na requisição:', error);
+        
+        // Tentar com proxy apenas se for erro de CORS
+        if (error.message.includes('Failed to fetch') || error.message.includes('CORS') || error.message.includes('Network')) {
+            console.log('🔄 Tentando com proxy CORS...');
+            try {
+                const PROXY_URL = 'https://corsproxy.io/?';
+                const proxyResponse = await fetch(`${PROXY_URL}${encodeURIComponent(url)}`, config);
+                
+                if (!proxyResponse.ok) {
+                    const errorText = await proxyResponse.text();
+                    throw new Error(`Erro ${proxyResponse.status}: ${errorText}`);
+                }
+                
+                const text = await proxyResponse.text();
+                if (!text) {
+                    return { success: true, message: 'Operação realizada com sucesso' };
+                }
+                
+                return JSON.parse(text);
+            } catch (proxyError) {
+                console.error('❌ Erro também com proxy:', proxyError);
+                throw new Error(`Falha na conexão: ${error.message}`);
+            }
+        }
+        
+        throw error;
+    }
+}
+
 function showAddUserModal() {
     document.getElementById('add-user-form').reset();
     document.getElementById('add-user-modal').style.display = 'flex';
+}
+
+// Validação de formulário de usuário
+function validateUserForm(userData) {
+    const errors = [];
+    
+    if (!userData.nome || userData.nome.trim().length < 2) {
+        errors.push('Nome deve ter pelo menos 2 caracteres');
+    }
+    
+    if (!userData.ra || userData.ra.trim().length < 3) {
+        errors.push('RA é obrigatório (mínimo 3 caracteres)');
+    }
+    
+    if (!userData.serie) {
+        errors.push('Série é obrigatória');
+    }
+    
+    if (!userData.curso) {
+        errors.push('Curso é obrigatório');
+    }
+    
+    if (!userData.senha || userData.senha.length < 4) {
+        errors.push('Senha deve ter pelo menos 4 caracteres');
+    }
+    
+    return errors;
 }
 
 async function saveNewUser() {
@@ -1579,8 +1653,9 @@ async function saveNewUser() {
     };
 
     // Validação completa
-    if (!userData.nome || !userData.ra || !userData.serie || !userData.senha || !userData.curso) {
-        showAlert('❌ Todos os campos são obrigatórios!', 'error');
+    const errors = validateUserForm(userData);
+    if (errors.length > 0) {
+        showAlert(`❌ Erros de validação:\n• ${errors.join('\n• ')}`, 'error');
         return;
     }
 
@@ -1589,50 +1664,12 @@ async function saveNewUser() {
     try {
         showGlobalLoading(true);
 
-        // ✅ TENTATIVA DIRETA PRIMEIRO (sem proxy)
-        try {
-            console.log('🔄 Tentando requisição direta...');
-            const directResponse = await fetch(`${API_BASE_URL}/api/usuarios`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify(userData)
-            });
-
-            if (directResponse.ok) {
-                const result = await directResponse.json();
-                console.log('✅ Usuário cadastrado com sucesso (direto):', result);
-                showAlert('✅ Usuário cadastrado com sucesso!', 'success');
-                document.getElementById('add-user-modal').style.display = 'none';
-                await loadUsers();
-                await loadDashboardData();
-                return;
-            }
-        } catch (directError) {
-            console.log('🔄 Direto falhou, tentando com proxy...');
-        }
-
-        // ✅ FALLBACK COM PROXY
-        const PROXY_URL = 'https://corsproxy.io/?';
-        const proxyResponse = await fetch(`${PROXY_URL}${encodeURIComponent(API_BASE_URL + '/api/usuarios')}`, {
+        const response = await fetchAPI('/api/usuarios', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify(userData)
+            body: userData
         });
 
-        if (!proxyResponse.ok) {
-            const errorText = await proxyResponse.text();
-            throw new Error(`Erro ${proxyResponse.status}: ${errorText}`);
-        }
-
-        const result = await proxyResponse.json();
-        console.log('✅ Usuário cadastrado com sucesso (proxy):', result);
-
+        console.log('✅ Usuário cadastrado com sucesso:', response);
         showAlert('✅ Usuário cadastrado com sucesso!', 'success');
         document.getElementById('add-user-modal').style.display = 'none';
 
@@ -1653,6 +1690,8 @@ async function saveNewUser() {
             errorMessage = '❌ Dados inválidos. Verifique os campos.';
         } else if (error.message.includes('Cannot destructure')) {
             errorMessage = '❌ Problema de comunicação com o servidor. Tente novamente.';
+        } else if (error.message.includes('Falha na conexão')) {
+            errorMessage = '❌ Problema de conexão. Verifique sua internet e tente novamente.';
         }
         
         showAlert(errorMessage, 'error');
@@ -1681,61 +1720,7 @@ function hideLoading() {
 function updateStats() {
     console.log('📊 Estatísticas atualizadas');
 }
-async function fetchAPI(endpoint, options = {}) {
-    const targetURL = `${API_BASE_URL}${endpoint}`;
-    
-    try {
-        console.log(`🌐 Fazendo requisição para: ${targetURL}`);
-        
-        // Tentar requisição direta primeiro
-        const response = await fetch(targetURL, {
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                ...options.headers
-            },
-            ...options
-        });
 
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`Erro ${response.status}: ${errorText}`);
-        }
-        
-        return await response.json();
-        
-    } catch (error) {
-        console.error('❌ Erro na requisição direta:', error);
-        
-        // Fallback para proxy apenas se for erro de CORS
-        if (error.message.includes('Failed to fetch') || error.message.includes('CORS')) {
-            console.log('🔄 Tentando com proxy CORS...');
-            try {
-                const PROXY_URL = 'https://corsproxy.io/?';
-                const proxyResponse = await fetch(`${PROXY_URL}${encodeURIComponent(targetURL)}`, {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        ...options.headers
-                    },
-                    ...options
-                });
-
-                if (!proxyResponse.ok) {
-                    const errorText = await proxyResponse.text();
-                    throw new Error(`Erro ${proxyResponse.status}: ${errorText}`);
-                }
-                
-                return await proxyResponse.json();
-            } catch (proxyError) {
-                console.error('❌ Erro também com proxy:', proxyError);
-                throw error; // Lança o erro original
-            }
-        }
-        
-        throw error;
-    }
-}
 // Data Loading Functions
 async function loadDashboardData() {
     try {
@@ -2001,7 +1986,10 @@ function displayCursos(cursosList = []) {
 
     container.innerHTML = '';
 
-    if (!cursosList || cursosList.length === 0) {
+    // ✅ CORREÇÃO: Garantir que cursosList seja um array
+    const cursosArray = Array.isArray(cursosList) ? cursosList : [];
+    
+    if (cursosArray.length === 0) {
         container.innerHTML = `
             <div class="no-data" style="text-align: center; padding: 40px;">
                 <i class="fas fa-graduation-cap" style="font-size: 3rem; margin-bottom: 15px; color: #ffcf00;"></i>
@@ -2012,7 +2000,7 @@ function displayCursos(cursosList = []) {
         return;
     }
 
-    cursosList.forEach(curso => {
+    cursosArray.forEach(curso => {
         const cursoCard = document.createElement('div');
         cursoCard.className = 'curso-card';
 
@@ -2217,7 +2205,6 @@ async function deleteUser(userId) {
 
             console.log(`🗑️ Excluindo usuário ${userId}...`);
 
-            // ✅ USANDO fetchAPI CORRIGIDA
             const response = await fetchAPI(`/api/usuarios/${userId}`, {
                 method: 'DELETE'
             });
@@ -2259,10 +2246,9 @@ async function saveUser() {
     try {
         showGlobalLoading(true);
 
-        // ✅ USANDO fetchAPI CORRIGIDA
         const response = await fetchAPI(`/api/usuarios/${userId}`, {
             method: 'PUT',
-            body: JSON.stringify(userData)
+            body: userData
         });
 
         console.log('✅ Usuário salvo:', response);
@@ -2326,26 +2312,18 @@ async function saveVideo() {
 
         let response;
         if (videoId) {
-            response = await fetch(`${API_BASE_URL}/api/videos/${videoId}`, {
+            response = await fetchAPI(`/api/videos/${videoId}`, {
                 method: 'PUT',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(videoData)
+                body: videoData
             });
         } else {
-            response = await fetch(`${API_BASE_URL}/api/videos`, {
+            response = await fetchAPI('/api/videos', {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(videoData)
+                body: videoData
             });
         }
 
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`Erro ${response.status}: ${errorText}`);
-        }
-
-        const result = await response.json();
-        console.log('✅ Vídeo salvo:', result);
+        console.log('✅ Vídeo salvo:', response);
 
         showAlert('✅ Vídeo salvo com sucesso!', 'success');
         document.getElementById('video-modal').style.display = 'none';
@@ -2368,14 +2346,11 @@ async function deleteVideo(videoId) {
         try {
             showGlobalLoading(true);
 
-            const response = await fetch(`${API_BASE_URL}/api/videos/${videoId}`, {
+            const response = await fetchAPI(`/api/videos/${videoId}`, {
                 method: 'DELETE'
             });
 
-            if (!response.ok) throw new Error(`Erro ${response.status}`);
-
-            const result = await response.json();
-            console.log('✅ Vídeo excluído:', result);
+            console.log('✅ Vídeo excluído:', response);
 
             showAlert('✅ Vídeo excluído com sucesso!', 'success');
 
@@ -2591,28 +2566,21 @@ async function saveCurso() {
 
         let response;
         if (cursoId) {
-            response = await fetch(`${API_BASE_URL}/api/cursos/${cursoId}`, {
+            response = await fetchAPI(`/api/cursos/${cursoId}`, {
                 method: 'PUT',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(cursoData)
+                body: cursoData
             });
         } else {
-            response = await fetch(`${API_BASE_URL}/api/cursos`, {
+            response = await fetchAPI('/api/cursos', {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(cursoData)
+                body: cursoData
             });
         }
 
-        if (response.ok) {
-            const result = await response.json();
-            showAlert('✅ Curso salvo com sucesso!', 'success');
-            document.getElementById('curso-modal').style.display = 'none';
-            await loadCursos();
-        } else {
-            const errorText = await response.text();
-            throw new Error(`Erro ${response.status}: ${errorText}`);
-        }
+        console.log('✅ Curso salvo:', response);
+        showAlert('✅ Curso salvo com sucesso!', 'success');
+        document.getElementById('curso-modal').style.display = 'none';
+        await loadCursos();
 
     } catch (error) {
         console.error('❌ Erro ao salvar curso:', error);
@@ -2635,35 +2603,19 @@ async function deleteCurso(cursoId) {
 
             console.log(`🗑️ Tentando excluir curso ID: ${cursoId}`);
             
-            const response = await fetch(`${API_BASE_URL}/api/cursos/${cursoId}`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
+            const response = await fetchAPI(`/api/cursos/${cursoId}`, {
+                method: 'DELETE'
             });
 
-            console.log('📡 Status da resposta:', response.status);
-
-            if (response.ok) {
-                const result = await response.json();
-                console.log('✅ Curso excluído:', result);
-                showAlert('✅ Curso excluído com sucesso!', 'success');
-                
-                cursos = cursos.filter(c => c.id != cursoId);
-                displayCursos(cursos);
-                
-            } else {
-                if (response.status === 404) {
-                    showAlert('❌ Rota DELETE não disponível no servidor. Atualize o backend.', 'error');
-                } else {
-                    const errorText = await response.text();
-                    showAlert(`❌ Erro ${response.status}: ${errorText}`, 'error');
-                }
-            }
+            console.log('✅ Curso excluído:', response);
+            showAlert('✅ Curso excluído com sucesso!', 'success');
+            
+            cursos = cursos.filter(c => c.id != cursoId);
+            displayCursos(cursos);
 
         } catch (error) {
             console.error('❌ Erro ao excluir curso:', error);
-            showAlert('❌ Erro de conexão: ' + error.message, 'error');
+            showAlert('❌ Erro ao excluir curso: ' + error.message, 'error');
         } finally {
             showGlobalLoading(false);
         }
@@ -2685,26 +2637,34 @@ async function handleSaveSettings() {
     }
 }
 
+// Funções de reset corrigidas
 async function resetAllPoints() {
     try {
         showGlobalLoading(true);
-
-        for (const user of users) {
-            await fetch(`${API_BASE_URL}/api/usuarios/${user.id}`, {
+        
+        // Buscar todos os usuários
+        const users = await fetchAPI('/api/usuarios');
+        
+        // Zerar pontuação de cada usuário
+        const resetPromises = users.map(user => 
+            fetchAPI(`/api/usuarios/${user.id}`, {
                 method: 'PUT',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
+                body: {
+                    ...user,
                     pontuacao: 0,
                     desafiosCompletados: 0
-                })
-            });
-        }
-
-        showAlert('Pontuações zeradas com sucesso!', 'success');
-        loadDashboardData();
-
+                }
+            })
+        );
+        
+        await Promise.all(resetPromises);
+        showAlert('✅ Todas as pontuações foram zeradas!', 'success');
+        await loadDashboardData();
+        await loadUsers();
+        
     } catch (error) {
-        showAlert('Erro ao zerar pontuações: ' + error.message, 'error');
+        console.error('❌ Erro ao zerar pontuações:', error);
+        showAlert('❌ Erro ao zerar pontuações: ' + error.message, 'error');
     } finally {
         showGlobalLoading(false);
     }
@@ -2713,28 +2673,38 @@ async function resetAllPoints() {
 async function resetAllData() {
     try {
         showGlobalLoading(true);
-
-        for (const user of users) {
-            await fetch(`${API_BASE_URL}/api/usuarios/${user.id}`, {
+        
+        // Buscar todos os usuários
+        const users = await fetchAPI('/api/usuarios');
+        
+        // Resetar dados de cada usuário
+        const resetPromises = users.map(user => 
+            fetchAPI(`/api/usuarios/${user.id}`, {
                 method: 'PUT',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
+                body: {
+                    ...user,
                     pontuacao: 0,
-                    desafiosCompletados: 0
-                })
-            });
-        }
-
-        showAlert('Todos os dados foram resetados!', 'success');
-        loadDashboardData();
-
+                    desafiosCompletados: 0,
+                    curso: '',
+                    serie: ''
+                }
+            })
+        );
+        
+        await Promise.all(resetPromises);
+        showAlert('✅ Todos os dados foram resetados!', 'success');
+        await loadDashboardData();
+        await loadUsers();
+        
     } catch (error) {
-        showAlert('Erro ao resetar dados: ' + error.message, 'error');
+        console.error('❌ Erro ao resetar dados:', error);
+        showAlert('❌ Erro ao resetar dados: ' + error.message, 'error');
     } finally {
         showGlobalLoading(false);
     }
 }
 
+// Utility Functions
 function showAlert(message, type = 'success') {
     if (!alertContainer) return;
 
