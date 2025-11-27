@@ -1338,8 +1338,8 @@ const tabs = document.querySelectorAll('.tab');
 const tabContents = document.querySelectorAll('.tab-content');
 const alertContainer = document.getElementById('alert-container');
 
-// ✅ FUNÇÃO fetchAPI CORRIGIDA
-async function fetchAPI(endpoint, options = {}) {
+// ✅ FUNÇÃO PRINCIPAL DE REQUISIÇÃO - CORRIGIDA
+async function apiRequest(endpoint, options = {}) {
     const url = `${API_BASE_URL}${endpoint}`;
     
     try {
@@ -1356,142 +1356,121 @@ async function fetchAPI(endpoint, options = {}) {
         };
         
         if (options.body) {
-            config.body = typeof options.body === 'string' ? options.body : JSON.stringify(options.body);
+            config.body = JSON.stringify(options.body);
         }
         
         const response = await fetch(url, config);
         
         if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`Erro ${response.status}: ${errorText}`);
-        }
-        
-        // Verificar se a resposta tem conteúdo
-        const contentLength = response.headers.get('content-length');
-        if (contentLength === '0' || response.status === 204) {
-            return { success: true, message: 'Operação realizada com sucesso' };
+            throw new Error(`Erro ${response.status}`);
         }
         
         const text = await response.text();
-        if (!text) {
-            return { success: true, message: 'Operação realizada com sucesso' };
-        }
-        
-        return JSON.parse(text);
+        return text ? JSON.parse(text) : { success: true };
         
     } catch (error) {
-        console.error('❌ Erro na requisição:', error);
+        console.error('❌ Erro na requisição direta:', error);
         
-        // Tentar com proxy apenas se for erro de CORS/rede
-        if (error.message.includes('Failed to fetch') || error.message.includes('CORS') || error.message.includes('Network')) {
+        // ✅ FALLBACK: Tentar com proxy alternativo
+        try {
             console.log('🔄 Tentando com proxy CORS...');
-            try {
-                const PROXY_URL = 'https://cors-anywhere.herokuapp.com/';
-                const proxyResponse = await fetch(`${PROXY_URL}${url}`, {
-                    method: options.method || 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        ...options.headers
-                    },
-                    body: options.body ? JSON.stringify(options.body) : undefined
-                });
-                
-                if (!proxyResponse.ok) {
-                    const errorText = await proxyResponse.text();
-                    throw new Error(`Erro ${proxyResponse.status}: ${errorText}`);
+            const proxyUrl = `https://api.cors-proxy.cc/v1?url=${encodeURIComponent(url)}`;
+            
+            const proxyConfig = {
+                method: options.method || 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
                 }
-                
-                const text = await proxyResponse.text();
-                if (!text) {
-                    return { success: true, message: 'Operação realizada com sucesso' };
-                }
-                
-                return JSON.parse(text);
-            } catch (proxyError) {
-                console.error('❌ Erro também com proxy:', proxyError);
-                throw new Error(`Falha na conexão: ${error.message}`);
+            };
+            
+            if (options.body) {
+                proxyConfig.body = JSON.stringify(options.body);
             }
+            
+            const proxyResponse = await fetch(proxyUrl, proxyConfig);
+            
+            if (!proxyResponse.ok) {
+                throw new Error(`Proxy error: ${proxyResponse.status}`);
+            }
+            
+            const text = await proxyResponse.text();
+            const result = text ? JSON.parse(text) : { success: true };
+            console.log('✅ Sucesso com proxy');
+            return result;
+            
+        } catch (proxyError) {
+            console.error('❌ Erro com proxy:', proxyError);
+            throw new Error('Falha na conexão com o servidor');
+        }
+    }
+}
+
+// ✅ FUNÇÃO DE REQUISIÇÃO SIMPLES (para casos onde CORS não funciona)
+async function simpleRequest(endpoint, options = {}) {
+    try {
+        const url = `${API_BASE_URL}${endpoint}`;
+        console.log(`🔧 Tentando requisição simples para: ${endpoint}`);
+        
+        const config = {
+            method: options.method || 'GET'
+        };
+        
+        // Para POST/PUT, usar FormData para evitar preflight
+        if (options.body && (options.method === 'POST' || options.method === 'PUT')) {
+            const formData = new FormData();
+            for (const key in options.body) {
+                formData.append(key, options.body[key]);
+            }
+            config.body = formData;
         }
         
+        const response = await fetch(url, config);
+        
+        if (response.ok) {
+            const text = await response.text();
+            return text ? JSON.parse(text) : { success: true };
+        }
+        
+        throw new Error(`HTTP ${response.status}`);
+        
+    } catch (error) {
+        console.error('❌ Erro na requisição simples:', error);
         throw error;
     }
 }
 
-// ✅ FUNÇÃO DE FALLBACK
-async function makeRequest(endpoint, options = {}) {
-    const bases = [
-        'https://coliseum-api.onrender.com',
-        'https://cors-anywhere.herokuapp.com/https://coliseum-api.onrender.com'
-    ];
-    
-    for (const base of bases) {
-        try {
-            const url = `${base}${endpoint}`;
-            console.log(`🔄 Tentando: ${url}`);
-            
-            const response = await fetch(url, {
-                method: options.method || 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...options.headers
-                },
-                body: options.body ? JSON.stringify(options.body) : undefined
-            });
-            
-            if (response.ok) {
-                const text = await response.text();
-                return text ? JSON.parse(text) : { success: true };
-            }
-        } catch (error) {
-            console.log(`❌ Falha com ${base}:`, error.message);
-            continue;
-        }
-    }
-    
-    throw new Error('Todas as tentativas de conexão falharam');
-}
-
 // ✅ TESTE DE CONEXÃO
-async function testAPIConnection() {
+async function testConnection() {
     try {
-        const response = await fetch('https://coliseum-api.onrender.com/api/health');
-        if (response.ok) {
-            console.log('✅ API está respondendo');
-            return true;
-        }
+        const response = await fetch(API_BASE_URL, { 
+            method: 'GET',
+            mode: 'no-cors'
+        });
+        return true;
     } catch (error) {
-        console.error('❌ API não está respondendo:', error);
+        return false;
     }
-    return false;
 }
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 Iniciando Admin Coliseum...');
     initializeTabs();
-    loadDashboardData();
     setupEventListeners();
     setupErrorHandling();
     
-    // Testar conexão com API
-    testAPIConnection().then(online => {
-        if (!online) {
-            showAlert('⚠️ A API parece estar offline. Algumas funcionalidades podem não funcionar.', 'error');
-        }
-    });
+    // Carregar dados iniciais
+    loadInitialData();
 });
 
 // Configurar tratamento de erro global
 function setupErrorHandling() {
     window.addEventListener('error', function(e) {
         console.error('❌ Erro global:', e.error);
-        showAlert('Ocorreu um erro inesperado. Verifique o console.', 'error');
     });
 
     window.addEventListener('unhandledrejection', function(e) {
         console.error('❌ Promise rejeitada:', e.reason);
-        showAlert('Erro de carregamento. Tente novamente.', 'error');
         e.preventDefault();
     });
 }
@@ -1500,11 +1479,9 @@ function setupErrorHandling() {
 function initializeTabs() {
     tabs.forEach(tab => {
         tab.addEventListener('click', function() {
-            // Update active tab
             tabs.forEach(t => t.classList.remove('active'));
             this.classList.add('active');
 
-            // Show corresponding content
             const tabId = this.getAttribute('data-tab');
             tabContents.forEach(content => {
                 content.classList.remove('active');
@@ -1512,7 +1489,6 @@ function initializeTabs() {
                     content.classList.add('active');
                     currentTab = tabId;
 
-                    // Load data for the tab
                     switch(tabId) {
                         case 'dashboard':
                             loadDashboardData();
@@ -1555,122 +1531,130 @@ function setupEventListeners() {
     // Modal controls
     document.addEventListener('click', function(e) {
         if (e.target.classList.contains('modal-close')) {
-            e.target.closest('.modal').style.display = 'none';
+            closeAllModals();
         }
     });
 
     // Cancel buttons
-    const cancelEdit = document.getElementById('cancel-edit');
-    if (cancelEdit) {
-        cancelEdit.addEventListener('click', function() {
-            document.getElementById('edit-user-modal').style.display = 'none';
-        });
-    }
+    setupButton('#cancel-edit', () => closeModal('edit-user-modal'));
+    setupButton('#cancel-video', () => closeModal('video-modal'));
+    setupButton('#cancel-curso', () => closeModal('curso-modal'));
+    setupButton('#cancel-action', () => closeModal('confirm-modal'));
+    setupButton('#cancel-add-user', () => closeModal('add-user-modal'));
 
-    const cancelVideo = document.getElementById('cancel-video');
-    if (cancelVideo) {
-        cancelVideo.addEventListener('click', function() {
-            document.getElementById('video-modal').style.display = 'none';
-        });
-    }
+    // Save buttons
+    setupButton('#save-user', saveUser);
+    setupButton('#save-video', saveVideo);
+    setupButton('#save-curso', saveCurso);
+    setupButton('#save-new-user', saveNewUser);
 
-    const cancelCurso = document.getElementById('cancel-curso');
-    if (cancelCurso) {
-        cancelCurso.addEventListener('click', function() {
-            document.getElementById('curso-modal').style.display = 'none';
-        });
-    }
+    // Add buttons
+    setupButton('#add-video-btn', () => showVideoModal());
+    setupButton('#add-curso-btn', () => showCursoModal());
+    setupButton('#add-user-btn', () => showAddUserModal());
+    setupButton('#add-modulo-btn', () => addModuloToForm());
 
-    const cancelAction = document.getElementById('cancel-action');
-    if (cancelAction) {
-        cancelAction.addEventListener('click', function() {
-            document.getElementById('confirm-modal').style.display = 'none';
-        });
-    }
+    // Settings
+    setupButton('#save-settings', handleSaveSettings);
+    setupButton('#reset-points', () => showConfirmation('Zerar todas as pontuações?', resetAllPoints));
+    setupButton('#reset-all', () => showConfirmation('Resetar TODOS os dados? Esta ação não pode ser desfeita!', resetAllData));
+    setupButton('#confirm-action', executePendingAction);
 
-    const saveUserBtn = document.getElementById('save-user');
-    if (saveUserBtn) {
-        saveUserBtn.addEventListener('click', saveUser);
-    }
+    // Configurar event listeners dinâmicos para tabelas
+    setupDynamicEventListeners();
+}
 
-    const saveVideoBtn = document.getElementById('save-video');
-    if (saveVideoBtn) {
-        saveVideoBtn.addEventListener('click', saveVideo);
+function setupButton(selector, handler) {
+    const element = document.querySelector(selector);
+    if (element) {
+        element.addEventListener('click', handler);
     }
+}
 
-    const saveCursoBtn = document.getElementById('save-curso');
-    if (saveCursoBtn) {
-        saveCursoBtn.addEventListener('click', saveCurso);
-    }
-
-    const addVideoBtn = document.getElementById('add-video-btn');
-    if (addVideoBtn) {
-        addVideoBtn.addEventListener('click', function() {
-            showVideoModal();
-        });
-    }
-
-    const addCursoBtn = document.getElementById('add-curso-btn');
-    if (addCursoBtn) {
-        addCursoBtn.addEventListener('click', function() {
-            showCursoModal();
-        });
-    }
-
-    const saveSettings = document.getElementById('save-settings');
-    if (saveSettings) {
-        saveSettings.addEventListener('click', handleSaveSettings);
-    }
-
-    const resetPoints = document.getElementById('reset-points');
-    if (resetPoints) {
-        resetPoints.addEventListener('click', function() {
-            showConfirmation('Zerar todas as pontuações?', resetAllPoints);
-        });
-    }
-
-    const resetAll = document.getElementById('reset-all');
-    if (resetAll) {
-        resetAll.addEventListener('click', function() {
-            showConfirmation('Resetar TODOS os dados? Esta ação não pode ser desfeita!', resetAllData);
-        });
-    }
-
-    const confirmAction = document.getElementById('confirm-action');
-    if (confirmAction) {
-        confirmAction.addEventListener('click', function() {
-            if (pendingAction) {
-                pendingAction();
-                document.getElementById('confirm-modal').style.display = 'none';
-                pendingAction = null;
+function setupDynamicEventListeners() {
+    // Event delegation para ações dinâmicas
+    document.addEventListener('click', function(e) {
+        // Editar usuário
+        if (e.target.closest('.edit-user')) {
+            const userId = e.target.closest('.edit-user').getAttribute('data-id');
+            editUser(userId);
+        }
+        
+        // Excluir usuário
+        if (e.target.closest('.delete-user')) {
+            const userId = e.target.closest('.delete-user').getAttribute('data-id');
+            deleteUser(userId);
+        }
+        
+        // Editar vídeo
+        if (e.target.closest('.edit-video')) {
+            const videoId = e.target.closest('.edit-video').getAttribute('data-id');
+            editVideo(videoId);
+        }
+        
+        // Excluir vídeo
+        if (e.target.closest('.delete-video')) {
+            const videoId = e.target.closest('.delete-video').getAttribute('data-id');
+            deleteVideo(videoId);
+        }
+        
+        // Editar curso
+        if (e.target.closest('.edit-curso')) {
+            const cursoId = e.target.closest('.edit-curso').getAttribute('data-id');
+            editCurso(cursoId);
+        }
+        
+        // Excluir curso
+        if (e.target.closest('.delete-curso')) {
+            const cursoId = e.target.closest('.delete-curso').getAttribute('data-id');
+            deleteCurso(cursoId);
+        }
+        
+        // Remover módulo
+        if (e.target.closest('.remove-modulo')) {
+            const moduloElement = e.target.closest('.modulo-item');
+            if (document.querySelectorAll('.modulo-item').length > 1) {
+                moduloElement.remove();
+            } else {
+                showAlert('❌ O curso deve ter pelo menos um módulo!', 'error');
             }
-        });
-    }
+        }
+        
+        // Adicionar aula
+        if (e.target.closest('.add-aula')) {
+            const moduloId = e.target.closest('.modulo-item').getAttribute('data-modulo-id');
+            addAulaToModulo(moduloId);
+        }
+        
+        // Remover aula
+        if (e.target.closest('.remove-aula')) {
+            const aulaItem = e.target.closest('.aula-item');
+            const aulasContainer = aulaItem.closest('.aulas-container');
+            if (aulasContainer.querySelectorAll('.aula-item').length > 1) {
+                aulaItem.remove();
+            } else {
+                showAlert('❌ Cada módulo deve ter pelo menos uma aula!', 'error');
+            }
+        }
+    });
+}
 
-    const addModuloBtn = document.getElementById('add-modulo-btn');
-    if (addModuloBtn) {
-        addModuloBtn.addEventListener('click', function() {
-            addModuloToForm();
-        });
-    }
+function closeAllModals() {
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.style.display = 'none';
+    });
+}
 
-    const addUserBtn = document.getElementById('add-user-btn');
-    if (addUserBtn) {
-        addUserBtn.addEventListener('click', function() {
-            showAddUserModal();
-        });
-    }
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) modal.style.display = 'none';
+}
 
-    const cancelAddUser = document.getElementById('cancel-add-user');
-    if (cancelAddUser) {
-        cancelAddUser.addEventListener('click', function() {
-            document.getElementById('add-user-modal').style.display = 'none';
-        });
-    }
-
-    const saveNewUserBtn = document.getElementById('save-new-user');
-    if (saveNewUserBtn) {
-        saveNewUserBtn.addEventListener('click', saveNewUser);
+function executePendingAction() {
+    if (pendingAction) {
+        pendingAction();
+        closeModal('confirm-modal');
+        pendingAction = null;
     }
 }
 
@@ -1678,17 +1662,13 @@ function setupEventListeners() {
 function showLoading() {
     const currentTab = document.querySelector('.tab-content.active').id;
     const loadingElement = document.getElementById(`${currentTab}-loading`);
-    if (loadingElement) {
-        loadingElement.style.display = 'flex';
-    }
+    if (loadingElement) loadingElement.style.display = 'flex';
 }
 
 function hideLoading() {
     const currentTab = document.querySelector('.tab-content.active').id;
     const loadingElement = document.getElementById(`${currentTab}-loading`);
-    if (loadingElement) {
-        loadingElement.style.display = 'none';
-    }
+    if (loadingElement) loadingElement.style.display = 'none';
 }
 
 function showGlobalLoading(show) {
@@ -1696,30 +1676,42 @@ function showGlobalLoading(show) {
     if (loading) loading.style.display = show ? 'flex' : 'none';
 }
 
-function updateStats() {
-    console.log('📊 Estatísticas atualizadas');
+// Data Loading Functions
+async function loadInitialData() {
+    showAlert('🔄 Conectando com o servidor...', 'warning');
+    
+    // Testar conexão primeiro
+    const isConnected = await testConnection();
+    
+    if (!isConnected) {
+        showAlert('❌ Não foi possível conectar com o servidor. Verifique se o backend está online.', 'error');
+        loadMockData(); // Carregar dados de demonstração
+        return;
+    }
+    
+    // Se conectado, carregar dados reais
+    try {
+        await loadDashboardData();
+        showAlert('✅ Conectado com sucesso!', 'success');
+    } catch (error) {
+        console.error('Erro ao carregar dados:', error);
+        showAlert('⚠️ Carregando dados de demonstração...', 'warning');
+        loadMockData();
+    }
 }
 
-// Data Loading Functions
 async function loadDashboardData() {
     try {
         document.getElementById('ranking-loading').style.display = 'flex';
 
         console.log('🔄 Carregando dados do dashboard...');
 
-        // Usar Promise.allSettled para evitar que um erro pare todos os requests
-        const [rankingResult, cursosResult, videosResult, usuariosResult] = await Promise.allSettled([
-            fetchAPI('/api/ranking').catch(() => []),
-            fetchAPI('/api/cursos').catch(() => []), 
-            fetchAPI('/api/videos').catch(() => []),
-            fetchAPI('/api/usuarios').catch(() => [])
+        const [ranking, cursosData, videosData, usuariosData] = await Promise.all([
+            apiRequest('/api/ranking').catch(() => []),
+            apiRequest('/api/cursos').catch(() => []), 
+            apiRequest('/api/videos').catch(() => []),
+            apiRequest('/api/usuarios').catch(() => [])
         ]);
-
-        // Extrair valores com fallback para array vazio
-        const ranking = rankingResult.status === 'fulfilled' ? rankingResult.value : [];
-        const cursosData = cursosResult.status === 'fulfilled' ? cursosResult.value : [];
-        const videosData = videosResult.status === 'fulfilled' ? videosResult.value : [];
-        const usuariosData = usuariosResult.status === 'fulfilled' ? usuariosResult.value : [];
 
         console.log('📊 Dados carregados:', {
             usuarios: usuariosData.length,
@@ -1728,55 +1720,48 @@ async function loadDashboardData() {
             ranking: ranking.length
         });
 
-        // Exibir ranking (se disponível)
+        // Atualizar interface
         if (ranking.length > 0) {
             displayRanking(ranking.slice(0, 10));
         } else {
-            console.warn('⚠️ Ranking vazio ou não carregado');
             displayRanking([]);
         }
 
-        // Atualizar estatísticas
-        const totalUsers = usuariosData.length || ranking.length;
-        const totalPoints = ranking.reduce((sum, user) => sum + (user.pontuacao || 0), 0);
-        const totalChallenges = ranking.reduce((sum, user) => sum + (user.desafiosCompletados || 0), 0);
-        const series = [...new Set(ranking.map(user => user.serie || 'N/A'))].length;
-        const totalCursos = cursosData.length || 0;
-        const totalVideos = videosData.length || 0;
-
-        // Atualizar UI
-        document.getElementById('total-users').textContent = totalUsers;
-        document.getElementById('total-points').textContent = totalPoints.toLocaleString();
-        document.getElementById('total-challenges').textContent = totalChallenges;
-        document.getElementById('total-series').textContent = series;
-        document.getElementById('total-cursos').textContent = totalCursos;
-        document.getElementById('total-videos').textContent = totalVideos;
+        updateDashboardStats(ranking, usuariosData, cursosData, videosData);
 
     } catch (error) {
-        console.error('❌ Erro crítico no dashboard:', error);
-        showAlert('Erro ao carregar dashboard. Verifique a conexão com a API.', 'error');
-        
-        // Valores padrão em caso de erro
-        document.getElementById('total-users').textContent = '0';
-        document.getElementById('total-points').textContent = '0';
-        document.getElementById('total-challenges').textContent = '0';
-        document.getElementById('total-series').textContent = '0';
-        document.getElementById('total-cursos').textContent = '0';
-        document.getElementById('total-videos').textContent = '0';
+        console.error('❌ Erro no dashboard:', error);
+        throw error;
     } finally {
         document.getElementById('ranking-loading').style.display = 'none';
     }
 }
 
+function updateDashboardStats(ranking, usuariosData, cursosData, videosData) {
+    const totalUsers = usuariosData.length || ranking.length;
+    const totalPoints = ranking.reduce((sum, user) => sum + (user.pontuacao || 0), 0);
+    const totalChallenges = ranking.reduce((sum, user) => sum + (user.desafiosCompletados || 0), 0);
+    const series = [...new Set(ranking.map(user => user.serie || 'N/A'))].length;
+    const totalCursos = cursosData.length || 0;
+    const totalVideos = videosData.length || 0;
+
+    document.getElementById('total-users').textContent = totalUsers;
+    document.getElementById('total-points').textContent = totalPoints.toLocaleString();
+    document.getElementById('total-challenges').textContent = totalChallenges;
+    document.getElementById('total-series').textContent = series;
+    document.getElementById('total-cursos').textContent = totalCursos;
+    document.getElementById('total-videos').textContent = totalVideos;
+}
+
 async function loadUsers() {
     try {
         showLoading();
-        const usuarios = await fetchAPI('/api/usuarios');
-        users = usuarios;
+        const usuarios = await apiRequest('/api/usuarios');
+        users = Array.isArray(usuarios) ? usuarios : [];
         displayUsers(users);
     } catch (error) {
         console.error('Error loading users:', error);
-        showAlert('Erro ao carregar usuários: ' + error.message, 'error');
+        showAlert('❌ Erro ao carregar usuários', 'error');
     } finally {
         hideLoading();
     }
@@ -1785,12 +1770,12 @@ async function loadUsers() {
 async function loadVideos() {
     try {
         showLoading();
-        const videosData = await fetchAPI('/api/videos');
+        const videosData = await apiRequest('/api/videos');
         videos = Array.isArray(videosData) ? videosData : [];
         displayVideos(videos);
     } catch (error) {
         console.error('Error loading videos:', error);
-        showAlert('Erro ao carregar vídeos: ' + error.message, 'error');
+        showAlert('❌ Erro ao carregar vídeos', 'error');
     } finally {
         hideLoading();
     }
@@ -1799,32 +1784,25 @@ async function loadVideos() {
 async function loadCursos() {
     try {
         showLoading();
-        console.log('🔄 Carregando cursos...');
-        
-        const cursosData = await fetchAPI('/api/cursos');
+        const cursosData = await apiRequest('/api/cursos');
         cursos = Array.isArray(cursosData) ? cursosData : [];
-        console.log(`✅ ${cursos.length} cursos carregados`);
-        
         displayCursos(cursos);
-        
     } catch (error) {
-        console.error('❌ Erro ao carregar cursos:', error);
-        cursos = [];
-        showAlert('❌ Erro ao carregar cursos. Verifique se a API está funcionando.', 'error');
+        console.error('Error loading cursos:', error);
+        showAlert('❌ Erro ao carregar cursos', 'error');
     } finally {
         hideLoading();
-        updateStats();
     }
 }
 
 async function loadFullRanking() {
     try {
         showLoading();
-        const ranking = await fetchAPI('/api/ranking');
+        const ranking = await apiRequest('/api/ranking');
         displayFullRanking(ranking);
     } catch (error) {
         console.error('Error loading full ranking:', error);
-        showAlert('Erro ao carregar ranking: ' + error.message, 'error');
+        showAlert('❌ Erro ao carregar ranking', 'error');
     } finally {
         hideLoading();
     }
@@ -1838,14 +1816,13 @@ function displayRanking(ranking) {
     tbody.innerHTML = '';
 
     if (!ranking || ranking.length === 0) {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td colspan="6" style="text-align: center; color: #888; padding: 20px;">
-                <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
-                Nenhum usuário encontrado
-            </td>
-        `;
-        tbody.appendChild(row);
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="6" style="text-align: center; color: #888; padding: 20px;">
+                    <i class="fas fa-inbox"></i>
+                    Nenhum usuário encontrado
+                </td>
+            </tr>`;
         return;
     }
 
@@ -1853,12 +1830,11 @@ function displayRanking(ranking) {
         const row = document.createElement('tr');
         row.innerHTML = `
             <td><strong>${index + 1}º</strong></td>
-            <td>${user.nome}</td>
-            <td><code>${user.ra}</code></td>
-            <td>${user.serie}</td>
-            <td><span style="color: #ffcf00; font-weight: bold;">${user.pontuacao}</span></td>
-            <td>${user.desafiosCompletados}</td>
-        `;
+            <td>${user.nome || 'N/A'}</td>
+            <td><code>${user.ra || 'N/A'}</code></td>
+            <td>${user.serie || 'N/A'}</td>
+            <td><span style="color: #ffcf00; font-weight: bold;">${user.pontuacao || 0}</span></td>
+            <td>${user.desafiosCompletados || 0}</td>`;
         tbody.appendChild(row);
     });
 }
@@ -1873,11 +1849,10 @@ function displayUsers(users) {
         tbody.innerHTML = `
             <tr>
                 <td colspan="8" style="text-align: center; color: #888; padding: 20px;">
-                    <i class="fas fa-users" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
+                    <i class="fas fa-users"></i>
                     Nenhum usuário encontrado
                 </td>
-            </tr>
-        `;
+            </tr>`;
         return;
     }
 
@@ -1898,20 +1873,8 @@ function displayUsers(users) {
                 <button class="btn btn-danger btn-sm delete-user" data-id="${user.id}">
                     <i class="fas fa-trash"></i>
                 </button>
-            </td>
-        `;
+            </td>`;
         tbody.appendChild(row);
-    });
-
-    tbody.addEventListener('click', function(e) {
-        if (e.target.closest('.edit-user')) {
-            const userId = e.target.closest('.edit-user').getAttribute('data-id');
-            editUser(userId);
-        }
-        if (e.target.closest('.delete-user')) {
-            const userId = e.target.closest('.delete-user').getAttribute('data-id');
-            deleteUser(userId);
-        }
     });
 }
 
@@ -1922,14 +1885,13 @@ function displayVideos(videosList) {
     tbody.innerHTML = '';
 
     if (!videosList || videosList.length === 0) {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td colspan="7" style="text-align: center; color: #888; padding: 20px;">
-                <i class="fas fa-video" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
-                Nenhum vídeo encontrado
-            </td>
-        `;
-        tbody.appendChild(row);
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="7" style="text-align: center; color: #888; padding: 20px;">
+                    <i class="fas fa-video"></i>
+                    Nenhum vídeo encontrado
+                </td>
+            </tr>`;
         return;
     }
 
@@ -1951,20 +1913,8 @@ function displayVideos(videosList) {
                 <button class="btn btn-danger btn-sm delete-video" data-id="${video.id}">
                     <i class="fas fa-trash"></i>
                 </button>
-            </td>
-        `;
+            </td>`;
         tbody.appendChild(row);
-    });
-
-    tbody.addEventListener('click', function(e) {
-        if (e.target.closest('.edit-video')) {
-            const videoId = e.target.closest('.edit-video').getAttribute('data-id');
-            editVideo(videoId);
-        }
-        if (e.target.closest('.delete-video')) {
-            const videoId = e.target.closest('.delete-video').getAttribute('data-id');
-            deleteVideo(videoId);
-        }
     });
 }
 
@@ -1974,17 +1924,15 @@ function displayCursos(cursosList = []) {
 
     container.innerHTML = '';
 
-    // ✅ CORREÇÃO: Garantir que cursosList seja um array
     const cursosArray = Array.isArray(cursosList) ? cursosList : [];
     
     if (cursosArray.length === 0) {
         container.innerHTML = `
-            <div class="no-data" style="text-align: center; padding: 40px;">
+            <div style="text-align: center; padding: 40px;">
                 <i class="fas fa-graduation-cap" style="font-size: 3rem; margin-bottom: 15px; color: #ffcf00;"></i>
                 <h3 style="color: #ffcf00; margin-bottom: 10px;">Nenhum curso encontrado</h3>
                 <p style="color: #aaa;">Clique em "Criar Curso" para adicionar o primeiro curso ao sistema.</p>
-            </div>
-        `;
+            </div>`;
         return;
     }
 
@@ -2032,24 +1980,10 @@ function displayCursos(cursosList = []) {
                 <small style="color: #ffcf00;">Categoria: ${getCategoriaNome(curso.categoria)}</small>
             </div>
             <div class="curso-status">
-                <span class="badge success">
-                    Ativo
-                </span>
-            </div>
-        `;
+                <span class="badge success">Ativo</span>
+            </div>`;
 
         container.appendChild(cursoCard);
-    });
-
-    container.addEventListener('click', function(e) {
-        if (e.target.closest('.edit-curso')) {
-            const cursoId = e.target.closest('.edit-curso').getAttribute('data-id');
-            editCurso(cursoId);
-        }
-        if (e.target.closest('.delete-curso')) {
-            const cursoId = e.target.closest('.delete-curso').getAttribute('data-id');
-            deleteCurso(cursoId);
-        }
     });
 }
 
@@ -2060,14 +1994,13 @@ function displayFullRanking(ranking) {
     tbody.innerHTML = '';
 
     if (!ranking || ranking.length === 0) {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td colspan="6" style="text-align: center; color: #888; padding: 20px;">
-                <i class="fas fa-trophy" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
-                Nenhum usuário no ranking
-            </td>
-        `;
-        tbody.appendChild(row);
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="6" style="text-align: center; color: #888; padding: 20px;">
+                    <i class="fas fa-trophy"></i>
+                    Nenhum usuário no ranking
+                </td>
+            </tr>`;
         return;
     }
 
@@ -2079,8 +2012,7 @@ function displayFullRanking(ranking) {
             <td>${user.ra}</td>
             <td>${user.serie}</td>
             <td>${user.pontuacao}</td>
-            <td>${user.desafiosCompletados}</td>
-        `;
+            <td>${user.desafiosCompletados}</td>`;
         tbody.appendChild(row);
     });
 }
@@ -2162,12 +2094,7 @@ function filterUsers() {
 
 function editUser(userId) {
     const user = users.find(u => u.id == userId);
-    if (!user) {
-        console.error('❌ Usuário não encontrado:', userId);
-        return;
-    }
-
-    console.log('✏️ Editando usuário:', user);
+    if (!user) return;
 
     document.getElementById('edit-user-id').value = user.id;
     document.getElementById('edit-user-name').value = user.nome;
@@ -2182,30 +2109,17 @@ function editUser(userId) {
 
 async function deleteUser(userId) {
     const user = users.find(u => u.id == userId);
-    if (!user) {
-        console.error('❌ Usuário não encontrado:', userId);
-        return;
-    }
+    if (!user) return;
 
-    showConfirmation(`Tem certeza que deseja excluir o usuário "${user.nome}" (RA: ${user.ra})? Esta ação não pode ser desfeita.`, async () => {
+    showConfirmation(`Excluir usuário "${user.nome}" (RA: ${user.ra})?`, async () => {
         try {
             showGlobalLoading(true);
-
-            console.log(`🗑️ Excluindo usuário ${userId}...`);
-
-            const response = await fetchAPI(`/api/usuarios/${userId}`, {
-                method: 'DELETE'
-            });
-
-            console.log('✅ Usuário excluído:', response);
-
+            await apiRequest(`/api/usuarios/${userId}`, { method: 'DELETE' });
             showAlert('✅ Usuário excluído com sucesso!', 'success');
-
             await loadUsers();
-
         } catch (error) {
             console.error('❌ Erro ao excluir usuário:', error);
-            showAlert('❌ Erro ao excluir usuário: ' + error.message, 'error');
+            showAlert('❌ Erro ao excluir usuário', 'error');
         } finally {
             showGlobalLoading(false);
         }
@@ -2223,32 +2137,23 @@ async function saveUser() {
         desafiosCompletados: parseInt(document.getElementById('edit-user-desafios').value)
     };
 
-    // Validação
     if (!userData.curso) {
         showAlert('❌ O campo curso é obrigatório!', 'error');
         return;
     }
 
-    console.log('💾 Salvando usuário...', userId, userData);
-
     try {
         showGlobalLoading(true);
-
-        const response = await fetchAPI(`/api/usuarios/${userId}`, {
-            method: 'PUT',
-            body: userData
+        await apiRequest(`/api/usuarios/${userId}`, { 
+            method: 'PUT', 
+            body: userData 
         });
-
-        console.log('✅ Usuário salvo:', response);
-
         showAlert('✅ Usuário atualizado com sucesso!', 'success');
-        document.getElementById('edit-user-modal').style.display = 'none';
-
+        closeModal('edit-user-modal');
         await loadUsers();
-
     } catch (error) {
         console.error('❌ Erro ao salvar usuário:', error);
-        showAlert('❌ Erro ao salvar usuário: ' + error.message, 'error');
+        showAlert('❌ Erro ao salvar usuário', 'error');
     } finally {
         showGlobalLoading(false);
     }
@@ -2258,7 +2163,6 @@ async function saveUser() {
 function showVideoModal(video = null) {
     const modal = document.getElementById('video-modal');
     const title = document.getElementById('video-modal-title');
-    const form = document.getElementById('video-form');
 
     if (video) {
         title.textContent = 'Editar Vídeo';
@@ -2271,7 +2175,7 @@ function showVideoModal(video = null) {
         document.getElementById('video-duracao').value = video.duracao;
     } else {
         title.textContent = 'Adicionar Vídeo';
-        form.reset();
+        document.getElementById('video-form').reset();
     }
 
     modal.style.display = 'flex';
@@ -2279,9 +2183,7 @@ function showVideoModal(video = null) {
 
 function editVideo(videoId) {
     const video = videos.find(v => v.id == videoId);
-    if (video) {
-        showVideoModal(video);
-    }
+    if (video) showVideoModal(video);
 }
 
 async function saveVideo() {
@@ -2297,30 +2199,27 @@ async function saveVideo() {
 
     try {
         showGlobalLoading(true);
-
+        
         let response;
         if (videoId) {
-            response = await fetchAPI(`/api/videos/${videoId}`, {
+            response = await apiRequest(`/api/videos/${videoId}`, {
                 method: 'PUT',
                 body: videoData
             });
         } else {
-            response = await fetchAPI('/api/videos', {
+            response = await apiRequest('/api/videos', {
                 method: 'POST',
                 body: videoData
             });
         }
 
-        console.log('✅ Vídeo salvo:', response);
-
         showAlert('✅ Vídeo salvo com sucesso!', 'success');
-        document.getElementById('video-modal').style.display = 'none';
-
+        closeModal('video-modal');
         await loadVideos();
 
     } catch (error) {
         console.error('❌ Erro ao salvar vídeo:', error);
-        showAlert('❌ Erro ao salvar vídeo: ' + error.message, 'error');
+        showAlert('❌ Erro ao salvar vídeo', 'error');
     } finally {
         showGlobalLoading(false);
     }
@@ -2330,23 +2229,15 @@ async function deleteVideo(videoId) {
     const video = videos.find(v => v.id == videoId);
     if (!video) return;
 
-    showConfirmation(`Tem certeza que deseja excluir o vídeo "${video.titulo}"?`, async () => {
+    showConfirmation(`Excluir vídeo "${video.titulo}"?`, async () => {
         try {
             showGlobalLoading(true);
-
-            const response = await fetchAPI(`/api/videos/${videoId}`, {
-                method: 'DELETE'
-            });
-
-            console.log('✅ Vídeo excluído:', response);
-
+            await apiRequest(`/api/videos/${videoId}`, { method: 'DELETE' });
             showAlert('✅ Vídeo excluído com sucesso!', 'success');
-
             await loadVideos();
-
         } catch (error) {
             console.error('❌ Erro ao excluir vídeo:', error);
-            showAlert('❌ Erro ao excluir vídeo: ' + error.message, 'error');
+            showAlert('❌ Erro ao excluir vídeo', 'error');
         } finally {
             showGlobalLoading(false);
         }
@@ -2374,9 +2265,7 @@ function showCursoModal(curso = null) {
         document.getElementById('curso-imagem').value = curso.imagem || '';
 
         if (curso.modulos && curso.modulos.length > 0) {
-            curso.modulos.forEach(modulo => {
-                addModuloToForm(modulo);
-            });
+            curso.modulos.forEach(modulo => addModuloToForm(modulo));
         } else {
             addModuloToForm();
         }
@@ -2391,9 +2280,7 @@ function showCursoModal(curso = null) {
 
 function editCurso(cursoId) {
     const curso = cursos.find(c => c.id == cursoId);
-    if (curso) {
-        showCursoModal(curso);
-    }
+    if (curso) showCursoModal(curso);
 }
 
 function addModuloToForm(moduloData = null) {
@@ -2401,8 +2288,8 @@ function addModuloToForm(moduloData = null) {
     const moduloId = `modulo_${moduloCount}`;
     
     const moduloHTML = `
-        <div class="modulo-item" data-modulo-id="${moduloId}" style="background: rgba(255,207,0,0.05); padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #555;">
-            <div class="modulo-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <div class="modulo-item" data-modulo-id="${moduloId}">
+            <div class="modulo-header">
                 <div style="flex: 1;">
                     <input type="text" class="form-control modulo-titulo" placeholder="Título do Módulo" 
                            value="${moduloData?.titulo || ''}" required>
@@ -2412,19 +2299,19 @@ function addModuloToForm(moduloData = null) {
                 </button>
             </div>
             
-            <div class="aulas-container" style="margin-top: 15px;">
+            <div class="aulas-container">
                 ${moduloData?.aulas && moduloData.aulas.length > 0 ? 
                     moduloData.aulas.map(aula => `
-                        <div class="aula-item" style="display: flex; gap: 10px; margin-bottom: 10px; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 6px; border-left: 3px solid #ffcf00;">
+                        <div class="aula-item">
                             <div style="flex: 1;">
                                 <input type="text" class="form-control aula-titulo" placeholder="Título da Aula" value="${aula.titulo}" required>
-                                <input type="text" class="form-control aula-descricao" placeholder="Descrição da aula" value="${aula.descricao || ''}" style="margin-top: 8px;">
-                                <div style="display: flex; gap: 10px; margin-top: 8px;">
-                                    <input type="number" class="form-control aula-duracao" placeholder="Duração (min)" value="${aula.duracao || 15}" min="1" style="flex: 1;">
-                                    <input type="number" class="form-control aula-ordem" placeholder="Ordem" value="${aula.ordem || 1}" min="1" style="flex: 1;">
+                                <input type="text" class="form-control aula-descricao" placeholder="Descrição da aula" value="${aula.descricao || ''}">
+                                <div style="display: flex; gap: 10px;">
+                                    <input type="number" class="form-control aula-duracao" placeholder="Duração (min)" value="${aula.duracao || 15}" min="1">
+                                    <input type="number" class="form-control aula-ordem" placeholder="Ordem" value="${aula.ordem || 1}" min="1">
                                 </div>
-                                <input type="text" class="form-control aula-video-url" placeholder="URL do vídeo (opcional)" value="${aula.videoUrl || ''}" style="margin-top: 8px;">
-                                <textarea class="form-control aula-conteudo" placeholder="Conteúdo da aula..." rows="3" style="margin-top: 8px;">${aula.conteudo || ''}</textarea>
+                                <input type="text" class="form-control aula-video-url" placeholder="URL do vídeo (opcional)" value="${aula.videoUrl || ''}">
+                                <textarea class="form-control aula-conteudo" placeholder="Conteúdo da aula..." rows="3">${aula.conteudo || ''}</textarea>
                             </div>
                             <button type="button" class="btn btn-danger btn-sm remove-aula">
                                 <i class="fas fa-times"></i>
@@ -2432,83 +2319,43 @@ function addModuloToForm(moduloData = null) {
                         </div>
                     `).join('') 
                     : 
-                    '<div class="no-aulas" style="text-align: center; padding: 20px; color: #888;">Nenhuma aula adicionada</div>'
+                    '<div class="no-aulas">Nenhuma aula adicionada</div>'
                 }
             </div>
             
-            <button type="button" class="btn btn-secondary btn-sm add-aula" style="margin-top: 10px;">
+            <button type="button" class="btn btn-secondary btn-sm add-aula">
                 <i class="fas fa-plus"></i> Adicionar Aula
             </button>
-        </div>
-    `;
+        </div>`;
     
     document.getElementById('modulos-container').insertAdjacentHTML('beforeend', moduloHTML);
-    
-    const moduloElement = document.querySelector(`[data-modulo-id="${moduloId}"]`);
-    
-    moduloElement.querySelector('.remove-modulo').addEventListener('click', function() {
-        if (document.querySelectorAll('.modulo-item').length > 1) {
-            moduloElement.remove();
-        } else {
-            alert('❌ O curso deve ter pelo menos um módulo!');
-        }
-    });
-    
-    moduloElement.querySelector('.add-aula').addEventListener('click', function() {
-        addAulaToModulo(moduloId);
-    });
-    
-    moduloElement.querySelectorAll('.remove-aula').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const aulasContainer = this.closest('.aulas-container');
-            if (aulasContainer.querySelectorAll('.aula-item').length > 1) {
-                this.closest('.aula-item').remove();
-            } else {
-                alert('❌ Cada módulo deve ter pelo menos uma aula!');
-            }
-        });
-    });
 }
 
 function addAulaToModulo(moduloId) {
     aulaCount++;
     
     const aulaHTML = `
-        <div class="aula-item" style="display: flex; gap: 10px; margin-bottom: 10px; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 6px; border-left: 3px solid #4361ee;">
+        <div class="aula-item">
             <div style="flex: 1;">
                 <input type="text" class="form-control aula-titulo" placeholder="Título da Aula" required>
-                <input type="text" class="form-control aula-descricao" placeholder="Descrição da aula" style="margin-top: 8px;">
-                <div style="display: flex; gap: 10px; margin-top: 8px;">
-                    <input type="number" class="form-control aula-duracao" placeholder="Duração (min)" value="15" min="1" style="flex: 1;">
-                    <input type="number" class="form-control aula-ordem" placeholder="Ordem" value="1" min="1" style="flex: 1;">
+                <input type="text" class="form-control aula-descricao" placeholder="Descrição da aula">
+                <div style="display: flex; gap: 10px;">
+                    <input type="number" class="form-control aula-duracao" placeholder="Duração (min)" value="15" min="1">
+                    <input type="number" class="form-control aula-ordem" placeholder="Ordem" value="1" min="1">
                 </div>
-                <input type="text" class="form-control aula-video-url" placeholder="URL do vídeo (opcional)" style="margin-top: 8px;">
-                <textarea class="form-control aula-conteudo" placeholder="Conteúdo da aula..." rows="3" style="margin-top: 8px;"></textarea>
+                <input type="text" class="form-control aula-video-url" placeholder="URL do vídeo (opcional)">
+                <textarea class="form-control aula-conteudo" placeholder="Conteúdo da aula..." rows="3"></textarea>
             </div>
             <button type="button" class="btn btn-danger btn-sm remove-aula">
                 <i class="fas fa-times"></i>
             </button>
-        </div>
-    `;
+        </div>`;
     
     const moduloElement = document.querySelector(`[data-modulo-id="${moduloId}"] .aulas-container`);
-    
     const noAulas = moduloElement.querySelector('.no-aulas');
-    if (noAulas) {
-        noAulas.remove();
-    }
+    if (noAulas) noAulas.remove();
     
     moduloElement.insertAdjacentHTML('beforeend', aulaHTML);
-    
-    const newAula = moduloElement.lastElementChild;
-    newAula.querySelector('.remove-aula').addEventListener('click', function() {
-        const aulasContainer = this.closest('.aulas-container');
-        if (aulasContainer.querySelectorAll('.aula-item').length > 1) {
-            this.closest('.aula-item').remove();
-        } else {
-            alert('❌ Cada módulo deve ter pelo menos uma aula!');
-        }
-    });
 }
 
 async function saveCurso() {
@@ -2554,25 +2401,24 @@ async function saveCurso() {
 
         let response;
         if (cursoId) {
-            response = await fetchAPI(`/api/cursos/${cursoId}`, {
+            response = await apiRequest(`/api/cursos/${cursoId}`, {
                 method: 'PUT',
                 body: cursoData
             });
         } else {
-            response = await fetchAPI('/api/cursos', {
+            response = await apiRequest('/api/cursos', {
                 method: 'POST',
                 body: cursoData
             });
         }
 
-        console.log('✅ Curso salvo:', response);
         showAlert('✅ Curso salvo com sucesso!', 'success');
-        document.getElementById('curso-modal').style.display = 'none';
+        closeModal('curso-modal');
         await loadCursos();
 
     } catch (error) {
         console.error('❌ Erro ao salvar curso:', error);
-        showAlert('❌ Erro ao salvar curso: ' + error.message, 'error');
+        showAlert('❌ Erro ao salvar curso', 'error');
     } finally {
         showGlobalLoading(false);
     }
@@ -2580,30 +2426,17 @@ async function saveCurso() {
 
 async function deleteCurso(cursoId) {
     const curso = cursos.find(c => c.id == cursoId);
-    if (!curso) {
-        showAlert('❌ Curso não encontrado!', 'error');
-        return;
-    }
+    if (!curso) return;
 
-    showConfirmation(`Tem certeza que deseja excluir o curso "${curso.titulo}"?`, async () => {
+    showConfirmation(`Excluir curso "${curso.titulo}"?`, async () => {
         try {
             showGlobalLoading(true);
-
-            console.log(`🗑️ Tentando excluir curso ID: ${cursoId}`);
-            
-            const response = await fetchAPI(`/api/cursos/${cursoId}`, {
-                method: 'DELETE'
-            });
-
-            console.log('✅ Curso excluído:', response);
+            await apiRequest(`/api/cursos/${cursoId}`, { method: 'DELETE' });
             showAlert('✅ Curso excluído com sucesso!', 'success');
-            
-            cursos = cursos.filter(c => c.id != cursoId);
-            displayCursos(cursos);
-
+            await loadCursos();
         } catch (error) {
             console.error('❌ Erro ao excluir curso:', error);
-            showAlert('❌ Erro ao excluir curso: ' + error.message, 'error');
+            showAlert('❌ Erro ao excluir curso', 'error');
         } finally {
             showGlobalLoading(false);
         }
@@ -2616,7 +2449,6 @@ function showAddUserModal() {
     document.getElementById('add-user-modal').style.display = 'flex';
 }
 
-// Validação de formulário de usuário
 function validateUserForm(userData) {
     const errors = [];
     
@@ -2652,46 +2484,28 @@ async function saveNewUser() {
         curso: document.getElementById('new-user-curso').value
     };
 
-    // Validação completa
     const errors = validateUserForm(userData);
     if (errors.length > 0) {
         showAlert(`❌ Erros de validação:\n• ${errors.join('\n• ')}`, 'error');
         return;
     }
 
-    console.log('💾 Tentando cadastrar usuário:', userData);
-
     try {
         showGlobalLoading(true);
-
-        const response = await fetchAPI('/api/usuarios', {
+        await apiRequest('/api/usuarios', {
             method: 'POST',
             body: userData
         });
-
-        console.log('✅ Usuário cadastrado com sucesso:', response);
         showAlert('✅ Usuário cadastrado com sucesso!', 'success');
-        document.getElementById('add-user-modal').style.display = 'none';
-
-        // Recarregar os dados
+        closeModal('add-user-modal');
         await loadUsers();
         await loadDashboardData();
-
     } catch (error) {
-        console.error('❌ Erro completo ao cadastrar usuário:', error);
+        console.error('❌ Erro ao cadastrar usuário:', error);
         
         let errorMessage = '❌ Erro ao cadastrar usuário';
-        
         if (error.message.includes('já existe') || error.message.includes('RA já')) {
             errorMessage = '❌ RA já cadastrado no sistema!';
-        } else if (error.message.includes('500')) {
-            errorMessage = '❌ Erro no servidor. Verifique se o backend está funcionando.';
-        } else if (error.message.includes('JSON')) {
-            errorMessage = '❌ Dados inválidos. Verifique os campos.';
-        } else if (error.message.includes('Cannot destructure')) {
-            errorMessage = '❌ Problema de comunicação com o servidor. Tente novamente.';
-        } else if (error.message.includes('Falha na conexão')) {
-            errorMessage = '❌ Problema de conexão. Verifique sua internet e tente novamente.';
         }
         
         showAlert(errorMessage, 'error');
@@ -2704,28 +2518,21 @@ async function saveNewUser() {
 async function handleSaveSettings() {
     try {
         const apiUrl = document.getElementById('api-url').value;
-        const adminPassword = document.getElementById('admin-password').value;
-        
-        // Salvar no localStorage
         localStorage.setItem('coliseum_api_url', apiUrl);
-        
-        showAlert('Configurações salvas com sucesso!', 'success');
+        showAlert('✅ Configurações salvas com sucesso!', 'success');
     } catch (error) {
-        showAlert('Erro ao salvar configurações: ' + error.message, 'error');
+        showAlert('❌ Erro ao salvar configurações', 'error');
     }
 }
 
-// Funções de reset corrigidas
+// Funções de reset
 async function resetAllPoints() {
     try {
         showGlobalLoading(true);
+        const users = await apiRequest('/api/usuarios');
         
-        // Buscar todos os usuários
-        const users = await fetchAPI('/api/usuarios');
-        
-        // Zerar pontuação de cada usuário
         const resetPromises = users.map(user => 
-            fetchAPI(`/api/usuarios/${user.id}`, {
+            apiRequest(`/api/usuarios/${user.id}`, {
                 method: 'PUT',
                 body: {
                     ...user,
@@ -2742,7 +2549,7 @@ async function resetAllPoints() {
         
     } catch (error) {
         console.error('❌ Erro ao zerar pontuações:', error);
-        showAlert('❌ Erro ao zerar pontuações: ' + error.message, 'error');
+        showAlert('❌ Erro ao zerar pontuações', 'error');
     } finally {
         showGlobalLoading(false);
     }
@@ -2751,13 +2558,10 @@ async function resetAllPoints() {
 async function resetAllData() {
     try {
         showGlobalLoading(true);
+        const users = await apiRequest('/api/usuarios');
         
-        // Buscar todos os usuários
-        const users = await fetchAPI('/api/usuarios');
-        
-        // Resetar dados de cada usuário
         const resetPromises = users.map(user => 
-            fetchAPI(`/api/usuarios/${user.id}`, {
+            apiRequest(`/api/usuarios/${user.id}`, {
                 method: 'PUT',
                 body: {
                     ...user,
@@ -2776,7 +2580,7 @@ async function resetAllData() {
         
     } catch (error) {
         console.error('❌ Erro ao resetar dados:', error);
-        showAlert('❌ Erro ao resetar dados: ' + error.message, 'error');
+        showAlert('❌ Erro ao resetar dados', 'error');
     } finally {
         showGlobalLoading(false);
     }
@@ -2800,6 +2604,30 @@ function showConfirmation(message, action) {
     pendingAction = action;
     document.getElementById('confirm-modal').style.display = 'flex';
 }
+    // Atualizar variáveis globais
+    users = mockUsers;
+    cursos = mockCursos;
+    videos = mockVideos;
+
+    // Atualizar interface
+    displayUsers(users);
+    displayCursos(cursos);
+    displayVideos(videos);
+    displayRanking(mockUsers);
+    displayFullRanking(mockUsers);
+
+    // Atualizar estatísticas
+    document.getElementById('total-users').textContent = mockUsers.length;
+    document.getElementById('total-points').textContent = mockUsers.reduce((sum, u) => sum + u.pontuacao, 0);
+    document.getElementById('total-challenges').textContent = mockUsers.reduce((sum, u) => sum + u.desafiosCompletados, 0);
+    document.getElementById('total-series').textContent = new Set(mockUsers.map(u => u.serie)).size;
+    document.getElementById('total-cursos').textContent = mockCursos.length;
+    document.getElementById('total-videos').textContent = mockVideos.length;
+
+    showAlert('📱 Modo de demonstração: Dados simulados carregados', 'warning');
+}
+
+console.log('✅ Script do Admin Coliseum carregado com sucesso!');
     </script>
 </body>
 </html>
