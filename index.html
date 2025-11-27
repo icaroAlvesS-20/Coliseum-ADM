@@ -1338,14 +1338,148 @@ const tabs = document.querySelectorAll('.tab');
 const tabContents = document.querySelectorAll('.tab-content');
 const alertContainer = document.getElementById('alert-container');
 
+// ✅ FUNÇÃO fetchAPI CORRIGIDA
+async function fetchAPI(endpoint, options = {}) {
+    const url = `${API_BASE_URL}${endpoint}`;
+    
+    try {
+        console.log(`🌐 Fazendo requisição para: ${url}`);
+        
+        const config = {
+            method: options.method || 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                ...options.headers
+            },
+            mode: 'cors'
+        };
+        
+        if (options.body) {
+            config.body = typeof options.body === 'string' ? options.body : JSON.stringify(options.body);
+        }
+        
+        const response = await fetch(url, config);
+        
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Erro ${response.status}: ${errorText}`);
+        }
+        
+        // Verificar se a resposta tem conteúdo
+        const contentLength = response.headers.get('content-length');
+        if (contentLength === '0' || response.status === 204) {
+            return { success: true, message: 'Operação realizada com sucesso' };
+        }
+        
+        const text = await response.text();
+        if (!text) {
+            return { success: true, message: 'Operação realizada com sucesso' };
+        }
+        
+        return JSON.parse(text);
+        
+    } catch (error) {
+        console.error('❌ Erro na requisição:', error);
+        
+        // Tentar com proxy apenas se for erro de CORS/rede
+        if (error.message.includes('Failed to fetch') || error.message.includes('CORS') || error.message.includes('Network')) {
+            console.log('🔄 Tentando com proxy CORS...');
+            try {
+                const PROXY_URL = 'https://cors-anywhere.herokuapp.com/';
+                const proxyResponse = await fetch(`${PROXY_URL}${url}`, {
+                    method: options.method || 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        ...options.headers
+                    },
+                    body: options.body ? JSON.stringify(options.body) : undefined
+                });
+                
+                if (!proxyResponse.ok) {
+                    const errorText = await proxyResponse.text();
+                    throw new Error(`Erro ${proxyResponse.status}: ${errorText}`);
+                }
+                
+                const text = await proxyResponse.text();
+                if (!text) {
+                    return { success: true, message: 'Operação realizada com sucesso' };
+                }
+                
+                return JSON.parse(text);
+            } catch (proxyError) {
+                console.error('❌ Erro também com proxy:', proxyError);
+                throw new Error(`Falha na conexão: ${error.message}`);
+            }
+        }
+        
+        throw error;
+    }
+}
+
+// ✅ FUNÇÃO DE FALLBACK
+async function makeRequest(endpoint, options = {}) {
+    const bases = [
+        'https://coliseum-api.onrender.com',
+        'https://cors-anywhere.herokuapp.com/https://coliseum-api.onrender.com'
+    ];
+    
+    for (const base of bases) {
+        try {
+            const url = `${base}${endpoint}`;
+            console.log(`🔄 Tentando: ${url}`);
+            
+            const response = await fetch(url, {
+                method: options.method || 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...options.headers
+                },
+                body: options.body ? JSON.stringify(options.body) : undefined
+            });
+            
+            if (response.ok) {
+                const text = await response.text();
+                return text ? JSON.parse(text) : { success: true };
+            }
+        } catch (error) {
+            console.log(`❌ Falha com ${base}:`, error.message);
+            continue;
+        }
+    }
+    
+    throw new Error('Todas as tentativas de conexão falharam');
+}
+
+// ✅ TESTE DE CONEXÃO
+async function testAPIConnection() {
+    try {
+        const response = await fetch('https://coliseum-api.onrender.com/api/health');
+        if (response.ok) {
+            console.log('✅ API está respondendo');
+            return true;
+        }
+    } catch (error) {
+        console.error('❌ API não está respondendo:', error);
+    }
+    return false;
+}
+
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 Iniciando Admin Coliseum...');
     initializeTabs();
     loadDashboardData();
     setupEventListeners();
-    
-    // Adicionar tratamento de erro global
     setupErrorHandling();
+    
+    // Testar conexão com API
+    testAPIConnection().then(online => {
+        if (!online) {
+            showAlert('⚠️ A API parece estar offline. Algumas funcionalidades podem não funcionar.', 'error');
+        }
+    });
 });
 
 // Configurar tratamento de erro global
@@ -1540,166 +1674,6 @@ function setupEventListeners() {
     }
 }
 
-// Função fetchAPI corrigida
-async function fetchAPI(endpoint, options = {}) {
-    const url = `${API_BASE_URL}${endpoint}`;
-    
-    try {
-        console.log(`🌐 Fazendo requisição para: ${url}`);
-        
-        const config = {
-            method: options.method || 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                ...options.headers
-            }
-        };
-        
-        if (options.body) {
-            config.body = typeof options.body === 'string' ? options.body : JSON.stringify(options.body);
-        }
-        
-        const response = await fetch(url, config);
-        
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`Erro ${response.status}: ${errorText}`);
-        }
-        
-        // Verificar se a resposta tem conteúdo
-        const contentLength = response.headers.get('content-length');
-        if (contentLength === '0' || response.status === 204) {
-            return { success: true, message: 'Operação realizada com sucesso' };
-        }
-        
-        const text = await response.text();
-        if (!text) {
-            return { success: true, message: 'Operação realizada com sucesso' };
-        }
-        
-        return JSON.parse(text);
-        
-    } catch (error) {
-        console.error('❌ Erro na requisição:', error);
-        
-        // Tentar com proxy apenas se for erro de CORS
-        if (error.message.includes('Failed to fetch') || error.message.includes('CORS') || error.message.includes('Network')) {
-            console.log('🔄 Tentando com proxy CORS...');
-            try {
-                const PROXY_URL = 'https://corsproxy.io/?';
-                const proxyResponse = await fetch(`${PROXY_URL}${encodeURIComponent(url)}`, config);
-                
-                if (!proxyResponse.ok) {
-                    const errorText = await proxyResponse.text();
-                    throw new Error(`Erro ${proxyResponse.status}: ${errorText}`);
-                }
-                
-                const text = await proxyResponse.text();
-                if (!text) {
-                    return { success: true, message: 'Operação realizada com sucesso' };
-                }
-                
-                return JSON.parse(text);
-            } catch (proxyError) {
-                console.error('❌ Erro também com proxy:', proxyError);
-                throw new Error(`Falha na conexão: ${error.message}`);
-            }
-        }
-        
-        throw error;
-    }
-}
-
-function showAddUserModal() {
-    document.getElementById('add-user-form').reset();
-    document.getElementById('add-user-modal').style.display = 'flex';
-}
-
-// Validação de formulário de usuário
-function validateUserForm(userData) {
-    const errors = [];
-    
-    if (!userData.nome || userData.nome.trim().length < 2) {
-        errors.push('Nome deve ter pelo menos 2 caracteres');
-    }
-    
-    if (!userData.ra || userData.ra.trim().length < 3) {
-        errors.push('RA é obrigatório (mínimo 3 caracteres)');
-    }
-    
-    if (!userData.serie) {
-        errors.push('Série é obrigatória');
-    }
-    
-    if (!userData.curso) {
-        errors.push('Curso é obrigatório');
-    }
-    
-    if (!userData.senha || userData.senha.length < 4) {
-        errors.push('Senha deve ter pelo menos 4 caracteres');
-    }
-    
-    return errors;
-}
-
-async function saveNewUser() {
-    const userData = {
-        nome: document.getElementById('new-user-name').value.trim(),
-        ra: document.getElementById('new-user-ra').value.trim(),
-        serie: document.getElementById('new-user-serie').value,
-        senha: document.getElementById('new-user-senha').value.trim(),
-        curso: document.getElementById('new-user-curso').value
-    };
-
-    // Validação completa
-    const errors = validateUserForm(userData);
-    if (errors.length > 0) {
-        showAlert(`❌ Erros de validação:\n• ${errors.join('\n• ')}`, 'error');
-        return;
-    }
-
-    console.log('💾 Tentando cadastrar usuário:', userData);
-
-    try {
-        showGlobalLoading(true);
-
-        const response = await fetchAPI('/api/usuarios', {
-            method: 'POST',
-            body: userData
-        });
-
-        console.log('✅ Usuário cadastrado com sucesso:', response);
-        showAlert('✅ Usuário cadastrado com sucesso!', 'success');
-        document.getElementById('add-user-modal').style.display = 'none';
-
-        // Recarregar os dados
-        await loadUsers();
-        await loadDashboardData();
-
-    } catch (error) {
-        console.error('❌ Erro completo ao cadastrar usuário:', error);
-        
-        let errorMessage = '❌ Erro ao cadastrar usuário';
-        
-        if (error.message.includes('já existe') || error.message.includes('RA já')) {
-            errorMessage = '❌ RA já cadastrado no sistema!';
-        } else if (error.message.includes('500')) {
-            errorMessage = '❌ Erro no servidor. Verifique se o backend está funcionando.';
-        } else if (error.message.includes('JSON')) {
-            errorMessage = '❌ Dados inválidos. Verifique os campos.';
-        } else if (error.message.includes('Cannot destructure')) {
-            errorMessage = '❌ Problema de comunicação com o servidor. Tente novamente.';
-        } else if (error.message.includes('Falha na conexão')) {
-            errorMessage = '❌ Problema de conexão. Verifique sua internet e tente novamente.';
-        }
-        
-        showAlert(errorMessage, 'error');
-    } finally {
-        showGlobalLoading(false);
-    }
-}
-
 // Funções auxiliares
 function showLoading() {
     const currentTab = document.querySelector('.tab-content.active').id;
@@ -1717,6 +1691,11 @@ function hideLoading() {
     }
 }
 
+function showGlobalLoading(show) {
+    const loading = document.getElementById('loadingGlobal');
+    if (loading) loading.style.display = show ? 'flex' : 'none';
+}
+
 function updateStats() {
     console.log('📊 Estatísticas atualizadas');
 }
@@ -1728,36 +1707,44 @@ async function loadDashboardData() {
 
         console.log('🔄 Carregando dados do dashboard...');
 
-        const [rankingResult, cursosResult, videosResult] = await Promise.allSettled([
-            fetchAPI('/api/ranking'),
-            fetchAPI('/api/cursos'), 
-            fetchAPI('/api/videos')
+        // Usar Promise.allSettled para evitar que um erro pare todos os requests
+        const [rankingResult, cursosResult, videosResult, usuariosResult] = await Promise.allSettled([
+            fetchAPI('/api/ranking').catch(() => []),
+            fetchAPI('/api/cursos').catch(() => []), 
+            fetchAPI('/api/videos').catch(() => []),
+            fetchAPI('/api/usuarios').catch(() => [])
         ]);
 
+        // Extrair valores com fallback para array vazio
         const ranking = rankingResult.status === 'fulfilled' ? rankingResult.value : [];
         const cursosData = cursosResult.status === 'fulfilled' ? cursosResult.value : [];
         const videosData = videosResult.status === 'fulfilled' ? videosResult.value : [];
+        const usuariosData = usuariosResult.status === 'fulfilled' ? usuariosResult.value : [];
 
         console.log('📊 Dados carregados:', {
-            usuarios: ranking.length,
+            usuarios: usuariosData.length,
             cursos: cursosData.length,
-            videos: videosData.length
+            videos: videosData.length,
+            ranking: ranking.length
         });
 
-        if (rankingResult.status === 'fulfilled') {
+        // Exibir ranking (se disponível)
+        if (ranking.length > 0) {
             displayRanking(ranking.slice(0, 10));
         } else {
-            console.warn('⚠️ Não foi possível carregar o ranking');
+            console.warn('⚠️ Ranking vazio ou não carregado');
             displayRanking([]);
         }
 
-        const totalUsers = ranking.length;
+        // Atualizar estatísticas
+        const totalUsers = usuariosData.length || ranking.length;
         const totalPoints = ranking.reduce((sum, user) => sum + (user.pontuacao || 0), 0);
         const totalChallenges = ranking.reduce((sum, user) => sum + (user.desafiosCompletados || 0), 0);
         const series = [...new Set(ranking.map(user => user.serie || 'N/A'))].length;
         const totalCursos = cursosData.length || 0;
         const totalVideos = videosData.length || 0;
 
+        // Atualizar UI
         document.getElementById('total-users').textContent = totalUsers;
         document.getElementById('total-points').textContent = totalPoints.toLocaleString();
         document.getElementById('total-challenges').textContent = totalChallenges;
@@ -1767,8 +1754,9 @@ async function loadDashboardData() {
 
     } catch (error) {
         console.error('❌ Erro crítico no dashboard:', error);
-        showAlert('Erro ao carregar dashboard. Alguns dados podem estar incompletos.', 'error');
+        showAlert('Erro ao carregar dashboard. Verifique a conexão com a API.', 'error');
         
+        // Valores padrão em caso de erro
         document.getElementById('total-users').textContent = '0';
         document.getElementById('total-points').textContent = '0';
         document.getElementById('total-challenges').textContent = '0';
@@ -2622,6 +2610,96 @@ async function deleteCurso(cursoId) {
     });
 }
 
+// User Management - Add User
+function showAddUserModal() {
+    document.getElementById('add-user-form').reset();
+    document.getElementById('add-user-modal').style.display = 'flex';
+}
+
+// Validação de formulário de usuário
+function validateUserForm(userData) {
+    const errors = [];
+    
+    if (!userData.nome || userData.nome.trim().length < 2) {
+        errors.push('Nome deve ter pelo menos 2 caracteres');
+    }
+    
+    if (!userData.ra || userData.ra.trim().length < 3) {
+        errors.push('RA é obrigatório (mínimo 3 caracteres)');
+    }
+    
+    if (!userData.serie) {
+        errors.push('Série é obrigatória');
+    }
+    
+    if (!userData.curso) {
+        errors.push('Curso é obrigatório');
+    }
+    
+    if (!userData.senha || userData.senha.length < 4) {
+        errors.push('Senha deve ter pelo menos 4 caracteres');
+    }
+    
+    return errors;
+}
+
+async function saveNewUser() {
+    const userData = {
+        nome: document.getElementById('new-user-name').value.trim(),
+        ra: document.getElementById('new-user-ra').value.trim(),
+        serie: document.getElementById('new-user-serie').value,
+        senha: document.getElementById('new-user-senha').value.trim(),
+        curso: document.getElementById('new-user-curso').value
+    };
+
+    // Validação completa
+    const errors = validateUserForm(userData);
+    if (errors.length > 0) {
+        showAlert(`❌ Erros de validação:\n• ${errors.join('\n• ')}`, 'error');
+        return;
+    }
+
+    console.log('💾 Tentando cadastrar usuário:', userData);
+
+    try {
+        showGlobalLoading(true);
+
+        const response = await fetchAPI('/api/usuarios', {
+            method: 'POST',
+            body: userData
+        });
+
+        console.log('✅ Usuário cadastrado com sucesso:', response);
+        showAlert('✅ Usuário cadastrado com sucesso!', 'success');
+        document.getElementById('add-user-modal').style.display = 'none';
+
+        // Recarregar os dados
+        await loadUsers();
+        await loadDashboardData();
+
+    } catch (error) {
+        console.error('❌ Erro completo ao cadastrar usuário:', error);
+        
+        let errorMessage = '❌ Erro ao cadastrar usuário';
+        
+        if (error.message.includes('já existe') || error.message.includes('RA já')) {
+            errorMessage = '❌ RA já cadastrado no sistema!';
+        } else if (error.message.includes('500')) {
+            errorMessage = '❌ Erro no servidor. Verifique se o backend está funcionando.';
+        } else if (error.message.includes('JSON')) {
+            errorMessage = '❌ Dados inválidos. Verifique os campos.';
+        } else if (error.message.includes('Cannot destructure')) {
+            errorMessage = '❌ Problema de comunicação com o servidor. Tente novamente.';
+        } else if (error.message.includes('Falha na conexão')) {
+            errorMessage = '❌ Problema de conexão. Verifique sua internet e tente novamente.';
+        }
+        
+        showAlert(errorMessage, 'error');
+    } finally {
+        showGlobalLoading(false);
+    }
+}
+
 // Settings Management
 async function handleSaveSettings() {
     try {
@@ -2721,11 +2799,6 @@ function showConfirmation(message, action) {
     document.getElementById('confirm-message').textContent = message;
     pendingAction = action;
     document.getElementById('confirm-modal').style.display = 'flex';
-}
-
-function showGlobalLoading(show) {
-    const loading = document.getElementById('loadingGlobal');
-    if (loading) loading.style.display = show ? 'flex' : 'none';
 }
     </script>
 </body>
