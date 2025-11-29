@@ -1375,11 +1375,6 @@ let pendingAction = null;
 let moduloCount = 0;
 let aulaCount = 0;
 
-// DOM Elements
-const tabs = document.querySelectorAll('.tab');
-const tabContents = document.querySelectorAll('.tab-content');
-const alertContainer = document.getElementById('alert-container');
-
 // ✅ FUNÇÃO PARA GERAR RA ALEATÓRIO DE 4 DÍGITOS
 function generateRandomRA() {
     return Math.floor(1000 + Math.random() * 9000).toString();
@@ -1452,49 +1447,53 @@ async function apiRequest(endpoint, options = {}) {
     }
 }
 
-// ✅ FUNÇÃO DE REQUISIÇÃO SIMPLES (para casos onde CORS não funciona)
-async function simpleRequest(endpoint, options = {}) {
+// ✅ FUNÇÃO PARA VERIFICAR STATUS DO USUÁRIO NO LOGIN
+async function checkUserStatus(ra, senha) {
     try {
-        const url = `${API_BASE_URL}${endpoint}`;
-        console.log(`🔧 Tentando requisição simples para: ${endpoint}`);
+        const response = await apiRequest('/api/usuarios');
+        const usuarios = Array.isArray(response) ? response : [];
         
-        const config = {
-            method: options.method || 'GET'
-        };
+        const usuario = usuarios.find(u => u.ra === ra && u.senha === senha);
         
-        // Para POST/PUT, usar FormData para evitar preflight
-        if (options.body && (options.method === 'POST' || options.method === 'PUT')) {
-            const formData = new FormData();
-            for (const key in options.body) {
-                formData.append(key, options.body[key]);
-            }
-            config.body = formData;
+        if (!usuario) {
+            return { success: false, message: 'RA ou senha incorretos' };
         }
         
-        const response = await fetch(url, config);
-        
-        if (response.ok) {
-            const text = await response.text();
-            return text ? JSON.parse(text) : { success: true };
+        // ✅ VERIFICAR SE USUÁRIO ESTÁ ATIVO
+        if (usuario.status === 'inativo') {
+            return { 
+                success: false, 
+                message: 'Usuário inativo. Entre em contato com o administrador.' 
+            };
         }
         
-        throw new Error(`HTTP ${response.status}`);
+        return { success: true, usuario: usuario };
         
     } catch (error) {
-        console.error('❌ Erro na requisição simples:', error);
-        throw error;
+        console.error('❌ Erro ao verificar status:', error);
+        return { success: false, message: 'Erro ao conectar com o servidor' };
     }
 }
 
-// ✅ TESTE DE CONEXÃO
-async function testConnection() {
+// ✅ FUNÇÃO PARA ATUALIZAR STATUS DO USUÁRIO
+async function updateUserStatus(userId, status) {
     try {
-        const response = await fetch(API_BASE_URL, { 
-            method: 'GET',
-            mode: 'no-cors'
+        const user = users.find(u => u.id == userId);
+        if (!user) return false;
+
+        const updatedUser = {
+            ...user,
+            status: status
+        };
+
+        await apiRequest(`/api/usuarios/${userId}`, {
+            method: 'PUT',
+            body: updatedUser
         });
+
         return true;
     } catch (error) {
+        console.error('❌ Erro ao atualizar status:', error);
         return false;
     }
 }
@@ -1638,6 +1637,15 @@ function setupDynamicEventListeners() {
             deleteUser(userId);
         }
         
+        // Alterar status do usuário
+        if (e.target.closest('.status-select')) {
+            const select = e.target.closest('.status-select');
+            const userId = select.getAttribute('data-user-id');
+            const newStatus = select.value;
+            
+            updateUserStatusInTable(userId, newStatus);
+        }
+        
         // Editar vídeo
         if (e.target.closest('.edit-video')) {
             const videoId = e.target.closest('.edit-video').getAttribute('data-id');
@@ -1689,6 +1697,27 @@ function setupDynamicEventListeners() {
             }
         }
     });
+}
+
+// ✅ FUNÇÃO PARA ATUALIZAR STATUS NA TABELA
+async function updateUserStatusInTable(userId, newStatus) {
+    try {
+        showGlobalLoading(true);
+        
+        const success = await updateUserStatus(userId, newStatus);
+        
+        if (success) {
+            showAlert(`✅ Status do usuário atualizado para: ${newStatus === 'ativo' ? 'Ativo' : 'Inativo'}`, 'success');
+            await loadUsers(); // Recarregar a lista de usuários
+        } else {
+            showAlert('❌ Erro ao atualizar status do usuário', 'error');
+        }
+    } catch (error) {
+        console.error('❌ Erro ao atualizar status:', error);
+        showAlert('❌ Erro ao atualizar status do usuário', 'error');
+    } finally {
+        showGlobalLoading(false);
+    }
 }
 
 function closeAllModals() {
@@ -1900,7 +1929,7 @@ function displayUsers(users) {
     if (!users || users.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="8" style="text-align: center; color: #888; padding: 20px;">
+                <td colspan="9" style="text-align: center; color: #888; padding: 20px;">
                     <i class="fas fa-users"></i>
                     Nenhum usuário encontrado
                 </td>
@@ -1909,6 +1938,11 @@ function displayUsers(users) {
     }
 
     users.forEach(user => {
+        const status = user.status || 'ativo'; // Default para ativo
+        const statusBadge = status === 'ativo' ? 
+            '<span class="badge success">Ativo</span>' : 
+            '<span class="badge danger">Inativo</span>';
+        
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>${user.id}</td>
@@ -1918,6 +1952,7 @@ function displayUsers(users) {
             <td>${user.pontuacao}</td>
             <td>${user.desafiosCompletados}</td>
             <td>${user.curso || 'Não informado'}</td>
+            <td>${statusBadge}</td>
             <td class="actions">
                 <button class="btn btn-primary btn-sm edit-user" data-id="${user.id}">
                     <i class="fas fa-edit"></i>
@@ -1925,13 +1960,10 @@ function displayUsers(users) {
                 <button class="btn btn-danger btn-sm delete-user" data-id="${user.id}">
                     <i class="fas fa-trash"></i>
                 </button>
-                <div class="select-container">
-                    <select class="btn-select">
-                        <option value="">Tipo</option>
-                        <option value="Off">Inativo</option>
-                        <option value="On">Ativo</option>
-                    </select>
-                </div>
+                <select class="btn-select status-select" data-user-id="${user.id}">
+                    <option value="ativo" ${status === 'ativo' ? 'selected' : ''}>Ativo</option>
+                    <option value="inativo" ${status === 'inativo' ? 'selected' : ''}>Inativo</option>
+                </select>
             </td>`;
         tbody.appendChild(row);
     });
@@ -2162,6 +2194,7 @@ function editUser(userId) {
     document.getElementById('edit-user-curso').value = user.curso || '';
     document.getElementById('edit-user-pontuacao').value = user.pontuacao || 0;
     document.getElementById('edit-user-desafios').value = user.desafiosCompletados || 0;
+    document.getElementById('edit-user-status').value = user.status || 'ativo';
 
     document.getElementById('edit-user-modal').style.display = 'flex';
 }
@@ -2193,7 +2226,8 @@ async function saveUser() {
         serie: document.getElementById('edit-user-serie').value,
         curso: document.getElementById('edit-user-curso').value,
         pontuacao: parseInt(document.getElementById('edit-user-pontuacao').value),
-        desafiosCompletados: parseInt(document.getElementById('edit-user-desafios').value)
+        desafiosCompletados: parseInt(document.getElementById('edit-user-desafios').value),
+        status: document.getElementById('edit-user-status').value || 'ativo'
     };
 
     if (!userData.curso) {
@@ -2544,7 +2578,8 @@ async function saveNewUser() {
         ra: document.getElementById('new-user-ra').value.trim(),
         serie: document.getElementById('new-user-serie').value,
         senha: document.getElementById('new-user-senha').value.trim(),
-        curso: document.getElementById('new-user-curso').value
+        curso: document.getElementById('new-user-curso').value,
+        status: 'ativo' // ✅ NOVOS USUÁRIOS SÃO CRIADOS COMO ATIVOS
     };
 
     const errors = validateUserForm(userData);
@@ -2669,6 +2704,7 @@ function showConfirmation(message, action) {
     pendingAction = action;
     document.getElementById('confirm-modal').style.display = 'flex';
 }
+
 console.log('✅ Script do Admin Coliseum carregado com sucesso!');
     </script>
 </body>
