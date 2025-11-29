@@ -283,6 +283,49 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
 
+        .select-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .btn-select {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            padding: 12px 40px 12px 15px;
+            background: linear-gradient(135deg, #4361ee, #3a56d4);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            min-width: 200px;
+            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .btn-select:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(67, 97, 238, 0.4);
+        }
+
+        .btn-select:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.3);
+        }
+        
+        .select-container::after {
+            content: "▾";
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: white;
+            pointer-events: none;
+            font-size: 16px;
+        }
+        
         .form-container {
             background: linear-gradient(145deg, #383838, #282828);
             border-radius: 15px;
@@ -1873,6 +1916,14 @@ function displayUsers(users) {
                 <button class="btn btn-danger btn-sm delete-user" data-id="${user.id}">
                     <i class="fas fa-trash"></i>
                 </button>
+                <!-- HTML -->
+            <div class="select-container">
+                <select class="btn-select">
+                    <option value="">Selecione</option>
+                    <option value="Off">Inativo</option>
+                    <option value="On">Ativo</option>
+                </select>
+</div>
             </td>`;
         tbody.appendChild(row);
     });
