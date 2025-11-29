@@ -1305,9 +1305,17 @@
                     <label for="new-user-name">Nome Completo *</label>
                     <input type="text" id="new-user-name" class="form-control" placeholder="Ex: João Silva" required>
                 </div>
-                <div class="form-group">
+               <div class="form-group">
                     <label for="new-user-ra">RA (Registro Acadêmico) *</label>
-                    <input type="text" id="new-user-ra" class="form-control" placeholder="Ex: 123456" required>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <input type="text" id="new-user-ra" class="form-control" placeholder="RA será gerado automaticamente" readonly style="flex: 1;">
+                        <button type="button" class="btn btn-warning" id="regenerate-ra" title="Gerar novo RA">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                    <small style="color: #888; font-size: 12px; margin-top: 5px;">
+                        RA gerado automaticamente com 4 dígitos
+                    </small>
                 </div>
                 <div class="form-group">
                     <label for="new-user-serie">Série *</label>
@@ -1372,7 +1380,12 @@ const tabs = document.querySelectorAll('.tab');
 const tabContents = document.querySelectorAll('.tab-content');
 const alertContainer = document.getElementById('alert-container');
 
-// ✅ FUNÇÃO PRINCIPAL DE REQUISIÇÃO - CORRIGIDA
+// ✅ FUNÇÃO PARA GERAR RA ALEATÓRIO DE 4 DÍGITOS
+function generateRandomRA() {
+    return Math.floor(1000 + Math.random() * 9000).toString();
+}
+
+// ✅ FUNÇÃO PRINCIPAL DE REQUISIÇÃO
 async function apiRequest(endpoint, options = {}) {
     const url = `${API_BASE_URL}${endpoint}`;
     
@@ -1587,6 +1600,11 @@ function setupEventListeners() {
     setupButton('#add-curso-btn', () => showCursoModal());
     setupButton('#add-user-btn', () => showAddUserModal());
     setupButton('#add-modulo-btn', () => addModuloToForm());
+
+    // Botão para gerar novo RA
+    setupButton('#regenerate-ra', () => {
+        document.getElementById('new-user-ra').value = generateRandomRA();
+    });
 
     // Settings
     setupButton('#save-settings', handleSaveSettings);
@@ -1907,14 +1925,13 @@ function displayUsers(users) {
                 <button class="btn btn-danger btn-sm delete-user" data-id="${user.id}">
                     <i class="fas fa-trash"></i>
                 </button>
-                <!-- HTML -->
-            <div class="select-container">
-                <select class="btn-select">
-                    <option value="">Tipo</option>
-                    <option value="Off">Inativo</option>
-                    <option value="On">Ativo</option>
-                </select>
-</div>
+                <div class="select-container">
+                    <select class="btn-select">
+                        <option value="">Tipo</option>
+                        <option value="Off">Inativo</option>
+                        <option value="On">Ativo</option>
+                    </select>
+                </div>
             </td>`;
         tbody.appendChild(row);
     });
@@ -2488,6 +2505,10 @@ async function deleteCurso(cursoId) {
 // User Management - Add User
 function showAddUserModal() {
     document.getElementById('add-user-form').reset();
+    
+    // ✅ GERAR RA ALEATÓRIO AUTOMATICAMENTE
+    document.getElementById('new-user-ra').value = generateRandomRA();
+    
     document.getElementById('add-user-modal').style.display = 'flex';
 }
 
@@ -2498,8 +2519,8 @@ function validateUserForm(userData) {
         errors.push('Nome deve ter pelo menos 2 caracteres');
     }
     
-    if (!userData.ra || userData.ra.trim().length < 3) {
-        errors.push('RA é obrigatório (mínimo 3 caracteres)');
+    if (!userData.ra || userData.ra.trim().length !== 4) {
+        errors.push('RA deve ter exatamente 4 dígitos');
     }
     
     if (!userData.serie) {
@@ -2547,7 +2568,9 @@ async function saveNewUser() {
         
         let errorMessage = '❌ Erro ao cadastrar usuário';
         if (error.message.includes('já existe') || error.message.includes('RA já')) {
-            errorMessage = '❌ RA já cadastrado no sistema!';
+            errorMessage = '❌ RA já cadastrado no sistema! Gerando novo RA...';
+            // Se houver conflito, gerar novo RA e manter o formulário aberto
+            document.getElementById('new-user-ra').value = generateRandomRA();
         }
         
         showAlert(errorMessage, 'error');
@@ -2645,28 +2668,6 @@ function showConfirmation(message, action) {
     document.getElementById('confirm-message').textContent = message;
     pendingAction = action;
     document.getElementById('confirm-modal').style.display = 'flex';
-
-    // Atualizar variáveis globais
-    users = mockUsers;
-    cursos = mockCursos;
-    videos = mockVideos;
-
-    // Atualizar interface
-    displayUsers(users);
-    displayCursos(cursos);
-    displayVideos(videos);
-    displayRanking(mockUsers);
-    displayFullRanking(mockUsers);
-
-    // Atualizar estatísticas
-    document.getElementById('total-users').textContent = mockUsers.length;
-    document.getElementById('total-points').textContent = mockUsers.reduce((sum, u) => sum + u.pontuacao, 0);
-    document.getElementById('total-challenges').textContent = mockUsers.reduce((sum, u) => sum + u.desafiosCompletados, 0);
-    document.getElementById('total-series').textContent = new Set(mockUsers.map(u => u.serie)).size;
-    document.getElementById('total-cursos').textContent = mockCursos.length;
-    document.getElementById('total-videos').textContent = mockVideos.length;
-
-    showAlert('📱 Modo de demonstração: Dados simulados carregados', 'warning');
 }
 console.log('✅ Script do Admin Coliseum carregado com sucesso!');
     </script>
