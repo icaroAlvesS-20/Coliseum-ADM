@@ -1375,6 +1375,9 @@ let pendingAction = null;
 let moduloCount = 0;
 let aulaCount = 0;
 
+// DOM Elements - AGORA DENTRO DA FUNÇÃO initializeTabs
+let tabs, tabContents, alertContainer;
+
 // ✅ FUNÇÃO PARA GERAR RA ALEATÓRIO DE 4 DÍGITOS
 function generateRandomRA() {
     return Math.floor(1000 + Math.random() * 9000).toString();
@@ -1447,53 +1450,49 @@ async function apiRequest(endpoint, options = {}) {
     }
 }
 
-// ✅ FUNÇÃO PARA VERIFICAR STATUS DO USUÁRIO NO LOGIN
-async function checkUserStatus(ra, senha) {
+// ✅ FUNÇÃO DE REQUISIÇÃO SIMPLES (para casos onde CORS não funciona)
+async function simpleRequest(endpoint, options = {}) {
     try {
-        const response = await apiRequest('/api/usuarios');
-        const usuarios = Array.isArray(response) ? response : [];
+        const url = `${API_BASE_URL}${endpoint}`;
+        console.log(`🔧 Tentando requisição simples para: ${endpoint}`);
         
-        const usuario = usuarios.find(u => u.ra === ra && u.senha === senha);
+        const config = {
+            method: options.method || 'GET'
+        };
         
-        if (!usuario) {
-            return { success: false, message: 'RA ou senha incorretos' };
+        // Para POST/PUT, usar FormData para evitar preflight
+        if (options.body && (options.method === 'POST' || options.method === 'PUT')) {
+            const formData = new FormData();
+            for (const key in options.body) {
+                formData.append(key, options.body[key]);
+            }
+            config.body = formData;
         }
         
-        // ✅ VERIFICAR SE USUÁRIO ESTÁ ATIVO
-        if (usuario.status === 'inativo') {
-            return { 
-                success: false, 
-                message: 'Usuário inativo. Entre em contato com o administrador.' 
-            };
+        const response = await fetch(url, config);
+        
+        if (response.ok) {
+            const text = await response.text();
+            return text ? JSON.parse(text) : { success: true };
         }
         
-        return { success: true, usuario: usuario };
+        throw new Error(`HTTP ${response.status}`);
         
     } catch (error) {
-        console.error('❌ Erro ao verificar status:', error);
-        return { success: false, message: 'Erro ao conectar com o servidor' };
+        console.error('❌ Erro na requisição simples:', error);
+        throw error;
     }
 }
 
-// ✅ FUNÇÃO PARA ATUALIZAR STATUS DO USUÁRIO
-async function updateUserStatus(userId, status) {
+// ✅ TESTE DE CONEXÃO
+async function testConnection() {
     try {
-        const user = users.find(u => u.id == userId);
-        if (!user) return false;
-
-        const updatedUser = {
-            ...user,
-            status: status
-        };
-
-        await apiRequest(`/api/usuarios/${userId}`, {
-            method: 'PUT',
-            body: updatedUser
+        const response = await fetch(API_BASE_URL, { 
+            method: 'GET',
+            mode: 'no-cors'
         });
-
         return true;
     } catch (error) {
-        console.error('❌ Erro ao atualizar status:', error);
         return false;
     }
 }
@@ -1501,6 +1500,9 @@ async function updateUserStatus(userId, status) {
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 Iniciando Admin Coliseum...');
+    
+    // ✅ INICIALIZAR VARIÁVEIS DOM PRIMEIRO
+    initializeDOMElements();
     initializeTabs();
     setupEventListeners();
     setupErrorHandling();
@@ -1508,6 +1510,19 @@ document.addEventListener('DOMContentLoaded', function() {
     // Carregar dados iniciais
     loadInitialData();
 });
+
+// ✅ FUNÇÃO PARA INICIALIZAR ELEMENTOS DOM
+function initializeDOMElements() {
+    tabs = document.querySelectorAll('.tab');
+    tabContents = document.querySelectorAll('.tab-content');
+    alertContainer = document.getElementById('alert-container');
+    
+    console.log('✅ Elementos DOM inicializados:', {
+        tabs: tabs.length,
+        tabContents: tabContents.length,
+        alertContainer: !!alertContainer
+    });
+}
 
 // Configurar tratamento de erro global
 function setupErrorHandling() {
@@ -1523,6 +1538,11 @@ function setupErrorHandling() {
 
 // Tab Navigation
 function initializeTabs() {
+    if (!tabs || tabs.length === 0) {
+        console.error('❌ Elementos tabs não encontrados!');
+        return;
+    }
+
     tabs.forEach(tab => {
         tab.addEventListener('click', function() {
             tabs.forEach(t => t.classList.remove('active'));
@@ -1699,6 +1719,29 @@ function setupDynamicEventListeners() {
     });
 }
 
+// ✅ FUNÇÃO PARA ATUALIZAR STATUS DO USUÁRIO
+async function updateUserStatus(userId, status) {
+    try {
+        const user = users.find(u => u.id == userId);
+        if (!user) return false;
+
+        const updatedUser = {
+            ...user,
+            status: status
+        };
+
+        await apiRequest(`/api/usuarios/${userId}`, {
+            method: 'PUT',
+            body: updatedUser
+        });
+
+        return true;
+    } catch (error) {
+        console.error('❌ Erro ao atualizar status:', error);
+        return false;
+    }
+}
+
 // ✅ FUNÇÃO PARA ATUALIZAR STATUS NA TABELA
 async function updateUserStatusInTable(userId, newStatus) {
     try {
@@ -1783,7 +1826,8 @@ async function loadInitialData() {
 
 async function loadDashboardData() {
     try {
-        document.getElementById('ranking-loading').style.display = 'flex';
+        const rankingLoading = document.getElementById('ranking-loading');
+        if (rankingLoading) rankingLoading.style.display = 'flex';
 
         console.log('🔄 Carregando dados do dashboard...');
 
@@ -1814,7 +1858,8 @@ async function loadDashboardData() {
         console.error('❌ Erro no dashboard:', error);
         throw error;
     } finally {
-        document.getElementById('ranking-loading').style.display = 'none';
+        const rankingLoading = document.getElementById('ranking-loading');
+        if (rankingLoading) rankingLoading.style.display = 'none';
     }
 }
 
