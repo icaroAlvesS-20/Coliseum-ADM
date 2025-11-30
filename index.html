@@ -1365,6 +1365,7 @@
     </div>
 </div>
     <script>// Variáveis globais// Variáveis globais
+// Variáveis globais
 const API_BASE_URL = 'https://coliseum-api.onrender.com';
 let users = [];
 let videos = [];
@@ -1393,6 +1394,27 @@ function initializeDOMElements() {
 // ✅ FUNÇÃO PARA GERAR RA ALEATÓRIO DE 4 DÍGITOS
 function generateRandomRA() {
     return Math.floor(1000 + Math.random() * 9000).toString();
+}
+
+// ✅ FUNÇÃO PARA TESTAR CONEXÃO (QUE ESTAVA FALTANDO)
+async function testConnection() {
+    try {
+        console.log('🔍 Testando conexão com o servidor...');
+        const response = await fetch(`${API_BASE_URL}/api/usuarios`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+        
+        const isConnected = response.ok;
+        console.log('📡 Status da conexão:', isConnected ? '✅ Conectado' : '❌ Falha');
+        return isConnected;
+        
+    } catch (error) {
+        console.error('❌ Erro no teste de conexão:', error);
+        return false;
+    }
 }
 
 // ✅ FUNÇÃO PRINCIPAL DE REQUISIÇÃO
