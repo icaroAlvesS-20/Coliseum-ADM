@@ -420,6 +420,34 @@
             flex: 1;
         }
 
+        .ra-input-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .ra-input-group .form-control {
+            flex: 1;
+        }
+
+        .generate-ra-btn {
+            background: linear-gradient(135deg, #4cc9f0, #3ab7e0);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .generate-ra-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(76, 201, 240, 0.3);
+        }
+
         .modal {
             display: none;
             position: fixed;
@@ -773,6 +801,15 @@
                 margin-bottom: 10px;
             }
 
+            .ra-input-group {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .generate-ra-btn {
+                width: 100%;
+            }
+
         }
 
         @media (max-width: 480px) {
@@ -1112,7 +1149,15 @@
                     </div>
                     <div class="form-group">
                         <label for="edit-user-ra">RA *</label>
-                        <input type="text" id="edit-user-ra" class="form-control" required>
+                        <div class="ra-input-group">
+                            <input type="text" id="edit-user-ra" class="form-control" required maxlength="4" pattern="[0-9]{4}" title="Digite um RA de 4 dígitos">
+                            <button type="button" class="generate-ra-btn" onclick="generateRandomRA('edit-user-ra')">
+                                <i class="fas fa-dice"></i> Gerar RA
+                            </button>
+                        </div>
+                        <small style="color: #888; font-size: 12px; margin-top: 5px;">
+                            RA deve conter exatamente 4 dígitos
+                        </small>
                     </div>
                     <div class="form-group">
                         <label for="edit-user-serie">Série *</label>
@@ -1382,7 +1427,15 @@
                     </div>
                     <div class="form-group">
                         <label for="new-user-ra">RA (Registro Acadêmico) *</label>
-                        <input type="text" id="new-user-ra" class="form-control" placeholder="Ex: 123456" required>
+                        <div class="ra-input-group">
+                            <input type="text" id="new-user-ra" class="form-control" placeholder="Ex: 1234" required maxlength="4" pattern="[0-9]{4}" title="Digite um RA de 4 dígitos">
+                            <button type="button" class="generate-ra-btn" onclick="generateRandomRA('new-user-ra')">
+                                <i class="fas fa-dice"></i> Gerar RA
+                            </button>
+                        </div>
+                        <small style="color: #888; font-size: 12px; margin-top: 5px;">
+                            RA deve conter exatamente 4 dígitos. Use o botão para gerar automaticamente.
+                        </small>
                     </div>
                     <div class="form-group">
                         <label for="new-user-serie">Série *</label>
@@ -1450,11 +1503,49 @@
         let moduloCount = 0;
         let aulaCount = 0;
         let currentFilter = 'todos';
+        let usedRAs = new Set(); // Para armazenar RAs já utilizados
 
         // DOM Elements
         const tabs = document.querySelectorAll('.tab');
         const tabContents = document.querySelectorAll('.tab-content');
         const alertContainer = document.getElementById('alert-container');
+
+        // ✅ FUNÇÃO PARA GERAR RA ALEATÓRIO DE 4 DÍGITOS
+        function generateRandomRA(inputId) {
+            let newRA;
+            let attempts = 0;
+            const maxAttempts = 100;
+            
+            // Gerar RA único
+            do {
+                newRA = Math.floor(1000 + Math.random() * 9000).toString();
+                attempts++;
+                
+                // Prevenir loop infinito
+                if (attempts >= maxAttempts) {
+                    showAlert('❌ Não foi possível gerar um RA único. Tente novamente.', 'error');
+                    return;
+                }
+            } while (usedRAs.has(newRA));
+            
+            // Atualizar o campo de input
+            const raInput = document.getElementById(inputId);
+            if (raInput) {
+                raInput.value = newRA;
+                showAlert(`✅ RA gerado: ${newRA}`, 'success');
+            }
+        }
+
+        // ✅ FUNÇÃO PARA CARREGAR RAs EXISTENTES
+        function loadExistingRAs(usersList) {
+            usedRAs.clear();
+            usersList.forEach(user => {
+                if (user.ra) {
+                    usedRAs.add(user.ra.toString());
+                }
+            });
+            console.log(`📋 RAs existentes carregados: ${usedRAs.size}`);
+        }
 
         // ✅ FUNÇÃO PRINCIPAL DE REQUISIÇÃO
         async function apiRequest(endpoint, options = {}) {
@@ -1633,6 +1724,13 @@
 
             // Configurar event listeners dinâmicos para tabelas
             setupDynamicEventListeners();
+
+            // Gerar RA automaticamente ao abrir modal de adicionar usuário
+            document.getElementById('add-user-btn').addEventListener('click', function() {
+                setTimeout(() => {
+                    generateRandomRA('new-user-ra');
+                }, 100);
+            });
         }
 
         function setupButton(selector, handler) {
@@ -1828,6 +1926,10 @@
                 showLoading();
                 const usuarios = await apiRequest('/api/usuarios');
                 users = Array.isArray(usuarios) ? usuarios : [];
+                
+                // ✅ CARREGAR RAs EXISTENTES
+                loadExistingRAs(users);
+                
                 displayUsers(users);
             } catch (error) {
                 console.error('Error loading users:', error);
@@ -1938,7 +2040,7 @@
                         ${user.nome}
                         ${user.status === 'inativo' ? '<span class="status-badge status-inativo" style="margin-left: 8px;">INATIVO</span>' : ''}
                     </td>
-                    <td>${user.ra}</td>
+                    <td><code>${user.ra}</code></td>
                     <td>${user.serie}</td>
                     <td>${user.pontuacao}</td>
                     <td>${user.desafiosCompletados}</td>
@@ -2097,7 +2199,7 @@
                 row.innerHTML = `
                     <td>${index + 1}</td>
                     <td>${user.nome}</td>
-                    <td>${user.ra}</td>
+                    <td><code>${user.ra}</code></td>
                     <td>${user.serie}</td>
                     <td>${user.pontuacao}</td>
                     <td>${user.desafiosCompletados}</td>`;
@@ -2252,6 +2354,12 @@
                 desafiosCompletados: parseInt(document.getElementById('edit-user-desafios').value),
                 status: document.getElementById('edit-user-status').value
             };
+
+            // ✅ VALIDAÇÃO DO RA
+            if (!userData.ra || userData.ra.length !== 4 || !/^\d{4}$/.test(userData.ra)) {
+                showAlert('❌ O RA deve conter exatamente 4 dígitos numéricos!', 'error');
+                return;
+            }
 
             if (!userData.curso) {
                 showAlert('❌ O campo curso é obrigatório!', 'error');
@@ -2603,8 +2711,9 @@
                 errors.push('Nome deve ter pelo menos 2 caracteres');
             }
             
-            if (!userData.ra || userData.ra.trim().length < 3) {
-                errors.push('RA é obrigatório (mínimo 3 caracteres)');
+            // ✅ VALIDAÇÃO DO RA
+            if (!userData.ra || userData.ra.length !== 4 || !/^\d{4}$/.test(userData.ra)) {
+                errors.push('RA deve conter exatamente 4 dígitos numéricos');
             }
             
             if (!userData.serie) {
@@ -2638,12 +2747,22 @@
                 return;
             }
 
+            // ✅ VERIFICAR SE RA JÁ EXISTE
+            if (usedRAs.has(userData.ra)) {
+                showAlert('❌ Este RA já está em uso! Gere um novo RA único.', 'error');
+                return;
+            }
+
             try {
                 showGlobalLoading(true);
                 await apiRequest('/api/usuarios', {
                     method: 'POST',
                     body: userData
                 });
+                
+                // ✅ ADICIONAR RA À LISTA DE RAs USADOS
+                usedRAs.add(userData.ra);
+                
                 showAlert('✅ Usuário cadastrado com sucesso!', 'success');
                 closeModal('add-user-modal');
                 await loadUsers();
@@ -2654,6 +2773,8 @@
                 let errorMessage = '❌ Erro ao cadastrar usuário';
                 if (error.message.includes('já existe') || error.message.includes('RA já')) {
                     errorMessage = '❌ RA já cadastrado no sistema!';
+                    // ✅ ATUALIZAR LISTA DE RAs SE DETECTAR CONFLITO
+                    usedRAs.add(userData.ra);
                 }
                 
                 showAlert(errorMessage, 'error');
@@ -2752,7 +2873,6 @@
             pendingAction = action;
             document.getElementById('confirm-modal').style.display = 'flex';
         }
-
         console.log('✅ Script do Admin Coliseum carregado com sucesso!');
     </script>
 </body>
