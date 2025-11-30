@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -1305,17 +1306,9 @@
                     <label for="new-user-name">Nome Completo *</label>
                     <input type="text" id="new-user-name" class="form-control" placeholder="Ex: João Silva" required>
                 </div>
-               <div class="form-group">
+                <div class="form-group">
                     <label for="new-user-ra">RA (Registro Acadêmico) *</label>
-                    <div style="display: flex; gap: 10px; align-items: center;">
-                        <input type="text" id="new-user-ra" class="form-control" placeholder="RA será gerado automaticamente" readonly style="flex: 1;">
-                        <button type="button" class="btn btn-warning" id="regenerate-ra" title="Gerar novo RA">
-                            <i class="fas fa-sync-alt"></i>
-                        </button>
-                    </div>
-                    <small style="color: #888; font-size: 12px; margin-top: 5px;">
-                        RA gerado automaticamente com 4 dígitos
-                    </small>
+                    <input type="text" id="new-user-ra" class="form-control" placeholder="Ex: 123456" required>
                 </div>
                 <div class="form-group">
                     <label for="new-user-serie">Série *</label>
@@ -1364,7 +1357,7 @@
         </div>
     </div>
 </div>
-    <script>// Variáveis globais// Variáveis globais
+    <script>// Variáveis globais
 // Variáveis globais
 const API_BASE_URL = 'https://coliseum-api.onrender.com';
 let users = [];
@@ -1375,49 +1368,12 @@ let pendingAction = null;
 let moduloCount = 0;
 let aulaCount = 0;
 
-// ✅ CORREÇÃO: Inicializar variáveis DOM
-let tabs, tabContents, alertContainer;
+// DOM Elements
+const tabs = document.querySelectorAll('.tab');
+const tabContents = document.querySelectorAll('.tab-content');
+const alertContainer = document.getElementById('alert-container');
 
-// ✅ FUNÇÃO PARA INICIALIZAR ELEMENTOS DOM
-function initializeDOMElements() {
-    tabs = document.querySelectorAll('.tab');
-    tabContents = document.querySelectorAll('.tab-content');
-    alertContainer = document.getElementById('alert-container');
-    
-    console.log('✅ Elementos DOM inicializados:', {
-        tabs: tabs.length,
-        tabContents: tabContents.length,
-        alertContainer: !!alertContainer
-    });
-}
-
-// ✅ FUNÇÃO PARA GERAR RA ALEATÓRIO DE 4 DÍGITOS
-function generateRandomRA() {
-    return Math.floor(1000 + Math.random() * 9000).toString();
-}
-
-// ✅ FUNÇÃO PARA TESTAR CONEXÃO
-async function testConnection() {
-    try {
-        console.log('🔍 Testando conexão com o servidor...');
-        const response = await fetch(`${API_BASE_URL}/api/usuarios`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        });
-        
-        const isConnected = response.ok;
-        console.log('📡 Status da conexão:', isConnected ? '✅ Conectado' : '❌ Falha');
-        return isConnected;
-        
-    } catch (error) {
-        console.error('❌ Erro no teste de conexão:', error);
-        return false;
-    }
-}
-
-// ✅ FUNÇÃO PRINCIPAL DE REQUISIÇÃO
+// ✅ FUNÇÃO PRINCIPAL DE REQUISIÇÃO - CORRIGIDA
 async function apiRequest(endpoint, options = {}) {
     const url = `${API_BASE_URL}${endpoint}`;
     
@@ -1484,61 +1440,49 @@ async function apiRequest(endpoint, options = {}) {
     }
 }
 
-// ✅ FUNÇÃO PARA VERIFICAR STATUS DO USUÁRIO NO LOGIN
-async function checkUserStatus(ra, senha) {
+// ✅ FUNÇÃO DE REQUISIÇÃO SIMPLES (para casos onde CORS não funciona)
+async function simpleRequest(endpoint, options = {}) {
     try {
-        const response = await apiRequest('/api/usuarios');
-        const usuarios = Array.isArray(response) ? response : [];
+        const url = `${API_BASE_URL}${endpoint}`;
+        console.log(`🔧 Tentando requisição simples para: ${endpoint}`);
         
-        const usuario = usuarios.find(u => u.ra === ra && u.senha === senha);
+        const config = {
+            method: options.method || 'GET'
+        };
         
-        if (!usuario) {
-            return { success: false, message: 'RA ou senha incorretos' };
+        // Para POST/PUT, usar FormData para evitar preflight
+        if (options.body && (options.method === 'POST' || options.method === 'PUT')) {
+            const formData = new FormData();
+            for (const key in options.body) {
+                formData.append(key, options.body[key]);
+            }
+            config.body = formData;
         }
         
-        // ✅ VERIFICAR SE USUÁRIO ESTÁ ATIVO
-        if (usuario.status === 'inativo') {
-            return { 
-                success: false, 
-                message: '❌ Usuário inativo. Entre em contato com o administrador.' 
-            };
+        const response = await fetch(url, config);
+        
+        if (response.ok) {
+            const text = await response.text();
+            return text ? JSON.parse(text) : { success: true };
         }
         
-        return { success: true, usuario: usuario };
+        throw new Error(`HTTP ${response.status}`);
         
     } catch (error) {
-        console.error('❌ Erro ao verificar status:', error);
-        return { success: false, message: 'Erro ao conectar com o servidor' };
+        console.error('❌ Erro na requisição simples:', error);
+        throw error;
     }
 }
 
-// ✅ FUNÇÃO PARA ATUALIZAR STATUS DO USUÁRIO
-async function updateUserStatus(userId, status) {
+// ✅ TESTE DE CONEXÃO
+async function testConnection() {
     try {
-        const user = users.find(u => u.id == userId);
-        if (!user) {
-            console.error('❌ Usuário não encontrado:', userId);
-            return false;
-        }
-
-        // ✅ CORREÇÃO: Criar objeto com TODOS os dados do usuário incluindo status
-        const updatedUser = {
-            ...user,
-            status: status
-        };
-
-        console.log('📤 Atualizando usuário:', { userId, status, updatedUser });
-
-        const response = await apiRequest(`/api/usuarios/${userId}`, {
-            method: 'PUT',
-            body: updatedUser
+        const response = await fetch(API_BASE_URL, { 
+            method: 'GET',
+            mode: 'no-cors'
         });
-
-        console.log('✅ Status atualizado com sucesso:', response);
         return true;
-
     } catch (error) {
-        console.error('❌ Erro ao atualizar status:', error);
         return false;
     }
 }
@@ -1546,9 +1490,6 @@ async function updateUserStatus(userId, status) {
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 Iniciando Admin Coliseum...');
-    
-    // ✅ CORREÇÃO: Inicializar elementos DOM primeiro
-    initializeDOMElements();
     initializeTabs();
     setupEventListeners();
     setupErrorHandling();
@@ -1571,11 +1512,6 @@ function setupErrorHandling() {
 
 // Tab Navigation
 function initializeTabs() {
-    if (!tabs || tabs.length === 0) {
-        console.error('❌ Elementos tabs não encontrados!');
-        return;
-    }
-
     tabs.forEach(tab => {
         tab.addEventListener('click', function() {
             tabs.forEach(t => t.classList.remove('active'));
@@ -1653,11 +1589,6 @@ function setupEventListeners() {
     setupButton('#add-user-btn', () => showAddUserModal());
     setupButton('#add-modulo-btn', () => addModuloToForm());
 
-    // Botão para gerar novo RA
-    setupButton('#regenerate-ra', () => {
-        document.getElementById('new-user-ra').value = generateRandomRA();
-    });
-
     // Settings
     setupButton('#save-settings', handleSaveSettings);
     setupButton('#reset-points', () => showConfirmation('Zerar todas as pontuações?', resetAllPoints));
@@ -1688,16 +1619,6 @@ function setupDynamicEventListeners() {
         if (e.target.closest('.delete-user')) {
             const userId = e.target.closest('.delete-user').getAttribute('data-id');
             deleteUser(userId);
-        }
-        
-        // ✅ CORREÇÃO: Alterar status do usuário - AGORA FUNCIONANDO
-        if (e.target.closest('.status-select')) {
-            const select = e.target.closest('.status-select');
-            const userId = select.getAttribute('data-user-id');
-            const newStatus = select.value;
-            
-            console.log('🔄 Alterando status:', { userId, newStatus });
-            updateUserStatusInTable(userId, newStatus);
         }
         
         // Editar vídeo
@@ -1751,27 +1672,6 @@ function setupDynamicEventListeners() {
             }
         }
     });
-}
-
-// ✅ FUNÇÃO PARA ATUALIZAR STATUS NA TABELA
-async function updateUserStatusInTable(userId, newStatus) {
-    try {
-        showGlobalLoading(true);
-        
-        const success = await updateUserStatus(userId, newStatus);
-        
-        if (success) {
-            showAlert(`✅ Status do usuário atualizado para: ${newStatus === 'ativo' ? 'Ativo' : 'Inativo'}`, 'success');
-            await loadUsers(); // Recarregar a lista de usuários
-        } else {
-            showAlert('❌ Erro ao atualizar status do usuário', 'error');
-        }
-    } catch (error) {
-        console.error('❌ Erro ao atualizar status:', error);
-        showAlert('❌ Erro ao atualizar status do usuário', 'error');
-    } finally {
-        showGlobalLoading(false);
-    }
 }
 
 function closeAllModals() {
@@ -1837,8 +1737,7 @@ async function loadInitialData() {
 
 async function loadDashboardData() {
     try {
-        const rankingLoading = document.getElementById('ranking-loading');
-        if (rankingLoading) rankingLoading.style.display = 'flex';
+        document.getElementById('ranking-loading').style.display = 'flex';
 
         console.log('🔄 Carregando dados do dashboard...');
 
@@ -1869,8 +1768,7 @@ async function loadDashboardData() {
         console.error('❌ Erro no dashboard:', error);
         throw error;
     } finally {
-        const rankingLoading = document.getElementById('ranking-loading');
-        if (rankingLoading) rankingLoading.style.display = 'none';
+        document.getElementById('ranking-loading').style.display = 'none';
     }
 }
 
@@ -1895,8 +1793,6 @@ async function loadUsers() {
         showLoading();
         const usuarios = await apiRequest('/api/usuarios');
         users = Array.isArray(usuarios) ? usuarios : [];
-        
-        console.log('👥 Usuários carregados:', users.map(u => ({ id: u.id, nome: u.nome, status: u.status })));
         displayUsers(users);
     } catch (error) {
         console.error('Error loading users:', error);
@@ -1987,7 +1883,7 @@ function displayUsers(users) {
     if (!users || users.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="9" style="text-align: center; color: #888; padding: 20px;">
+                <td colspan="8" style="text-align: center; color: #888; padding: 20px;">
                     <i class="fas fa-users"></i>
                     Nenhum usuário encontrado
                 </td>
@@ -1996,12 +1892,6 @@ function displayUsers(users) {
     }
 
     users.forEach(user => {
-        // ✅ CORREÇÃO: Garantir que status sempre tenha um valor padrão
-        const status = user.status || 'ativo';
-        const statusBadge = status === 'ativo' ? 
-            '<span class="badge success">Ativo</span>' : 
-            '<span class="badge danger">Inativo</span>';
-        
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>${user.id}</td>
@@ -2011,7 +1901,6 @@ function displayUsers(users) {
             <td>${user.pontuacao}</td>
             <td>${user.desafiosCompletados}</td>
             <td>${user.curso || 'Não informado'}</td>
-            <td>${statusBadge}</td>
             <td class="actions">
                 <button class="btn btn-primary btn-sm edit-user" data-id="${user.id}">
                     <i class="fas fa-edit"></i>
@@ -2019,10 +1908,14 @@ function displayUsers(users) {
                 <button class="btn btn-danger btn-sm delete-user" data-id="${user.id}">
                     <i class="fas fa-trash"></i>
                 </button>
-                <select class="btn-select status-select" data-user-id="${user.id}">
-                    <option value="ativo" ${status === 'ativo' ? 'selected' : ''}>Ativo</option>
-                    <option value="inativo" ${status === 'inativo' ? 'selected' : ''}>Inativo</option>
+                <!-- HTML -->
+            <div class="select-container">
+                <select class="btn-select">
+                    <option value="">Tipo</option>
+                    <option value="Off">Inativo</option>
+                    <option value="On">Ativo</option>
                 </select>
+</div>
             </td>`;
         tbody.appendChild(row);
     });
@@ -2253,8 +2146,6 @@ function editUser(userId) {
     document.getElementById('edit-user-curso').value = user.curso || '';
     document.getElementById('edit-user-pontuacao').value = user.pontuacao || 0;
     document.getElementById('edit-user-desafios').value = user.desafiosCompletados || 0;
-    // ✅ CORREÇÃO: Adicionar campo status no modal de edição
-    document.getElementById('edit-user-status').value = user.status || 'ativo';
 
     document.getElementById('edit-user-modal').style.display = 'flex';
 }
@@ -2286,8 +2177,7 @@ async function saveUser() {
         serie: document.getElementById('edit-user-serie').value,
         curso: document.getElementById('edit-user-curso').value,
         pontuacao: parseInt(document.getElementById('edit-user-pontuacao').value),
-        desafiosCompletados: parseInt(document.getElementById('edit-user-desafios').value),
-        status: document.getElementById('edit-user-status').value || 'ativo'
+        desafiosCompletados: parseInt(document.getElementById('edit-user-desafios').value)
     };
 
     if (!userData.curso) {
@@ -2599,10 +2489,6 @@ async function deleteCurso(cursoId) {
 // User Management - Add User
 function showAddUserModal() {
     document.getElementById('add-user-form').reset();
-    
-    // ✅ GERAR RA ALEATÓRIO AUTOMATICAMENTE
-    document.getElementById('new-user-ra').value = generateRandomRA();
-    
     document.getElementById('add-user-modal').style.display = 'flex';
 }
 
@@ -2613,8 +2499,8 @@ function validateUserForm(userData) {
         errors.push('Nome deve ter pelo menos 2 caracteres');
     }
     
-    if (!userData.ra || userData.ra.trim().length !== 4) {
-        errors.push('RA deve ter exatamente 4 dígitos');
+    if (!userData.ra || userData.ra.trim().length < 3) {
+        errors.push('RA é obrigatório (mínimo 3 caracteres)');
     }
     
     if (!userData.serie) {
@@ -2638,8 +2524,7 @@ async function saveNewUser() {
         ra: document.getElementById('new-user-ra').value.trim(),
         serie: document.getElementById('new-user-serie').value,
         senha: document.getElementById('new-user-senha').value.trim(),
-        curso: document.getElementById('new-user-curso').value,
-        status: 'ativo' // ✅ NOVOS USUÁRIOS SÃO CRIADOS COMO ATIVOS
+        curso: document.getElementById('new-user-curso').value
     };
 
     const errors = validateUserForm(userData);
@@ -2663,9 +2548,7 @@ async function saveNewUser() {
         
         let errorMessage = '❌ Erro ao cadastrar usuário';
         if (error.message.includes('já existe') || error.message.includes('RA já')) {
-            errorMessage = '❌ RA já cadastrado no sistema! Gerando novo RA...';
-            // Se houver conflito, gerar novo RA e manter o formulário aberto
-            document.getElementById('new-user-ra').value = generateRandomRA();
+            errorMessage = '❌ RA já cadastrado no sistema!';
         }
         
         showAlert(errorMessage, 'error');
@@ -2745,6 +2628,7 @@ async function resetAllData() {
         showGlobalLoading(false);
     }
 }
+
 // Utility Functions
 function showAlert(message, type = 'success') {
     if (!alertContainer) return;
@@ -2762,8 +2646,29 @@ function showConfirmation(message, action) {
     document.getElementById('confirm-message').textContent = message;
     pendingAction = action;
     document.getElementById('confirm-modal').style.display = 'flex';
-}
 
+    // Atualizar variáveis globais
+    users = mockUsers;
+    cursos = mockCursos;
+    videos = mockVideos;
+
+    // Atualizar interface
+    displayUsers(users);
+    displayCursos(cursos);
+    displayVideos(videos);
+    displayRanking(mockUsers);
+    displayFullRanking(mockUsers);
+
+    // Atualizar estatísticas
+    document.getElementById('total-users').textContent = mockUsers.length;
+    document.getElementById('total-points').textContent = mockUsers.reduce((sum, u) => sum + u.pontuacao, 0);
+    document.getElementById('total-challenges').textContent = mockUsers.reduce((sum, u) => sum + u.desafiosCompletados, 0);
+    document.getElementById('total-series').textContent = new Set(mockUsers.map(u => u.serie)).size;
+    document.getElementById('total-cursos').textContent = mockCursos.length;
+    document.getElementById('total-videos').textContent = mockVideos.length;
+
+    showAlert('📱 Modo de demonstração: Dados simulados carregados', 'warning');
+}
 console.log('✅ Script do Admin Coliseum carregado com sucesso!');
     </script>
 </body>
