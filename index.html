@@ -1364,8 +1364,7 @@
         </div>
     </div>
 </div>
-    <script>// Variáveis globais
-// Variáveis globais
+    <script>// Variáveis globais// Variáveis globais
 const API_BASE_URL = 'https://coliseum-api.onrender.com';
 let users = [];
 let videos = [];
@@ -1375,8 +1374,21 @@ let pendingAction = null;
 let moduloCount = 0;
 let aulaCount = 0;
 
-// DOM Elements - AGORA DENTRO DA FUNÇÃO initializeTabs
+// ✅ CORREÇÃO: Inicializar variáveis DOM
 let tabs, tabContents, alertContainer;
+
+// ✅ FUNÇÃO PARA INICIALIZAR ELEMENTOS DOM
+function initializeDOMElements() {
+    tabs = document.querySelectorAll('.tab');
+    tabContents = document.querySelectorAll('.tab-content');
+    alertContainer = document.getElementById('alert-container');
+    
+    console.log('✅ Elementos DOM inicializados:', {
+        tabs: tabs.length,
+        tabContents: tabContents.length,
+        alertContainer: !!alertContainer
+    });
+}
 
 // ✅ FUNÇÃO PARA GERAR RA ALEATÓRIO DE 4 DÍGITOS
 function generateRandomRA() {
@@ -1450,49 +1462,53 @@ async function apiRequest(endpoint, options = {}) {
     }
 }
 
-// ✅ FUNÇÃO DE REQUISIÇÃO SIMPLES (para casos onde CORS não funciona)
-async function simpleRequest(endpoint, options = {}) {
+// ✅ FUNÇÃO PARA VERIFICAR STATUS DO USUÁRIO NO LOGIN
+async function checkUserStatus(ra, senha) {
     try {
-        const url = `${API_BASE_URL}${endpoint}`;
-        console.log(`🔧 Tentando requisição simples para: ${endpoint}`);
+        const response = await apiRequest('/api/usuarios');
+        const usuarios = Array.isArray(response) ? response : [];
         
-        const config = {
-            method: options.method || 'GET'
-        };
+        const usuario = usuarios.find(u => u.ra === ra && u.senha === senha);
         
-        // Para POST/PUT, usar FormData para evitar preflight
-        if (options.body && (options.method === 'POST' || options.method === 'PUT')) {
-            const formData = new FormData();
-            for (const key in options.body) {
-                formData.append(key, options.body[key]);
-            }
-            config.body = formData;
+        if (!usuario) {
+            return { success: false, message: 'RA ou senha incorretos' };
         }
         
-        const response = await fetch(url, config);
-        
-        if (response.ok) {
-            const text = await response.text();
-            return text ? JSON.parse(text) : { success: true };
+        // ✅ VERIFICAR SE USUÁRIO ESTÁ ATIVO
+        if (usuario.status === 'inativo') {
+            return { 
+                success: false, 
+                message: 'Usuário inativo. Entre em contato com o administrador.' 
+            };
         }
         
-        throw new Error(`HTTP ${response.status}`);
+        return { success: true, usuario: usuario };
         
     } catch (error) {
-        console.error('❌ Erro na requisição simples:', error);
-        throw error;
+        console.error('❌ Erro ao verificar status:', error);
+        return { success: false, message: 'Erro ao conectar com o servidor' };
     }
 }
 
-// ✅ TESTE DE CONEXÃO
-async function testConnection() {
+// ✅ FUNÇÃO PARA ATUALIZAR STATUS DO USUÁRIO
+async function updateUserStatus(userId, status) {
     try {
-        const response = await fetch(API_BASE_URL, { 
-            method: 'GET',
-            mode: 'no-cors'
+        const user = users.find(u => u.id == userId);
+        if (!user) return false;
+
+        const updatedUser = {
+            ...user,
+            status: status
+        };
+
+        await apiRequest(`/api/usuarios/${userId}`, {
+            method: 'PUT',
+            body: updatedUser
         });
+
         return true;
     } catch (error) {
+        console.error('❌ Erro ao atualizar status:', error);
         return false;
     }
 }
@@ -1501,7 +1517,7 @@ async function testConnection() {
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 Iniciando Admin Coliseum...');
     
-    // ✅ INICIALIZAR VARIÁVEIS DOM PRIMEIRO
+    // ✅ CORREÇÃO: Inicializar elementos DOM primeiro
     initializeDOMElements();
     initializeTabs();
     setupEventListeners();
@@ -1510,19 +1526,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Carregar dados iniciais
     loadInitialData();
 });
-
-// ✅ FUNÇÃO PARA INICIALIZAR ELEMENTOS DOM
-function initializeDOMElements() {
-    tabs = document.querySelectorAll('.tab');
-    tabContents = document.querySelectorAll('.tab-content');
-    alertContainer = document.getElementById('alert-container');
-    
-    console.log('✅ Elementos DOM inicializados:', {
-        tabs: tabs.length,
-        tabContents: tabContents.length,
-        alertContainer: !!alertContainer
-    });
-}
 
 // Configurar tratamento de erro global
 function setupErrorHandling() {
@@ -1717,29 +1720,6 @@ function setupDynamicEventListeners() {
             }
         }
     });
-}
-
-// ✅ FUNÇÃO PARA ATUALIZAR STATUS DO USUÁRIO
-async function updateUserStatus(userId, status) {
-    try {
-        const user = users.find(u => u.id == userId);
-        if (!user) return false;
-
-        const updatedUser = {
-            ...user,
-            status: status
-        };
-
-        await apiRequest(`/api/usuarios/${userId}`, {
-            method: 'PUT',
-            body: updatedUser
-        });
-
-        return true;
-    } catch (error) {
-        console.error('❌ Erro ao atualizar status:', error);
-        return false;
-    }
 }
 
 // ✅ FUNÇÃO PARA ATUALIZAR STATUS NA TABELA
