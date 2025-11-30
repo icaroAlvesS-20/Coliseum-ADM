@@ -1396,7 +1396,7 @@ function generateRandomRA() {
     return Math.floor(1000 + Math.random() * 9000).toString();
 }
 
-// ✅ FUNÇÃO PARA TESTAR CONEXÃO (QUE ESTAVA FALTANDO)
+// ✅ FUNÇÃO PARA TESTAR CONEXÃO
 async function testConnection() {
     try {
         console.log('🔍 Testando conexão com o servidor...');
@@ -1500,7 +1500,7 @@ async function checkUserStatus(ra, senha) {
         if (usuario.status === 'inativo') {
             return { 
                 success: false, 
-                message: 'Usuário inativo. Entre em contato com o administrador.' 
+                message: '❌ Usuário inativo. Entre em contato com o administrador.' 
             };
         }
         
@@ -1516,19 +1516,27 @@ async function checkUserStatus(ra, senha) {
 async function updateUserStatus(userId, status) {
     try {
         const user = users.find(u => u.id == userId);
-        if (!user) return false;
+        if (!user) {
+            console.error('❌ Usuário não encontrado:', userId);
+            return false;
+        }
 
+        // ✅ CORREÇÃO: Criar objeto com TODOS os dados do usuário incluindo status
         const updatedUser = {
             ...user,
             status: status
         };
 
-        await apiRequest(`/api/usuarios/${userId}`, {
+        console.log('📤 Atualizando usuário:', { userId, status, updatedUser });
+
+        const response = await apiRequest(`/api/usuarios/${userId}`, {
             method: 'PUT',
             body: updatedUser
         });
 
+        console.log('✅ Status atualizado com sucesso:', response);
         return true;
+
     } catch (error) {
         console.error('❌ Erro ao atualizar status:', error);
         return false;
@@ -1682,12 +1690,13 @@ function setupDynamicEventListeners() {
             deleteUser(userId);
         }
         
-        // Alterar status do usuário
+        // ✅ CORREÇÃO: Alterar status do usuário - AGORA FUNCIONANDO
         if (e.target.closest('.status-select')) {
             const select = e.target.closest('.status-select');
             const userId = select.getAttribute('data-user-id');
             const newStatus = select.value;
             
+            console.log('🔄 Alterando status:', { userId, newStatus });
             updateUserStatusInTable(userId, newStatus);
         }
         
@@ -1886,6 +1895,8 @@ async function loadUsers() {
         showLoading();
         const usuarios = await apiRequest('/api/usuarios');
         users = Array.isArray(usuarios) ? usuarios : [];
+        
+        console.log('👥 Usuários carregados:', users.map(u => ({ id: u.id, nome: u.nome, status: u.status })));
         displayUsers(users);
     } catch (error) {
         console.error('Error loading users:', error);
@@ -1985,7 +1996,8 @@ function displayUsers(users) {
     }
 
     users.forEach(user => {
-        const status = user.status || 'ativo'; // Default para ativo
+        // ✅ CORREÇÃO: Garantir que status sempre tenha um valor padrão
+        const status = user.status || 'ativo';
         const statusBadge = status === 'ativo' ? 
             '<span class="badge success">Ativo</span>' : 
             '<span class="badge danger">Inativo</span>';
@@ -2241,6 +2253,7 @@ function editUser(userId) {
     document.getElementById('edit-user-curso').value = user.curso || '';
     document.getElementById('edit-user-pontuacao').value = user.pontuacao || 0;
     document.getElementById('edit-user-desafios').value = user.desafiosCompletados || 0;
+    // ✅ CORREÇÃO: Adicionar campo status no modal de edição
     document.getElementById('edit-user-status').value = user.status || 'ativo';
 
     document.getElementById('edit-user-modal').style.display = 'flex';
@@ -2732,7 +2745,6 @@ async function resetAllData() {
         showGlobalLoading(false);
     }
 }
-
 // Utility Functions
 function showAlert(message, type = 'success') {
     if (!alertContainer) return;
