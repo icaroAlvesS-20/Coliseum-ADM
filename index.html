@@ -2090,59 +2090,64 @@
             }
         }
 
-        async function loadDashboardData() {
-            try {
-                document.getElementById('ranking-loading').style.display = 'flex';
+// Atualize esta função para incluir desafios
+async function loadDashboardData() {
+  try {
+    document.getElementById('ranking-loading').style.display = 'flex';
 
-                console.log('🔄 Carregando dados do dashboard...');
+    console.log('🔄 Carregando dados do dashboard...');
 
-                const [ranking, cursosData, videosData, usuariosData] = await Promise.all([
-                    apiRequest('/api/ranking').catch(() => []),
-                    apiRequest('/api/cursos').catch(() => []), 
-                    apiRequest('/api/videos').catch(() => []),
-                    apiRequest('/api/usuarios').catch(() => [])
-                ]);
+    const [ranking, cursosData, videosData, usuariosData, desafiosData] = await Promise.all([
+      apiRequest('/api/ranking').catch(() => []),
+      apiRequest('/api/cursos').catch(() => []), 
+      apiRequest('/api/videos').catch(() => []),
+      apiRequest('/api/usuarios').catch(() => []),
+      apiRequest('/api/desafios').catch(() => []) // NOVO: carregar desafios
+    ]);
 
-                console.log('📊 Dados carregados:', {
-                    usuarios: usuariosData.length,
-                    cursos: cursosData.length,
-                    videos: videosData.length,
-                    ranking: ranking.length
-                });
+    console.log('📊 Dados carregados:', {
+      usuarios: usuariosData.length,
+      cursos: cursosData.length,
+      videos: videosData.length,
+      desafios: desafiosData.length, // NOVO
+      ranking: ranking.length
+    });
 
-                // Atualizar interface
-                if (ranking.length > 0) {
-                    displayRanking(ranking.slice(0, 10));
-                } else {
-                    displayRanking([]);
-                }
+    // Atualizar interface
+    if (ranking.length > 0) {
+      displayRanking(ranking.slice(0, 10));
+    } else {
+      displayRanking([]);
+    }
 
-                updateDashboardStats(ranking, usuariosData, cursosData, videosData);
+    updateDashboardStats(ranking, usuariosData, cursosData, videosData, desafiosData); // ATUALIZADO
 
-            } catch (error) {
-                console.error('❌ Erro no dashboard:', error);
-                throw error;
-            } finally {
-                document.getElementById('ranking-loading').style.display = 'none';
-            }
-        }
+  } catch (error) {
+    console.error('❌ Erro no dashboard:', error);
+    throw error;
+  } finally {
+    document.getElementById('ranking-loading').style.display = 'none';
+  }
+}
 
-        function updateDashboardStats(ranking, usuariosData, cursosData, videosData) {
-            const totalUsers = usuariosData.length || ranking.length;
-            const totalPoints = ranking.reduce((sum, user) => sum + (user.pontuacao || 0), 0);
-            const totalChallenges = ranking.reduce((sum, user) => sum + (user.desafiosCompletados || 0), 0);
-            const series = [...new Set(ranking.map(user => user.serie || 'N/A'))].length;
-            const totalCursos = cursosData.length || 0;
-            const totalVideos = videosData.length || 0;
+// Atualize esta função para incluir desafios
+function updateDashboardStats(ranking, usuariosData, cursosData, videosData, desafiosData) {
+  const totalUsers = usuariosData.length || ranking.length;
+  const totalPoints = ranking.reduce((sum, user) => sum + (user.pontuacao || 0), 0);
+  const totalChallenges = ranking.reduce((sum, user) => sum + (user.desafiosCompletados || 0), 0);
+  const series = [...new Set(ranking.map(user => user.serie || 'N/A'))].length;
+  const totalCursos = cursosData.length || 0;
+  const totalVideos = videosData.length || 0;
+  const totalDesafios = desafiosData.length || 0; // NOVO
 
-            document.getElementById('total-users').textContent = totalUsers;
-            document.getElementById('total-points').textContent = totalPoints.toLocaleString();
-            document.getElementById('total-challenges').textContent = totalChallenges;
-            document.getElementById('total-series').textContent = series;
-            document.getElementById('total-cursos').textContent = totalCursos;
-            document.getElementById('total-videos').textContent = totalVideos;
-        }
-
+  document.getElementById('total-users').textContent = totalUsers;
+  document.getElementById('total-points').textContent = totalPoints.toLocaleString();
+  document.getElementById('total-challenges').textContent = totalChallenges;
+  document.getElementById('total-series').textContent = series;
+  document.getElementById('total-cursos').textContent = totalCursos;
+  document.getElementById('total-videos').textContent = totalVideos;
+  document.getElementById('total-challenges').textContent = totalDesafios; // ATUALIZADO: Mostrar número de desafios criados
+}
         async function loadUsers() {
             try {
                 showLoading();
