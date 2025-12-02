@@ -1072,6 +1072,56 @@
             </div>
         </div>
 
+<!-- Desafios Tab -->
+<div id="desafios" class="tab-content">
+    <div class="table-container">
+        <div class="table-header">
+            <h3>Gerenciar Desafios</h3>
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="desafio-search" placeholder="Buscar desafios...">
+                </div>
+                <div class="filter-buttons">
+                    <button class="btn btn-sm btn-primary" onclick="filterDesafiosByStatus('todos')">
+                        Todos
+                    </button>
+                    <button class="btn btn-sm btn-secondary" onclick="filterDesafiosByStatus('ativo')">
+                        Ativos
+                    </button>
+                    <button class="btn btn-sm btn-secondary" onclick="filterDesafiosByStatus('inativo')">
+                        Inativos
+                    </button>
+                </div>
+                <button class="btn btn-primary" id="add-desafio-btn">
+                    <i class="fas fa-plus"></i> Criar Desafio
+                </button>
+            </div>
+        </div>
+        <div class="loading" id="desafios-loading">
+            <div class="spinner"></div>
+        </div>
+        <table id="desafios-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Título</th>
+                    <th>Matéria</th>
+                    <th>Nível</th>
+                    <th>Perguntas</th>
+                    <th>Pontuação</th>
+                    <th>Status</th>
+                    <th>Expira em</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody id="desafios-body">
+                <!-- Desafios data will be loaded here -->
+            </tbody>
+        </table>
+    </div>
+</div>
+        
         <!-- Ranking Tab -->
         <div id="ranking" class="tab-content">
             <div class="table-container">
@@ -1493,6 +1543,126 @@
         </div>
     </div>
 
+<!-- Desafio Modal -->
+<div class="modal" id="desafio-modal">
+    <div class="modal-content" style="max-width: 900px;">
+        <div class="modal-header">
+            <h3 id="desafio-modal-title">Criar Desafio</h3>
+            <button class="modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="desafio-form">
+                <input type="hidden" id="desafio-id">
+                
+                <div class="form-row">
+                    <div class="form-group" style="flex: 2;">
+                        <label for="desafio-titulo">Título do Desafio *</label>
+                        <input type="text" id="desafio-titulo" class="form-control" placeholder="Ex: Álgebra Básica - Operações Fundamentais" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="desafio-pontuacao">Pontuação *</label>
+                        <input type="number" id="desafio-pontuacao" class="form-control" min="10" max="100" value="20" required>
+                        <small style="color: #888; font-size: 12px; margin-top: 5px;">10-100 pontos</small>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="desafio-materia">Matéria *</label>
+                        <select id="desafio-materia" class="form-control" required>
+                            <option value="">Selecione a matéria</option>
+                            <option value="matematica">Matemática</option>
+                            <option value="portugues">Português</option>
+                            <option value="ciencias">Ciências</option>
+                            <option value="historia">História</option>
+                            <option value="geografia">Geografia</option>
+                            <option value="fisica">Física</option>
+                            <option value="quimica">Química</option>
+                            <option value="programacao">Programação</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="desafio-nivel">Nível *</label>
+                        <select id="desafio-nivel" class="form-control" required>
+                            <option value="">Selecione o nível</option>
+                            <option value="facil">Fácil</option>
+                            <option value="medio">Médio</option>
+                            <option value="dificil">Difícil</option>
+                            <option value="avancado">Avançado</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="desafio-duracao">Duração (minutos) *</label>
+                        <input type="number" id="desafio-duracao" class="form-control" min="5" max="60" value="15" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="desafio-descricao">Descrição do Desafio</label>
+                    <textarea id="desafio-descricao" class="form-control" rows="3" 
+                              placeholder="Descreva o desafio, conteúdo abordado, objetivos..."></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="desafio-data-inicio">Data de Início</label>
+                        <input type="date" id="desafio-data-inicio" class="form-control">
+                        <small style="color: #888; font-size: 12px;">Deixe em branco para início imediato</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="desafio-data-fim">Data de Expiração</label>
+                        <input type="date" id="desafio-data-fim" class="form-control">
+                        <small style="color: #888; font-size: 12px;">Deixe em branco para sem expiração</small>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="desafio-status">Status do Desafio</label>
+                        <select id="desafio-status" class="form-control">
+                            <option value="ativo">Ativo</option>
+                            <option value="inativo">Inativo</option>
+                            <option value="rascunho">Rascunho</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="desafio-max-tentativas">Máx. Tentativas</label>
+                        <input type="number" id="desafio-max-tentativas" class="form-control" min="0" value="1">
+                        <small style="color: #888; font-size: 12px;">0 = ilimitado</small>
+                    </div>
+                </div>
+
+                <!-- SEÇÃO DE PERGUNTAS -->
+                <div class="form-group">
+                    <label style="color: #ffcf00; font-size: 1.1rem; margin-bottom: 15px;">
+                        <i class="fas fa-question-circle"></i> Perguntas do Desafio *
+                    </label>
+                    <small style="color: #888; display: block; margin-bottom: 10px;">
+                        Adicione pelo menos 3 perguntas para criar o desafio
+                    </small>
+                    
+                    <div id="perguntas-container">
+                        <!-- Perguntas serão adicionadas aqui -->
+                    </div>
+                    
+                    <button type="button" class="btn btn-secondary" id="add-pergunta-btn" style="margin-top: 10px;">
+                        <i class="fas fa-plus"></i> Adicionar Pergunta
+                    </button>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-warning" id="cancel-desafio">Cancelar</button>
+            <button class="btn btn-primary" id="save-desafio">Salvar Desafio</button>
+        </div>
+    </div>
+</div>
+    
     <script>
         // Variáveis globais
         const API_BASE_URL = 'https://coliseum-api.onrender.com';
@@ -1505,7 +1675,10 @@
         let aulaCount = 0;
         let currentFilter = 'todos';
         let usedRAs = new Set(); // Para armazenar RAs já utilizados
-
+        let desafios = [];
+        let currentDesafioFilter = 'todos';
+        let perguntaCount = 0;
+        
         // DOM Elements
         const tabs = document.querySelectorAll('.tab');
         const tabContents = document.querySelectorAll('.tab-content');
@@ -1668,6 +1841,9 @@
                                 case 'ranking':
                                     loadFullRanking();
                                     break;
+                                case 'desafios':
+                                    loadDesafios();
+                                    break;
                             }
                         }
                     });
@@ -1717,6 +1893,11 @@
             setupButton('#add-user-btn', () => showAddUserModal());
             setupButton('#add-modulo-btn', () => addModuloToForm());
 
+            // Desafios
+            setupButton('#add-desafio-btn', () => showDesafioModal());
+            setupButton('#cancel-desafio', () => closeModal('desafio-modal'));
+            setupButton('#save-desafio', saveDesafio);
+            
             // Settings
             setupButton('#save-settings', handleSaveSettings);
             setupButton('#reset-points', () => showConfirmation('Zerar todas as pontuações?', resetAllPoints));
@@ -1806,6 +1987,47 @@
                         showAlert('❌ Cada módulo deve ter pelo menos uma aula!', 'error');
                     }
                 }
+                if (e.target.closest('.edit-desafio')) {
+                    const desafioId = e.target.closest('.edit-desafio').getAttribute('data-id');
+                    editDesafio(desafioId);
+                }            
+
+                // Excluir desafio
+                if (e.target.closest('.delete-desafio')) {
+                    const desafioId = e.target.closest('.delete-desafio').getAttribute('data-id');
+                    deleteDesafio(desafioId);
+                }
+
+                // Visualizar desafio
+                if (e.target.closest('.preview-desafio')) {
+                    const desafioId = e.target.closest('.preview-desafio').getAttribute('data-id');
+                    previewDesafio(desafioId);
+                }
+
+                // Remover pergunta
+                if (e.target.closest('.remove-pergunta')) {
+                    const perguntaElement = e.target.closest('.pergunta-item');
+                if (document.querySelectorAll('.pergunta-item').length > 3) {
+                    perguntaElement.remove();
+                // Renumerar perguntas
+                    document.querySelectorAll('.pergunta-item').forEach((item, index) => {
+                    item.querySelector('h4').textContent = `Pergunta ${index + 1}`;
+                });
+                } else {
+                    showAlert('❌ O desafio deve ter pelo menos 3 perguntas!', 'error');
+            }
+        }
+                // Adicionar pergunta
+                if (e.target.closest('#add-pergunta-btn')) {
+                    addPerguntaToForm();
+                }
+
+                // Adicionar evento para busca de desafios
+                    const desafioSearch = document.getElementById('desafio-search');
+                if (desafioSearch) {
+                    desafioSearch.addEventListener('input', filterDesafios);
+        }
+            
             });
 
             // Event listener para mudança de status
@@ -1854,7 +2076,6 @@
             const loading = document.getElementById('loadingGlobal');
             if (loading) loading.style.display = show ? 'flex' : 'none';
         }
-
         // Data Loading Functions
         async function loadInitialData() {
             showAlert('🔄 Conectando com o servidor...', 'warning');
@@ -1967,7 +2188,20 @@
                 hideLoading();
             }
         }
-
+ 
+        async function loadDesafios() {
+            try {
+                showLoading();
+            const desafiosData = await apiRequest('/api/desafios');
+                    desafios = Array.isArray(desafiosData) ? desafiosData : [];
+                displayDesafios(desafios);
+        } catch (error) {
+                    console.error('Error loading desafios:', error);
+                showAlert('❌ Erro ao carregar desafios', 'error');
+        } finally {
+                hideLoading();
+    }
+}
         async function loadFullRanking() {
             try {
                 showLoading();
@@ -2109,6 +2343,63 @@
             });
         }
 
+        function displayDesafios(desafiosList) {
+    const tbody = document.getElementById('desafios-body');
+    if (!tbody) return;
+
+    tbody.innerHTML = '';
+
+    if (!desafiosList || desafiosList.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="9" style="text-align: center; color: #888; padding: 20px;">
+                    <i class="fas fa-flag"></i>
+                    Nenhum desafio encontrado
+                </td>
+            </tr>`;
+        return;
+    }
+
+    desafiosList.forEach(desafio => {
+        const row = document.createElement('tr');
+        const statusClass = desafio.status === 'ativo' ? 'status-ativo' : 
+                          desafio.status === 'inativo' ? 'status-inativo' : 'status-warning';
+        const statusText = desafio.status === 'ativo' ? 'Ativo' : 
+                          desafio.status === 'inativo' ? 'Inativo' : 'Rascunho';
+        
+        const dataFim = desafio.dataFim ? new Date(desafio.dataFim).toLocaleDateString('pt-BR') : 'Sem expiração';
+        
+        row.innerHTML = `
+            <td>${desafio.id}</td>
+            <td>
+                <strong>${desafio.titulo}</strong>
+                ${desafio.descricao ? `<br><small style="color: #888;">${desafio.descricao.substring(0, 50)}...</small>` : ''}
+            </td>
+            <td>${getMateriaNome(desafio.materia)}</td>
+            <td><span class="badge ${getNivelClass(desafio.nivel)}">${getNivelNome(desafio.nivel)}</span></td>
+            <td>${desafio.perguntas ? desafio.perguntas.length : 0}</td>
+            <td><span style="color: #ffcf00; font-weight: bold;">${desafio.pontuacao}</span></td>
+            <td>
+                <span class="status-badge ${statusClass}">
+                    ${statusText}
+                </span>
+            </td>
+            <td>${dataFim}</td>
+            <td class="actions">
+                <button class="btn btn-primary btn-sm edit-desafio" data-id="${desafio.id}">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn btn-danger btn-sm delete-desafio" data-id="${desafio.id}">
+                    <i class="fas fa-trash"></i>
+                </button>
+                <button class="btn btn-success btn-sm preview-desafio" data-id="${desafio.id}">
+                    <i class="fas fa-eye"></i>
+                </button>
+            </td>`;
+        tbody.appendChild(row);
+    });
+}
+        
         function displayCursos(cursosList = []) {
             const container = document.getElementById('cursos-container');
             if (!container) return;
@@ -2271,8 +2562,40 @@
             };
             return nomes[categoria] || categoria;
         }
-
-        // User Management
+        function getNivelClass(nivel) {
+            const classes = {
+                    'facil': 'success',
+                    'medio': 'warning',
+                    'dificil': 'danger',
+                    'avancado': 'primary'
+    };
+    return classes[nivel] || 'primary';
+    }
+        
+        function getNivelNome(nivel) {
+            const nomes = {
+                'facil': 'Fácil',
+                'medio': 'Médio',
+                'dificil': 'Difícil',
+                'avancado': 'Avançado'
+    };
+    return nomes[nivel] || nivel;
+}
+        function getMateriaNome(materia) {
+            const nomes = {
+                'matematica': 'Matemática',
+                'portugues': 'Português',
+                'ciencias': 'Ciências',
+                'historia': 'História',
+                'geografia': 'Geografia',
+                'fisica': 'Física',
+                'quimica': 'Química',
+                'programacao': 'Programação'
+    };
+    return nomes[materia] || materia;
+}
+        
+   // User Management
         function filterUsers() {
             const searchTerm = document.getElementById('user-search').value.toLowerCase();
             const filteredUsers = users.filter(user => 
@@ -2784,6 +3107,308 @@
             }
         }
 
+     function addPerguntaToForm(perguntaData = null) {
+    perguntaCount++;
+    const perguntaId = `pergunta_${perguntaCount}`;
+    
+    const perguntaHTML = `
+        <div class="pergunta-item" style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <h4 style="color: #ffcf00; margin: 0; font-size: 16px;">Pergunta ${perguntaCount}</h4>
+                <button type="button" class="btn btn-danger btn-sm remove-pergunta" ${perguntaCount <= 3 ? 'disabled' : ''}>
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+            
+            <div class="form-group" style="margin-bottom: 10px;">
+                <input type="text" class="form-control pergunta-texto" placeholder="Digite a pergunta..." 
+                       value="${perguntaData?.pergunta || ''}" required>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                <div class="form-group">
+                    <label style="color: #aaa; font-size: 12px;">Alternativa A</label>
+                    <input type="text" class="form-control alternativa alternativa-a" 
+                           value="${perguntaData?.alternativas?.[0] || ''}" placeholder="Alternativa A" required>
+                </div>
+                <div class="form-group">
+                    <label style="color: #aaa; font-size: 12px;">Alternativa B</label>
+                    <input type="text" class="form-control alternativa alternativa-b" 
+                           value="${perguntaData?.alternativas?.[1] || ''}" placeholder="Alternativa B" required>
+                </div>
+                <div class="form-group">
+                    <label style="color: #aaa; font-size: 12px;">Alternativa C</label>
+                    <input type="text" class="form-control alternativa alternativa-c" 
+                           value="${perguntaData?.alternativas?.[2] || ''}" placeholder="Alternativa C" required>
+                </div>
+                <div class="form-group">
+                    <label style="color: #aaa; font-size: 12px;">Alternativa D</label>
+                    <input type="text" class="form-control alternativa alternativa-d" 
+                           value="${perguntaData?.alternativas?.[3] || ''}" placeholder="Alternativa D" required>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label style="color: #aaa; font-size: 12px;">Alternativa Correta</label>
+                <select class="form-control alternativa-correta" required>
+                    <option value="0" ${perguntaData?.correta === 0 ? 'selected' : ''}>A</option>
+                    <option value="1" ${perguntaData?.correta === 1 ? 'selected' : ''}>B</option>
+                    <option value="2" ${perguntaData?.correta === 2 ? 'selected' : ''}>C</option>
+                    <option value="3" ${perguntaData?.correta === 3 ? 'selected' : ''}>D</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <input type="text" class="form-control pergunta-explicacao" 
+                       placeholder="Explicação (opcional - aparece após responder)" 
+                       value="${perguntaData?.explicacao || ''}">
+            </div>
+        </div>`;
+    
+    document.getElementById('perguntas-container').insertAdjacentHTML('beforeend', perguntaHTML);
+}   
+
+        function previewDesafio(desafioId) {
+    const desafio = desafios.find(d => d.id == desafioId);
+    if (!desafio) return;
+    
+    const perguntasHTML = desafio.perguntas.map((p, i) => `
+        <div style="margin-bottom: 20px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+            <strong style="color: #ffcf00;">Pergunta ${i + 1}:</strong> ${p.pergunta}
+            <div style="margin-top: 10px;">
+                ${p.alternativas.map((alt, j) => `
+                    <div style="padding: 8px; margin: 5px 0; background: ${j === p.correta ? 'rgba(76, 175, 80, 0.2)' : 'rgba(255,255,255,0.05)'}; 
+                         border-left: 3px solid ${j === p.correta ? '#4CAF50' : '#555'};">
+                        ${String.fromCharCode(65 + j)}) ${alt}
+                    </div>
+                `).join('')}
+            </div>
+            ${p.explicacao ? `<div style="margin-top: 10px; color: #4CAF50; font-size: 14px;">💡 ${p.explicacao}</div>` : ''}
+        </div>
+    `).join('');
+
+    document.getElementById('confirm-message').innerHTML = `
+        <h4 style="color: #ffcf00; margin-bottom: 10px;">${desafio.titulo}</h4>
+        <div style="color: #ccc; margin-bottom: 15px;">
+            <strong>Matéria:</strong> ${getMateriaNome(desafio.materia)}<br>
+            <strong>Nível:</strong> ${getNivelNome(desafio.nivel)}<br>
+            <strong>Pontuação:</strong> ${desafio.pontuacao} pontos<br>
+            <strong>Duração:</strong> ${desafio.duracao} minutos<br>
+            <strong>Status:</strong> ${desafio.status === 'ativo' ? 'Ativo' : 'Inativo'}<br>
+            ${desafio.descricao ? `<strong>Descrição:</strong> ${desafio.descricao}<br>` : ''}
+        </div>
+        <h5 style="color: #ffcf00; margin: 20px 0 10px 0;">Perguntas (${desafio.perguntas.length}):</h5>
+        <div style="max-height: 300px; overflow-y: auto;">
+            ${perguntasHTML}
+        </div>
+    `;
+
+    document.getElementById('confirm-modal').style.display = 'flex';
+    
+    // Alterar botões do modal de confirmação
+    document.getElementById('cancel-action').style.display = 'none';
+    document.getElementById('confirm-action').textContent = 'Fechar';
+    document.getElementById('confirm-action').classList.remove('btn-danger');
+    document.getElementById('confirm-action').classList.add('btn-primary');
+    
+    // Remover ação pendente
+    pendingAction = null;
+    
+    // Restaurar botões após fechar
+    const restoreButtons = () => {
+        document.getElementById('cancel-action').style.display = 'block';
+        document.getElementById('confirm-action').textContent = 'Confirmar';
+        document.getElementById('confirm-action').classList.remove('btn-primary');
+        document.getElementById('confirm-action').classList.add('btn-danger');
+        document.getElementById('confirm-action').removeEventListener('click', restoreButtons);
+    };
+    
+    document.getElementById('confirm-action').addEventListener('click', function handler() {
+        closeModal('confirm-modal');
+        restoreButtons();
+        this.removeEventListener('click', handler);
+    });
+}
+        
+async function saveDesafio() {
+    const desafioId = document.getElementById('desafio-id').value;
+    
+    const desafioData = {
+        titulo: document.getElementById('desafio-titulo').value,
+        pontuacao: parseInt(document.getElementById('desafio-pontuacao').value),
+        materia: document.getElementById('desafio-materia').value,
+        nivel: document.getElementById('desafio-nivel').value,
+        duracao: parseInt(document.getElementById('desafio-duracao').value),
+        descricao: document.getElementById('desafio-descricao').value,
+        status: document.getElementById('desafio-status').value,
+        maxTentativas: parseInt(document.getElementById('desafio-max-tentativas').value) || 1
+    };
+
+    // Datas
+    const dataInicio = document.getElementById('desafio-data-inicio').value;
+    const dataFim = document.getElementById('desafio-data-fim').value;
+    
+    if (dataInicio) desafioData.dataInicio = new Date(dataInicio).toISOString();
+    if (dataFim) desafioData.dataFim = new Date(dataFim).toISOString();
+
+    // Coletar perguntas
+    const perguntas = [];
+    document.querySelectorAll('.pergunta-item').forEach((perguntaElement, index) => {
+        const alternativas = [
+            perguntaElement.querySelector('.alternativa-a').value,
+            perguntaElement.querySelector('.alternativa-b').value,
+            perguntaElement.querySelector('.alternativa-c').value,
+            perguntaElement.querySelector('.alternativa-d').value
+        ];
+        
+        const pergunta = {
+            pergunta: perguntaElement.querySelector('.pergunta-texto').value,
+            alternativas: alternativas,
+            correta: parseInt(perguntaElement.querySelector('.alternativa-correta').value),
+            ordem: index + 1
+        };
+        
+        const explicacao = perguntaElement.querySelector('.pergunta-explicacao').value;
+        if (explicacao) pergunta.explicacao = explicacao;
+        
+        perguntas.push(pergunta);
+    });
+
+    if (perguntas.length < 3) {
+        showAlert('❌ O desafio deve ter pelo menos 3 perguntas!', 'error');
+        return;
+    }
+
+    desafioData.perguntas = perguntas;
+
+    try {
+        showGlobalLoading(true);
+
+        let response;
+        if (desafioId) {
+            response = await apiRequest(`/api/desafios/${desafioId}`, {
+                method: 'PUT',
+                body: desafioData
+            });
+        } else {
+            response = await apiRequest('/api/desafios', {
+                method: 'POST',
+                body: desafioData
+            });
+        }
+
+        showAlert('✅ Desafio salvo com sucesso!', 'success');
+        closeModal('desafio-modal');
+        await loadDesafios();
+
+    } catch (error) {
+        console.error('❌ Erro ao salvar desafio:', error);
+        showAlert('❌ Erro ao salvar desafio', 'error');
+    } finally {
+        showGlobalLoading(false);
+    }
+}  function editDesafio(desafioId) {
+    const desafio = desafios.find(d => d.id == desafioId);
+    if (desafio) showDesafioModal(desafio);
+}
+
+async function deleteDesafio(desafioId) {
+    const desafio = desafios.find(d => d.id == desafioId);
+    if (!desafio) return;
+
+    showConfirmation(`Excluir desafio "${desafio.titulo}"?`, async () => {
+        try {
+            showGlobalLoading(true);
+            await apiRequest(`/api/desafios/${desafioId}`, { method: 'DELETE' });
+            showAlert('✅ Desafio excluído com sucesso!', 'success');
+            await loadDesafios();
+        } catch (error) {
+            console.error('❌ Erro ao excluir desafio:', error);
+            showAlert('❌ Erro ao excluir desafio', 'error');
+        } finally {
+            showGlobalLoading(false);
+        }
+    });
+}
+    function showDesafioModal(desafio = null) {
+    const modal = document.getElementById('desafio-modal');
+    const title = document.getElementById('desafio-modal-title');
+    
+    perguntaCount = 0;
+    document.getElementById('perguntas-container').innerHTML = '';
+
+    if (desafio) {
+        title.textContent = 'Editar Desafio';
+        document.getElementById('desafio-id').value = desafio.id;
+        document.getElementById('desafio-titulo').value = desafio.titulo;
+        document.getElementById('desafio-pontuacao').value = desafio.pontuacao;
+        document.getElementById('desafio-materia').value = desafio.materia;
+        document.getElementById('desafio-nivel').value = desafio.nivel;
+        document.getElementById('desafio-duracao').value = desafio.duracao || 15;
+        document.getElementById('desafio-descricao').value = desafio.descricao || '';
+        document.getElementById('desafio-status').value = desafio.status || 'ativo';
+        document.getElementById('desafio-max-tentativas').value = desafio.maxTentativas || 1;
+
+        if (desafio.dataInicio) {
+            document.getElementById('desafio-data-inicio').value = new Date(desafio.dataInicio).toISOString().split('T')[0];
+        }
+        
+        if (desafio.dataFim) {
+            document.getElementById('desafio-data-fim').value = new Date(desafio.dataFim).toISOString().split('T')[0];
+        }
+
+        if (desafio.perguntas && desafio.perguntas.length > 0) {
+            desafio.perguntas.forEach(pergunta => addPerguntaToForm(pergunta));
+        } else {
+            addPerguntaToForm();
+        }
+    } else {
+        title.textContent = 'Criar Desafio';
+        document.getElementById('desafio-form').reset();
+        // Adicionar 3 perguntas padrão
+        for (let i = 0; i < 3; i++) {
+            addPerguntaToForm();
+        }
+    }
+
+    modal.style.display = 'flex';
+}
+        
+function filterDesafios() {
+    const searchTerm = document.getElementById('desafio-search').value.toLowerCase();
+    const filteredDesafios = desafios.filter(desafio => 
+        desafio.titulo.toLowerCase().includes(searchTerm) || 
+        (desafio.descricao && desafio.descricao.toLowerCase().includes(searchTerm)) ||
+        desafio.materia.toLowerCase().includes(searchTerm)
+    );
+    displayDesafios(filteredDesafios);
+}
+
+function filterDesafiosByStatus(status) {
+    currentDesafioFilter = status;
+    
+    document.querySelectorAll('#desafios .filter-buttons .btn').forEach(btn => {
+        btn.classList.remove('btn-primary');
+        btn.classList.add('btn-secondary');
+    });
+    
+    if (status === 'todos') {
+        document.querySelector('#desafios .filter-buttons .btn:nth-child(1)').classList.add('btn-primary');
+        document.querySelector('#desafios .filter-buttons .btn:nth-child(1)').classList.remove('btn-secondary');
+        displayDesafios(desafios);
+    } else if (status === 'ativo') {
+        document.querySelector('#desafios .filter-buttons .btn:nth-child(2)').classList.add('btn-primary');
+        document.querySelector('#desafios .filter-buttons .btn:nth-child(2)').classList.remove('btn-secondary');
+        const filteredDesafios = desafios.filter(desafio => desafio.status === 'ativo');
+        displayDesafios(filteredDesafios);
+    } else if (status === 'inativo') {
+        document.querySelector('#desafios .filter-buttons .btn:nth-child(3)').classList.add('btn-primary');
+        document.querySelector('#desafios .filter-buttons .btn:nth-child(3)').classList.remove('btn-secondary');
+        const filteredDesafios = desafios.filter(desafio => desafio.status === 'inativo');
+        displayDesafios(filteredDesafios);
+    }
+}
+        
         // Settings Management
         async function handleSaveSettings() {
             try {
@@ -2874,6 +3499,7 @@
             pendingAction = action;
             document.getElementById('confirm-modal').style.display = 'flex';
         }
+        
         console.log('✅ Script do Admin Coliseum carregado com sucesso!');
     </script>
 </body>
