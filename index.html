@@ -3072,6 +3072,9 @@ function addPerguntaToForm(perguntaData = null) {
     perguntaCount++;
     const perguntaId = `pergunta_${perguntaCount}`;
     
+    // Obter alternativas do perguntaData ou usar padrão
+    const alternativas = perguntaData?.alternativas || ['', '', '', ''];
+    
     const perguntaHTML = `
         <div class="pergunta-item" style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
@@ -3088,29 +3091,29 @@ function addPerguntaToForm(perguntaData = null) {
             
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
                 <div class="form-group">
-                    <label style="color: #aaa; font-size: 12px;">Alternativa A</label>
+                    <label style="color: #aaa; font-size: 12px;">Alternativa A *</label>
                     <input type="text" class="form-control alternativa alternativa-a" 
-                           value="${perguntaData?.alternativas?.[0] || ''}" placeholder="Alternativa A" required>
+                           value="${alternativas[0]}" placeholder="Alternativa A" required>
                 </div>
                 <div class="form-group">
-                    <label style="color: #aaa; font-size: 12px;">Alternativa B</label>
+                    <label style="color: #aaa; font-size: 12px;">Alternativa B *</label>
                     <input type="text" class="form-control alternativa alternativa-b" 
-                           value="${perguntaData?.alternativas?.[1] || ''}" placeholder="Alternativa B" required>
+                           value="${alternativas[1]}" placeholder="Alternativa B" required>
                 </div>
                 <div class="form-group">
-                    <label style="color: #aaa; font-size: 12px;">Alternativa C</label>
+                    <label style="color: #aaa; font-size: 12px;">Alternativa C *</label>
                     <input type="text" class="form-control alternativa alternativa-c" 
-                           value="${perguntaData?.alternativas?.[2] || ''}" placeholder="Alternativa C" required>
+                           value="${alternativas[2]}" placeholder="Alternativa C" required>
                 </div>
                 <div class="form-group">
-                    <label style="color: #aaa; font-size: 12px;">Alternativa D</label>
+                    <label style="color: #aaa; font-size: 12px;">Alternativa D *</label>
                     <input type="text" class="form-control alternativa alternativa-d" 
-                           value="${perguntaData?.alternativas?.[3] || ''}" placeholder="Alternativa D" required>
+                           value="${alternativas[3]}" placeholder="Alternativa D" required>
                 </div>
             </div>
             
             <div class="form-group">
-                <label style="color: #aaa; font-size: 12px;">Alternativa Correta</label>
+                <label style="color: #aaa; font-size: 12px;">Alternativa Correta *</label>
                 <select class="form-control alternativa-correta" required>
                     <option value="0" ${perguntaData?.correta === 0 ? 'selected' : ''}>A</option>
                     <option value="1" ${perguntaData?.correta === 1 ? 'selected' : ''}>B</option>
@@ -3123,12 +3126,15 @@ function addPerguntaToForm(perguntaData = null) {
                 <input type="text" class="form-control pergunta-explicacao" 
                        placeholder="Explicação (opcional - aparece após responder)" 
                        value="${perguntaData?.explicacao || ''}">
+                <small style="color: #888; font-size: 11px;">
+                    Explicação que será mostrada após o aluno responder a pergunta
+                </small>
             </div>
         </div>`;
     
     document.getElementById('perguntas-container').insertAdjacentHTML('beforeend', perguntaHTML);
 }
-
+        
 function showDesafioModal(desafio = null) {
     const modal = document.getElementById('desafio-modal');
     const title = document.getElementById('desafio-modal-title');
@@ -3181,42 +3187,87 @@ async function saveDesafio() {
     const desafioId = document.getElementById('desafio-id').value;
     
     const desafioData = {
-        titulo: document.getElementById('desafio-titulo').value,
+        titulo: document.getElementById('desafio-titulo').value.trim(),
         pontuacao: parseInt(document.getElementById('desafio-pontuacao').value),
         materia: document.getElementById('desafio-materia').value,
         nivel: document.getElementById('desafio-nivel').value,
         duracao: parseInt(document.getElementById('desafio-duracao').value),
-        descricao: document.getElementById('desafio-descricao').value,
+        descricao: document.getElementById('desafio-descricao').value.trim() || '',
         status: document.getElementById('desafio-status').value,
         maxTentativas: parseInt(document.getElementById('desafio-max-tentativas').value) || 1
     };
 
+    // Validação básica
+    if (!desafioData.titulo) {
+        showAlert('❌ O título do desafio é obrigatório!', 'error');
+        return;
+    }
+
+    if (desafioData.pontuacao < 10 || desafioData.pontuacao > 100) {
+        showAlert('❌ A pontuação deve estar entre 10 e 100 pontos!', 'error');
+        return;
+    }
+
+    // Processar datas
     const dataInicio = document.getElementById('desafio-data-inicio').value;
     const dataFim = document.getElementById('desafio-data-fim').value;
     
-    if (dataInicio) desafioData.dataInicio = new Date(dataInicio).toISOString();
-    if (dataFim) desafioData.dataFim = new Date(dataFim).toISOString();
+    if (dataInicio) {
+        const data = new Date(dataInicio);
+        if (isNaN(data.getTime())) {
+            showAlert('❌ Data de início inválida!', 'error');
+            return;
+        }
+        desafioData.dataInicio = data.toISOString();
+    }
+    
+    if (dataFim) {
+        const data = new Date(dataFim);
+        if (isNaN(data.getTime())) {
+            showAlert('❌ Data de expiração inválida!', 'error');
+            return;
+        }
+        desafioData.dataFim = data.toISOString();
+    }
 
+    // Coletar perguntas
     const perguntas = [];
-    document.querySelectorAll('.pergunta-item').forEach((perguntaElement, index) => {
+    const perguntaElements = document.querySelectorAll('.pergunta-item');
+    
+    perguntaElements.forEach((perguntaElement, index) => {
+        const texto = perguntaElement.querySelector('.pergunta-texto').value.trim();
         const alternativas = [
-            perguntaElement.querySelector('.alternativa-a').value,
-            perguntaElement.querySelector('.alternativa-b').value,
-            perguntaElement.querySelector('.alternativa-c').value,
-            perguntaElement.querySelector('.alternativa-d').value
+            perguntaElement.querySelector('.alternativa-a').value.trim(),
+            perguntaElement.querySelector('.alternativa-b').value.trim(),
+            perguntaElement.querySelector('.alternativa-c').value.trim(),
+            perguntaElement.querySelector('.alternativa-d').value.trim()
         ];
         
-        const pergunta = {
-            pergunta: perguntaElement.querySelector('.pergunta-texto').value,
+        const correta = parseInt(perguntaElement.querySelector('.alternativa-correta').value);
+        const explicacao = perguntaElement.querySelector('.pergunta-explicacao').value.trim() || null;
+
+        // Validação da pergunta
+        if (!texto) {
+            throw new Error(`Pergunta ${index + 1} não tem texto`);
+        }
+
+        for (let i = 0; i < alternativas.length; i++) {
+            if (!alternativas[i]) {
+                throw new Error(`Pergunta ${index + 1}, alternativa ${String.fromCharCode(65 + i)} está vazia`);
+            }
+        }
+
+        if (correta < 0 || correta > 3) {
+            throw new Error(`Pergunta ${index + 1} não tem alternativa correta definida`);
+        }
+
+        perguntas.push({
+            pergunta: texto,
             alternativas: alternativas,
-            correta: parseInt(perguntaElement.querySelector('.alternativa-correta').value),
+            correta: correta,
+            explicacao: explicacao,
             ordem: index + 1
-        };
-        
-        const explicacao = perguntaElement.querySelector('.pergunta-explicacao').value;
-        if (explicacao) pergunta.explicacao = explicacao;
-        
-        perguntas.push(pergunta);
+        });
     });
 
     if (perguntas.length < 3) {
@@ -3229,18 +3280,27 @@ async function saveDesafio() {
     try {
         showGlobalLoading(true);
 
+        // Log dos dados que serão enviados
+        console.log('📤 Enviando dados do desafio:', JSON.stringify(desafioData, null, 2));
+
         let response;
+        let endpoint;
+        let method;
+
         if (desafioId) {
-            response = await apiRequest(`/api/desafios/${desafioId}`, {
-                method: 'PUT',
-                body: desafioData
-            });
+            endpoint = `/api/desafios/${desafioId}`;
+            method = 'PUT';
         } else {
-            response = await apiRequest('/api/desafios', {
-                method: 'POST',
-                body: desafioData
-            });
+            endpoint = '/api/desafios';
+            method = 'POST';
         }
+
+        response = await apiRequest(endpoint, {
+            method: method,
+            body: desafioData
+        });
+
+        console.log('✅ Resposta da API:', response);
 
         showAlert('✅ Desafio salvo com sucesso!', 'success');
         closeModal('desafio-modal');
@@ -3248,7 +3308,17 @@ async function saveDesafio() {
 
     } catch (error) {
         console.error('❌ Erro ao salvar desafio:', error);
-        showAlert('❌ Erro ao salvar desafio', 'error');
+        
+        let errorMessage = '❌ Erro ao salvar desafio';
+        if (error.message.includes('Dados incompletos')) {
+            errorMessage = '❌ Dados incompletos. Preencha todos os campos obrigatórios.';
+        } else if (error.message.includes('Pergunta') || error.message.includes('alternativa')) {
+            errorMessage = `❌ ${error.message}`;
+        } else if (error.message.includes('Erro 400')) {
+            errorMessage = '❌ Dados inválidos enviados para a API. Verifique o formato dos dados.';
+        }
+        
+        showAlert(errorMessage, 'error');
     } finally {
         showGlobalLoading(false);
     }
