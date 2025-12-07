@@ -1724,6 +1724,11 @@ async function apiRequest(endpoint, options = {}) {
     
     try {
         console.log(`🌐 Fazendo requisição para: ${url}`);
+        console.log(`📦 Método: ${options.method || 'GET'}`);
+        
+        if (options.body) {
+            console.log(`📝 Body (resumo):`, typeof options.body === 'string' ? JSON.parse(options.body) : options.body);
+        }
         
         const config = {
             method: options.method || 'GET',
@@ -1732,55 +1737,41 @@ async function apiRequest(endpoint, options = {}) {
                 'Accept': 'application/json',
                 ...options.headers
             },
-            mode: 'cors'
+            mode: 'cors',
+            credentials: 'omit'
         };
         
         if (options.body) {
-            config.body = JSON.stringify(options.body);
+            config.body = typeof options.body === 'string' ? options.body : JSON.stringify(options.body);
         }
         
         const response = await fetch(url, config);
         
+        console.log(`📨 Status da resposta: ${response.status} ${response.statusText}`);
+        
         if (!response.ok) {
-            throw new Error(`Erro ${response.status}`);
+            let errorDetails = '';
+            try {
+                const errorText = await response.text();
+                console.error('📄 Texto do erro:', errorText);
+                errorDetails = errorText;
+            } catch (e) {
+                console.error('❌ Não foi possível ler o erro:', e);
+            }
+            throw new Error(`Erro ${response.status}: ${response.statusText}\n${errorDetails}`);
         }
         
         const text = await response.text();
+        console.log('✅ Resposta recebida:', text.substring(0, 200) + (text.length > 200 ? '...' : ''));
+        
         return text ? JSON.parse(text) : { success: true };
         
     } catch (error) {
         console.error('❌ Erro na requisição direta:', error);
+        console.error('Stack:', error.stack);
         
-        try {
-            console.log('🔄 Tentando com proxy CORS...');
-            const proxyUrl = `https://api.cors-proxy.cc/v1?url=${encodeURIComponent(url)}`;
-            
-            const proxyConfig = {
-                method: options.method || 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            };
-            
-            if (options.body) {
-                proxyConfig.body = JSON.stringify(options.body);
-            }
-            
-            const proxyResponse = await fetch(proxyUrl, proxyConfig);
-            
-            if (!proxyResponse.ok) {
-                throw new Error(`Proxy error: ${proxyResponse.status}`);
-            }
-            
-            const text = await proxyResponse.text();
-            const result = text ? JSON.parse(text) : { success: true };
-            console.log('✅ Sucesso com proxy');
-            return result;
-            
-        } catch (proxyError) {
-            console.error('❌ Erro com proxy:', proxyError);
-            throw new Error('Falha na conexão com o servidor');
-        }
+        // Não tentar proxy para evitar problemas adicionais
+        throw new Error(`Falha na conexão com o servidor: ${error.message}`);
     }
 }
 
@@ -3197,37 +3188,16 @@ async function saveDesafio() {
         maxTentativas: parseInt(document.getElementById('desafio-max-tentativas').value) || 1
     };
 
-    // Validação básica
-    if (!desafioData.titulo) {
-        showAlert('❌ O título do desafio é obrigatório!', 'error');
-        return;
-    }
-
-    if (desafioData.pontuacao < 10 || desafioData.pontuacao > 100) {
-        showAlert('❌ A pontuação deve estar entre 10 e 100 pontos!', 'error');
-        return;
-    }
-
     // Processar datas
     const dataInicio = document.getElementById('desafio-data-inicio').value;
     const dataFim = document.getElementById('desafio-data-fim').value;
     
     if (dataInicio) {
-        const data = new Date(dataInicio);
-        if (isNaN(data.getTime())) {
-            showAlert('❌ Data de início inválida!', 'error');
-            return;
-        }
-        desafioData.dataInicio = data.toISOString();
+        desafioData.dataInicio = new Date(dataInicio).toISOString();
     }
     
     if (dataFim) {
-        const data = new Date(dataFim);
-        if (isNaN(data.getTime())) {
-            showAlert('❌ Data de expiração inválida!', 'error');
-            return;
-        }
-        desafioData.dataFim = data.toISOString();
+        desafioData.dataFim = new Date(dataFim).toISOString();
     }
 
     // Coletar perguntas
@@ -3282,6 +3252,20 @@ async function saveDesafio() {
 
         // Log dos dados que serão enviados
         console.log('📤 Enviando dados do desafio:', JSON.stringify(desafioData, null, 2));
+        
+        // Verificar estrutura específica
+        console.log('🔍 Verificando estrutura das perguntas:');
+        desafioData.perguntas.forEach((pergunta, i) => {
+            console.log(`  Pergunta ${i + 1}:`, {
+                hasPergunta: !!pergunta.pergunta,
+                perguntaLength: pergunta.pergunta.length,
+                alternativasCount: pergunta.alternativas.length,
+                alternativas: pergunta.alternativas.map(a => a.length > 20 ? a.substring(0, 20) + '...' : a),
+                correta: pergunta.correta,
+                hasExplicacao: !!pergunta.explicacao,
+                ordem: pergunta.ordem
+            });
+        });
 
         let response;
         let endpoint;
