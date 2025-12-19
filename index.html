@@ -2550,7 +2550,23 @@ function getCategoriaNome(categoria) {
     };
     return nomes[categoria] || categoria;
 }
-
+function getMateriaNome(materia) {
+    const nomes = {
+        'algebra': 'Álgebra',
+        'geometria': 'Geometria',
+        'quimica': 'Química',
+        'fisica': 'Física',
+        'historia': 'História',
+        'geografia': 'Geografia',
+        'gramatica': 'Gramática',
+        'interpretacao': 'Interpretação',
+        'python': 'Python',
+        'javascript': 'JavaScript',
+        'Robótica': 'Robótica',
+        'web': 'Desenvolvimento Web'
+    };
+    return nomes[materia] || materia;
+}
 // User Management
 function filterUsers() {
     const searchTerm = document.getElementById('user-search').value.toLowerCase();
