@@ -2358,27 +2358,24 @@ async function sendChatMessage() {
         return;
     }
     
-    if (message.length > 1000) {
-        showAlert('❌ A mensagem não pode ter mais de 1000 caracteres', 'error');
-        return;
-    }
-    
     const mode = modeSelect ? modeSelect.value : 'public';
     const recipientId = recipientSelect ? recipientSelect.value : '';
     
     try {
-        console.log('📤 Enviando mensagem de chat...');
+        // SEMPRE inclua o usuarioId - use um ID de administrador válido
+        const ADMIN_USER_ID = 1; // Altere para o ID real do usuário admin
         
-        // Para mensagens administrativas, usamos um usuário especial (ou null)
         const messageData = {
+            usuarioId: ADMIN_USER_ID, // ⬅️ AGORA SEMPRE ENVIADO
             conteudo: message,
             tipo: 'texto'
         };
         
-        // Se houver destinatário específico, marcar como mensagem privada
+        // Para mensagens privadas (se seu backend suportar)
         if (recipientId && mode === 'private') {
-            messageData.usuarioId = 1; // ID do admin (ajustar conforme necessário)
-            messageData.destinatarioId = parseInt(recipientId);
+            // Nota: O backend atual NÃO tem suporte para destinatarioId
+            // Você pode marcar a mensagem de outra forma
+            messageData.conteudo = "[PRIVADO] " + message;
             messageData.tipo = 'privado';
         }
         
@@ -2392,11 +2389,7 @@ async function sendChatMessage() {
         if (response && response.success) {
             showAlert('✅ Mensagem enviada com sucesso!', 'success');
             messageInput.value = '';
-            
-            // Atualizar lista de mensagens
             await loadChatMessages();
-        } else {
-            showAlert('❌ Erro ao enviar mensagem', 'error');
         }
         
     } catch (error) {
