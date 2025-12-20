@@ -713,7 +713,180 @@
             display: flex;
             gap: 5px;
         }
+        .chat-message {
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-left: 4px solid;
+            transition: all 0.3s ease;
+            position: relative;
+        }
 
+            .chat-message:hover {
+                background: rgba(255, 255, 255, 0.08);
+                transform: translateX(5px);
+            }
+            
+            .chat-message.admin {
+                border-left-color: #ffcf00;
+                background: rgba(255, 207, 0, 0.1);
+            }
+            
+            .chat-message.user {
+                border-left-color: #4361ee;
+                background: rgba(67, 97, 238, 0.1);
+            }
+            
+            .chat-message.system {
+                border-left-color: #4cc9f0;
+                background: rgba(76, 201, 240, 0.1);
+            }
+            
+            .chat-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 10px;
+            }
+            
+            .chat-user-info {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            
+            .chat-user-avatar {
+                width: 32px;
+                height: 32px;
+                border-radius: 50%;
+                background: #ffcf00;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: #000;
+                font-weight: bold;
+                font-size: 14px;
+            }
+            
+            .chat-user-name {
+                font-weight: 600;
+                color: #ffcf00;
+            }
+            
+            .chat-user-ra {
+                color: #aaa;
+                font-size: 0.85rem;
+                margin-left: 10px;
+            }
+            
+            .chat-user-course {
+                font-size: 0.8rem;
+                padding: 3px 8px;
+                border-radius: 10px;
+                background: rgba(255, 255, 255, 0.1);
+                color: #ccc;
+            }
+            
+            .chat-timestamp {
+                color: #888;
+                font-size: 0.8rem;
+            }
+            
+            .chat-content {
+                color: #ddd;
+                line-height: 1.5;
+                margin: 10px 0;
+                word-break: break-word;
+            }
+            
+            .chat-actions {
+                display: flex;
+                gap: 8px;
+                margin-top: 10px;
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            }
+            
+            .chat-message:hover .chat-actions {
+                opacity: 1;
+            }
+            
+            .chat-action-btn {
+                padding: 4px 10px;
+                border: none;
+                border-radius: 6px;
+                font-size: 0.75rem;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+            
+            .chat-action-edit {
+                background: rgba(67, 97, 238, 0.2);
+                color: #4361ee;
+            }
+            
+            .chat-action-edit:hover {
+                background: rgba(67, 97, 238, 0.3);
+            }
+            
+            .chat-action-delete {
+                background: rgba(247, 37, 133, 0.2);
+                color: #f72585;
+            }
+            
+            .chat-action-delete:hover {
+                background: rgba(247, 37, 133, 0.3);
+            }
+            
+            .chat-admin-badge {
+                display: inline-block;
+                padding: 3px 8px;
+                background: linear-gradient(135deg, #ffcf00, #e6ba00);
+                color: #000;
+                border-radius: 10px;
+                font-size: 0.7rem;
+                font-weight: bold;
+                margin-left: 10px;
+            }
+            
+            .empty-chat {
+                text-align: center;
+                padding: 50px 20px;
+                color: #888;
+            }
+            
+            .empty-chat i {
+                font-size: 3rem;
+                margin-bottom: 15px;
+                color: #555;
+            }
+            
+            /* Modal de edição de mensagem */
+            #edit-message-modal .modal-content {
+                max-width: 500px;
+            }
+            
+            .message-type-indicator {
+                display: inline-block;
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                margin-right: 8px;
+            }
+            
+            .message-type-text .message-type-indicator {
+                background: #4361ee;
+            }
+            
+            .message-type-announcement .message-type-indicator {
+                background: #ffcf00;
+            }
+            
+            .message-type-warning .message-type-indicator {
+                background: #f72585;
+            }
+        
         @media (max-width: 768px) {
             body {
                 padding: 15px;
@@ -810,6 +983,24 @@
                 width: 100%;
             }
 
+            .chat-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+    
+            .chat-timestamp {
+                align-self: flex-start;
+            }
+    
+            .chat-actions {
+                opacity: 1;
+                justify-content: flex-start;
+            }
+    
+            .form-row {
+                flex-direction: column;
+            }
         }
 
         @media (max-width: 480px) {
@@ -869,6 +1060,7 @@
             <div class="tab" data-tab="cursos">Gerenciar Cursos</div>
             <div class="tab" data-tab="desafios">Gerenciar Desafios</div>
             <div class="tab" data-tab="ranking">Ranking Completo</div>
+            <div class="tab" data-tab="chat">Chat Geral-ADM</div>
             <div class="tab" data-tab="settings">Configurações</div>
         </div>
 
@@ -1151,7 +1343,106 @@
                 </table>
             </div>
         </div>
+<!-- Chat Tab -->
+<div id="chat" class="tab-content">
+    <div class="form-container">
+        <h3>Chat Administrativo</h3>
+        <div class="form-row">
+            <div class="form-group" style="flex: 2;">
+                <label for="chat-admin-message">Nova mensagem</label>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="chat-admin-message" class="form-control" 
+                           placeholder="Digite sua mensagem...">
+                    <button class="btn btn-primary" id="send-chat-message">
+                        <i class="fas fa-paper-plane"></i> Enviar
+                    </button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="chat-admin-mode">Modo</label>
+                <select id="chat-admin-mode" class="form-control">
+                    <option value="public">Público</option>
+                    <option value="private">Privado</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group" style="flex: 2;">
+                <label for="chat-recipient">Destinatário (opcional)</label>
+                <select id="chat-recipient" class="form-control">
+                    <option value="">Todos os usuários</option>
+                    <!-- Users will be loaded dynamically -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="chat-admin-action">Ação Rápida</label>
+                <select id="chat-admin-action" class="form-control">
+                    <option value="">Selecione uma ação...</option>
+                    <option value="announcement">Anúncio do Sistema</option>
+                    <option value="warning">Aviso Geral</option>
+                    <option value="motivation">Mensagem Motivacional</option>
+                    <option value="news">Novidade</option>
+                </select>
+            </div>
+        </div>
+    </div>
 
+    <div class="table-container">
+        <div class="table-header">
+            <h3>Mensagens do Chat</h3>
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="chat-search" placeholder="Buscar mensagens...">
+                </div>
+                <div class="filter-buttons">
+                    <button class="btn btn-sm btn-primary" onclick="filterChatMessages('all')">
+                        Todas
+                    </button>
+                    <button class="btn btn-sm btn-secondary" onclick="filterChatMessages('admin')">
+                        Administrativas
+                    </button>
+                    <button class="btn btn-sm btn-secondary" onclick="filterChatMessages('user')">
+                        Usuários
+                    </button>
+                </div>
+                <button class="btn btn-warning" id="clear-chat-btn">
+                    <i class="fas fa-trash-alt"></i> Limpar Chat
+                </button>
+            </div>
+        </div>
+        
+        <div class="loading" id="chat-loading">
+            <div class="spinner"></div>
+        </div>
+        
+        <div id="chat-messages-container" style="max-height: 500px; overflow-y: auto; padding: 20px;">
+            <!-- Messages will be loaded here -->
+            <div id="chat-messages-list">
+                <!-- Messages will be dynamically added here -->
+            </div>
+        </div>
+        
+        <div id="chat-controls" style="padding: 15px; border-top: 1px solid #555; display: flex; justify-content: space-between; align-items: center;">
+            <div style="color: #aaa; font-size: 0.9rem;">
+                <span id="total-messages-count">0</span> mensagens
+                <span style="margin: 0 10px;">•</span>
+                <span id="admin-messages-count">0</span> administrativas
+                <span style="margin: 0 10px;">•</span>
+                <span id="user-messages-count">0</span> de usuários
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-sm btn-secondary" id="load-more-chat" onclick="loadMoreChatMessages()">
+                    <i class="fas fa-sync-alt"></i> Carregar Mais
+                </button>
+                <button class="btn btn-sm btn-primary" id="refresh-chat" onclick="loadChatMessages()">
+                    <i class="fas fa-redo"></i> Atualizar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
         <!-- Settings Tab -->
         <div id="settings" class="tab-content">
             <div class="form-container">
@@ -1661,8 +1952,7 @@
     </div>
 </div>
     
-    <script>
-// Variáveis globais
+    <script>// Variáveis globais
 const API_BASE_URL = 'https://coliseum-api.onrender.com';
 let users = [];
 let videos = [];
@@ -1676,6 +1966,11 @@ let usedRAs = new Set();
 let desafios = [];
 let currentDesafioFilter = 'todos';
 let perguntaCount = 0;
+let chatMessages = [];
+let currentChatFilter = 'all';
+let chatPage = 1;
+let chatLimit = 20;
+let allUsersForChat = [];
 
 // DOM Elements
 const tabs = document.querySelectorAll('.tab');
@@ -1780,6 +2075,7 @@ document.addEventListener('DOMContentLoaded', function() {
     setupEventListeners();
     setupErrorHandling();
     loadInitialData();
+    initializeChat(); // Inicializar chat
 });
 
 // Configurar tratamento de erro global
@@ -1827,11 +2123,512 @@ function initializeTabs() {
                         case 'desafios':
                             loadDesafios();
                             break;
+                        case 'chat':
+                            loadChatMessages();
+                            loadChatUsers();
+                            break;
                     }
                 }
             });
         });
     });
+}
+
+// Funções para chat
+function initializeChat() {
+    console.log('💬 Inicializando sistema de chat...');
+    
+    // Configurar event listeners para chat
+    setupButton('#send-chat-message', sendChatMessage);
+    setupButton('#refresh-chat', loadChatMessages);
+    setupButton('#clear-chat-btn', () => {
+        showConfirmation('Limpar todas as mensagens do chat? Esta ação não pode ser desfeita!', clearAllChatMessages);
+    });
+    
+    // Configurar ação rápida
+    const chatActionSelect = document.getElementById('chat-admin-action');
+    if (chatActionSelect) {
+        chatActionSelect.addEventListener('change', function() {
+            const action = this.value;
+            if (action) {
+                applyQuickChatAction(action);
+                this.value = '';
+            }
+        });
+    }
+    
+    // Configurar busca
+    const chatSearch = document.getElementById('chat-search');
+    if (chatSearch) {
+        chatSearch.addEventListener('input', filterChatMessages);
+    }
+}
+
+async function loadChatUsers() {
+    try {
+        console.log('👥 Carregando usuários para chat...');
+        const users = await apiRequest('/api/usuarios');
+        allUsersForChat = Array.isArray(users) ? users : [];
+        
+        const recipientSelect = document.getElementById('chat-recipient');
+        if (recipientSelect) {
+            recipientSelect.innerHTML = '<option value="">Todos os usuários</option>';
+            
+            allUsersForChat
+                .filter(user => user.status === 'ativo')
+                .forEach(user => {
+                    const option = document.createElement('option');
+                    option.value = user.id;
+                    option.textContent = `${user.nome} (RA: ${user.ra}) - ${user.curso}`;
+                    recipientSelect.appendChild(option);
+                });
+        }
+        
+        console.log(`✅ ${allUsersForChat.length} usuários carregados para chat`);
+    } catch (error) {
+        console.error('❌ Erro ao carregar usuários para chat:', error);
+    }
+}
+
+async function loadChatMessages() {
+    try {
+        console.log('💬 Carregando mensagens do chat...');
+        showChatLoading(true);
+        
+        const response = await apiRequest('/api/chat/mensagens');
+        
+        if (response && response.success && Array.isArray(response.mensagens)) {
+            chatMessages = response.mensagens;
+            displayChatMessages(chatMessages);
+            updateChatStats();
+        } else {
+            chatMessages = [];
+            displayChatMessages([]);
+        }
+        
+        chatPage = 1;
+        
+    } catch (error) {
+        console.error('❌ Erro ao carregar mensagens:', error);
+        showAlert('❌ Erro ao carregar mensagens do chat', 'error');
+        chatMessages = [];
+        displayChatMessages([]);
+    } finally {
+        showChatLoading(false);
+    }
+}
+
+async function loadMoreChatMessages() {
+    try {
+        chatPage++;
+        console.log(`📥 Carregando mais mensagens, página ${chatPage}...`);
+        
+        const response = await apiRequest(`/api/chat/mensagens?page=${chatPage}&limit=${chatLimit}`);
+        
+        if (response && response.success && Array.isArray(response.mensagens)) {
+            const newMessages = response.mensagens;
+            chatMessages = [...chatMessages, ...newMessages];
+            displayChatMessages(chatMessages);
+            
+            // Desabilitar botão se não houver mais mensagens
+            const loadMoreBtn = document.getElementById('load-more-chat');
+            if (loadMoreBtn) {
+                if (newMessages.length < chatLimit) {
+                    loadMoreBtn.disabled = true;
+                    loadMoreBtn.innerHTML = '<i class="fas fa-check"></i> Todas as mensagens carregadas';
+                }
+            }
+        }
+        
+    } catch (error) {
+        console.error('❌ Erro ao carregar mais mensagens:', error);
+        showAlert('❌ Erro ao carregar mais mensagens', 'error');
+    }
+}
+
+function showChatLoading(show) {
+    const loadingElement = document.getElementById('chat-loading');
+    if (loadingElement) {
+        loadingElement.style.display = show ? 'flex' : 'none';
+    }
+}
+
+function displayChatMessages(messages) {
+    const container = document.getElementById('chat-messages-list');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    if (!messages || messages.length === 0) {
+        container.innerHTML = `
+            <div class="empty-chat">
+                <i class="fas fa-comments"></i>
+                <h3>Nenhuma mensagem no chat</h3>
+                <p>Seja o primeiro a enviar uma mensagem!</p>
+            </div>
+        `;
+        return;
+    }
+    
+    // Ordenar mensagens por timestamp (mais recente primeiro)
+    const sortedMessages = [...messages].sort((a, b) => 
+        new Date(b.timestamp) - new Date(a.timestamp)
+    );
+    
+    sortedMessages.forEach(message => {
+        const messageElement = createChatMessageElement(message);
+        container.appendChild(messageElement);
+    });
+}
+
+function createChatMessageElement(message) {
+    const div = document.createElement('div');
+    div.className = `chat-message ${message.usuario ? 'user' : 'admin'}`;
+    div.setAttribute('data-message-id', message.id);
+    div.setAttribute('data-user-id', message.usuarioId);
+    div.setAttribute('data-timestamp', message.timestamp);
+    
+    const user = message.usuario;
+    const isAdminMessage = !user; // Mensagens do sistema não têm usuário
+    
+    const timestamp = new Date(message.timestamp).toLocaleString('pt-BR');
+    const userInitial = user ? user.nome.charAt(0).toUpperCase() : 'A';
+    
+    div.innerHTML = `
+        <div class="chat-header">
+            <div class="chat-user-info">
+                <div class="chat-user-avatar">
+                    ${userInitial}
+                </div>
+                <div>
+                    <span class="chat-user-name">
+                        ${user ? user.nome : 'Administração'}
+                    </span>
+                    ${user ? `<span class="chat-user-ra">RA: ${user.ra}</span>` : ''}
+                    ${isAdminMessage ? '<span class="chat-admin-badge">ADMIN</span>' : ''}
+                </div>
+                ${user ? `<span class="chat-user-course">${user.curso}</span>` : ''}
+            </div>
+            <div class="chat-timestamp">
+                ${timestamp}
+            </div>
+        </div>
+        
+        <div class="chat-content">
+            ${escapeHtml(message.conteudo)}
+        </div>
+        
+        <div class="chat-actions">
+            <button class="chat-action-btn chat-action-edit" onclick="editChatMessage(${message.id})">
+                <i class="fas fa-edit"></i> Editar
+            </button>
+            <button class="chat-action-btn chat-action-delete" onclick="deleteChatMessage(${message.id})">
+                <i class="fas fa-trash"></i> Excluir
+            </button>
+        </div>
+    `;
+    
+    return div;
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function updateChatStats() {
+    const totalMessages = chatMessages.length;
+    const adminMessages = chatMessages.filter(msg => !msg.usuario).length;
+    const userMessages = totalMessages - adminMessages;
+    
+    document.getElementById('total-messages-count').textContent = totalMessages;
+    document.getElementById('admin-messages-count').textContent = adminMessages;
+    document.getElementById('user-messages-count').textContent = userMessages;
+}
+
+async function sendChatMessage() {
+    const messageInput = document.getElementById('chat-admin-message');
+    const message = messageInput.value.trim();
+    const modeSelect = document.getElementById('chat-admin-mode');
+    const recipientSelect = document.getElementById('chat-recipient');
+    
+    if (!message) {
+        showAlert('❌ Digite uma mensagem antes de enviar', 'error');
+        return;
+    }
+    
+    if (message.length > 1000) {
+        showAlert('❌ A mensagem não pode ter mais de 1000 caracteres', 'error');
+        return;
+    }
+    
+    const mode = modeSelect ? modeSelect.value : 'public';
+    const recipientId = recipientSelect ? recipientSelect.value : '';
+    
+    try {
+        console.log('📤 Enviando mensagem de chat...');
+        
+        // Para mensagens administrativas, usamos um usuário especial (ou null)
+        const messageData = {
+            conteudo: message,
+            tipo: 'texto'
+        };
+        
+        // Se houver destinatário específico, marcar como mensagem privada
+        if (recipientId && mode === 'private') {
+            messageData.usuarioId = 1; // ID do admin (ajustar conforme necessário)
+            messageData.destinatarioId = parseInt(recipientId);
+            messageData.tipo = 'privado';
+        }
+        
+        showGlobalLoading(true);
+        
+        const response = await apiRequest('/api/chat/mensagens', {
+            method: 'POST',
+            body: messageData
+        });
+        
+        if (response && response.success) {
+            showAlert('✅ Mensagem enviada com sucesso!', 'success');
+            messageInput.value = '';
+            
+            // Atualizar lista de mensagens
+            await loadChatMessages();
+        } else {
+            showAlert('❌ Erro ao enviar mensagem', 'error');
+        }
+        
+    } catch (error) {
+        console.error('❌ Erro ao enviar mensagem:', error);
+        showAlert('❌ Erro ao enviar mensagem', 'error');
+    } finally {
+        showGlobalLoading(false);
+    }
+}
+
+async function deleteChatMessage(messageId) {
+    showConfirmation('Excluir esta mensagem do chat?', async () => {
+        try {
+            showGlobalLoading(true);
+            
+            await apiRequest(`/api/chat/mensagens/${messageId}`, {
+                method: 'DELETE',
+                body: {
+                    isAdmin: true,
+                    usuarioId: 1 // ID do admin
+                }
+            });
+            
+            showAlert('✅ Mensagem excluída com sucesso!', 'success');
+            await loadChatMessages();
+            
+        } catch (error) {
+            console.error('❌ Erro ao excluir mensagem:', error);
+            showAlert('❌ Erro ao excluir mensagem', 'error');
+        } finally {
+            showGlobalLoading(false);
+        }
+    });
+}
+
+async function editChatMessage(messageId) {
+    try {
+        const message = chatMessages.find(msg => msg.id == messageId);
+        if (!message) return;
+        
+        const modal = document.getElementById('edit-message-modal');
+        if (!modal) {
+            // Criar modal dinamicamente
+            const modalHTML = `
+                <div class="modal" id="edit-message-modal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>Editar Mensagem</h3>
+                            <button class="modal-close">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label for="edit-message-content">Conteúdo da mensagem</label>
+                                <textarea id="edit-message-content" class="form-control" rows="5" placeholder="Digite a mensagem..."></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-warning" id="cancel-edit-message">Cancelar</button>
+                            <button class="btn btn-primary" id="save-edit-message">Salvar</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+            
+            // Configurar event listeners
+            document.querySelector('#edit-message-modal .modal-close').addEventListener('click', () => {
+                closeModal('edit-message-modal');
+            });
+            
+            document.getElementById('cancel-edit-message').addEventListener('click', () => {
+                closeModal('edit-message-modal');
+            });
+            
+            document.getElementById('save-edit-message').addEventListener('click', () => {
+                saveEditedMessage(messageId);
+            });
+        }
+        
+        // Preencher modal com dados da mensagem
+        document.getElementById('edit-message-content').value = message.conteudo;
+        
+        // Mostrar modal
+        document.getElementById('edit-message-modal').style.display = 'flex';
+        
+    } catch (error) {
+        console.error('❌ Erro ao abrir edição de mensagem:', error);
+        showAlert('❌ Erro ao carregar mensagem para edição', 'error');
+    }
+}
+
+async function saveEditedMessage(messageId) {
+    try {
+        const newContent = document.getElementById('edit-message-content').value.trim();
+        
+        if (!newContent) {
+            showAlert('❌ A mensagem não pode estar vazia', 'error');
+            return;
+        }
+        
+        if (newContent.length > 1000) {
+            showAlert('❌ A mensagem não pode ter mais de 1000 caracteres', 'error');
+            return;
+        }
+        
+        const message = chatMessages.find(msg => msg.id == messageId);
+        if (!message) return;
+        
+        const updateData = {
+            ...message,
+            conteudo: newContent
+        };
+        
+        showGlobalLoading(true);
+        
+        // Nota: A API atual não tem endpoint para atualizar mensagens de chat
+        // Podemos usar o endpoint DELETE + POST ou criar um endpoint PUT
+        // Por enquanto, vamos mostrar uma mensagem informativa
+        showAlert('ℹ️ Funcionalidade de edição em desenvolvimento', 'warning');
+        closeModal('edit-message-modal');
+        
+        // Para implementação completa, precisaríamos de um endpoint PUT no backend
+        
+    } catch (error) {
+        console.error('❌ Erro ao salvar mensagem editada:', error);
+        showAlert('❌ Erro ao salvar mensagem editada', 'error');
+    } finally {
+        showGlobalLoading(false);
+    }
+}
+
+async function clearAllChatMessages() {
+    try {
+        showGlobalLoading(true);
+        console.log('🗑️ Limpando todas as mensagens do chat...');
+        
+        // Nota: A API atual não tem endpoint para limpar todas as mensagens
+        // Precisaríamos deletar uma por uma ou criar um endpoint específico
+        
+        showAlert('ℹ️ Funcionalidade de limpeza em desenvolvimento', 'warning');
+        
+        // Para implementação completa:
+        // 1. Criar endpoint DELETE /api/chat/mensagens/todas (no backend)
+        // 2. Implementar loop para deletar todas as mensagens
+        
+    } catch (error) {
+        console.error('❌ Erro ao limpar chat:', error);
+        showAlert('❌ Erro ao limpar chat', 'error');
+    } finally {
+        showGlobalLoading(false);
+    }
+}
+
+function filterChatMessages(filter = null) {
+    if (filter) {
+        currentChatFilter = filter;
+        
+        // Atualizar botões de filtro
+        document.querySelectorAll('#chat .filter-buttons .btn').forEach(btn => {
+            btn.classList.remove('btn-primary');
+            btn.classList.add('btn-secondary');
+        });
+        
+        if (filter === 'all') {
+            document.querySelector('#chat .filter-buttons .btn:nth-child(1)').classList.add('btn-primary');
+            document.querySelector('#chat .filter-buttons .btn:nth-child(1)').classList.remove('btn-secondary');
+            displayChatMessages(chatMessages);
+        } else if (filter === 'admin') {
+            document.querySelector('#chat .filter-buttons .btn:nth-child(2)').classList.add('btn-primary');
+            document.querySelector('#chat .filter-buttons .btn:nth-child(2)').classList.remove('btn-secondary');
+            const adminMessages = chatMessages.filter(msg => !msg.usuario);
+            displayChatMessages(adminMessages);
+        } else if (filter === 'user') {
+            document.querySelector('#chat .filter-buttons .btn:nth-child(3)').classList.add('btn-primary');
+            document.querySelector('#chat .filter-buttons .btn:nth-child(3)').classList.remove('btn-secondary');
+            const userMessages = chatMessages.filter(msg => msg.usuario);
+            displayChatMessages(userMessages);
+        }
+    } else {
+        // Filtro por busca
+        const searchTerm = document.getElementById('chat-search').value.toLowerCase();
+        const filteredMessages = chatMessages.filter(message => {
+            const userInfo = message.usuario ? 
+                `${message.usuario.nome} ${message.usuario.ra} ${message.usuario.curso}`.toLowerCase() : 
+                'administração';
+            const content = message.conteudo.toLowerCase();
+            
+            return userInfo.includes(searchTerm) || content.includes(searchTerm);
+        });
+        
+        displayChatMessages(filteredMessages);
+    }
+    
+    updateChatStats();
+}
+
+function applyQuickChatAction(action) {
+    const messageInput = document.getElementById('chat-admin-message');
+    
+    let message = '';
+    let prefix = '';
+    
+    switch(action) {
+        case 'announcement':
+            message = '📢 **ANÚNCIO DO SISTEMA:** ';
+            prefix = 'announcement';
+            break;
+        case 'warning':
+            message = '⚠️ **AVISO GERAL:** ';
+            prefix = 'warning';
+            break;
+        case 'motivation':
+            message = '💪 **MENSAGEM MOTIVACIONAL:** ';
+            prefix = 'motivation';
+            break;
+        case 'news':
+            message = '🆕 **NOVIDADE:** ';
+            prefix = 'news';
+            break;
+    }
+    
+    if (messageInput) {
+        messageInput.value = message;
+        messageInput.focus();
+        
+        // Configurar o tipo da mensagem baseado na ação
+        const modeSelect = document.getElementById('chat-admin-mode');
+        if (modeSelect) {
+            modeSelect.value = 'public';
+        }
+    }
 }
 
 // Event Listeners
@@ -1886,6 +2683,13 @@ function setupEventListeners() {
     setupButton('#reset-points', () => showConfirmation('Zerar todas as pontuações?', resetAllPoints));
     setupButton('#reset-all', () => showConfirmation('Resetar TODOS os dados? Esta ação não pode ser desfeita!', resetAllData));
     setupButton('#confirm-action', executePendingAction);
+    
+    // Chat
+    setupButton('#send-chat-message', sendChatMessage);
+    setupButton('#refresh-chat', loadChatMessages);
+    setupButton('#clear-chat-btn', () => {
+        showConfirmation('Limpar todas as mensagens do chat? Esta ação não pode ser desfeita!', clearAllChatMessages);
+    });
 
     // Configurar event listeners dinâmicos para tabelas
     setupDynamicEventListeners();
@@ -1896,6 +2700,18 @@ function setupEventListeners() {
             generateRandomRA('new-user-ra');
         }, 100);
     });
+    
+    // Configurar ação rápida do chat
+    const chatActionSelect = document.getElementById('chat-admin-action');
+    if (chatActionSelect) {
+        chatActionSelect.addEventListener('change', function() {
+            const action = this.value;
+            if (action) {
+                applyQuickChatAction(action);
+                this.value = '';
+            }
+        });
+    }
 }
 
 function setupButton(selector, handler) {
@@ -2006,6 +2822,12 @@ function setupDynamicEventListeners() {
     const desafioSearch = document.getElementById('desafio-search');
     if (desafioSearch) {
         desafioSearch.addEventListener('input', filterDesafios);
+    }
+    
+    // Adicionar evento para busca de chat
+    const chatSearch = document.getElementById('chat-search');
+    if (chatSearch) {
+        chatSearch.addEventListener('input', filterChatMessages);
     }
 
     // Event listener para mudança de status
@@ -2556,6 +3378,7 @@ function getCategoriaNome(categoria) {
     };
     return nomes[categoria] || categoria;
 }
+
 function getMateriaNome(materia) {
     const nomes = {
         'algebra': 'Álgebra',
@@ -2573,6 +3396,7 @@ function getMateriaNome(materia) {
     };
     return nomes[materia] || materia;
 }
+
 // User Management
 function filterUsers() {
     const searchTerm = document.getElementById('user-search').value.toLowerCase();
@@ -2624,6 +3448,7 @@ function editUser(userId) {
 
     document.getElementById('edit-user-modal').style.display = 'flex';
 }
+
 async function deleteUser(userId) {
     const user = users.find(u => u.id == userId);
     if (!user) return;
@@ -3009,6 +3834,7 @@ function showAddUserModal() {
     
     document.getElementById('add-user-modal').style.display = 'flex';
 }
+
 // ✅ FUNÇÃO PARA VALIDAÇÃO DO FORMULÁRIO DE USUÁRIO
 function validateUserForm(userData) {
     const errors = [];
