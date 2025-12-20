@@ -3003,7 +3003,87 @@ function showAddUserModal() {
     
     document.getElementById('add-user-modal').style.display = 'flex';
 }
+// ✅ FUNÇÃO PARA VALIDAÇÃO DO FORMULÁRIO DE USUÁRIO
+function validateUserForm(userData) {
+    const errors = [];
 
+    if (!userData.nome || userData.nome.trim().length < 3) {
+        errors.push('Nome deve ter pelo menos 3 caracteres');
+    }
+
+    if (!userData.ra || userData.ra.length !== 4 || !/^\d{4}$/.test(userData.ra)) {
+        errors.push('RA deve conter exatamente 4 dígitos numéricos');
+    }
+
+    if (!userData.serie) {
+        errors.push('Série é obrigatória');
+    }
+
+    if (!userData.senha || userData.senha.length < 4) {
+        errors.push('Senha deve ter pelo menos 4 caracteres');
+    }
+
+    if (!userData.curso) {
+        errors.push('Curso é obrigatório');
+    }
+
+    if (!userData.status) {
+        errors.push('Status é obrigatório');
+    }
+
+    return errors;
+}
+
+// ✅ FUNÇÃO PARA ADICIONAR NOVO USUÁRIO
+async function saveNewUser() {
+    const userData = {
+        nome: document.getElementById('new-user-name').value.trim(),
+        ra: document.getElementById('new-user-ra').value.trim(),
+        serie: document.getElementById('new-user-serie').value,
+        senha: document.getElementById('new-user-senha').value.trim(),
+        curso: document.getElementById('new-user-curso').value,
+        status: document.getElementById('new-user-status').value
+    };
+
+    // Usar a função de validação
+    const errors = validateUserForm(userData);
+    if (errors.length > 0) {
+        showAlert(`❌ Erros de validação:\n• ${errors.join('\n• ')}`, 'error');
+        return;
+    }
+
+    if (usedRAs.has(userData.ra)) {
+        showAlert('❌ Este RA já está em uso! Gere um novo RA único.', 'error');
+        return;
+    }
+
+    try {
+        showGlobalLoading(true);
+        await apiRequest('/api/usuarios', {
+            method: 'POST',
+            body: userData
+        });
+        
+        usedRAs.add(userData.ra);
+        showAlert('✅ Usuário cadastrado com sucesso!', 'success');
+        closeModal('add-user-modal');
+        await loadUsers();
+        await loadDashboardData();
+    } catch (error) {
+        console.error('❌ Erro ao cadastrar usuário:', error);
+        
+        let errorMessage = '❌ Erro ao cadastrar usuário';
+        if (error.message.includes('já existe') || error.message.includes('RA já')) {
+            errorMessage = '❌ RA já cadastrado no sistema!';
+            usedRAs.add(userData.ra);
+        }
+        
+        showAlert(errorMessage, 'error');
+    } finally {
+        showGlobalLoading(false);
+    }
+}
+        
 async function saveNewUser() {
     const userData = {
         nome: document.getElementById('new-user-name').value.trim(),
