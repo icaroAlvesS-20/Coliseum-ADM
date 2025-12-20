@@ -2350,36 +2350,22 @@ function updateChatStats() {
 async function sendChatMessage() {
     const messageInput = document.getElementById('chat-admin-message');
     const message = messageInput.value.trim();
-    const modeSelect = document.getElementById('chat-admin-mode');
-    const recipientSelect = document.getElementById('chat-recipient');
     
     if (!message) {
         showAlert('❌ Digite uma mensagem antes de enviar', 'error');
         return;
     }
     
-    const mode = modeSelect ? modeSelect.value : 'public';
-    const recipientId = recipientSelect ? recipientSelect.value : '';
-    
     try {
-        // SEMPRE inclua o usuarioId - use um ID de administrador válido
-        const ADMIN_USER_ID = 1; // Altere para o ID real do usuário admin
+        showGlobalLoading(true);
         
         const messageData = {
-            usuarioId: ADMIN_USER_ID, // ⬅️ AGORA SEMPRE ENVIADO
             conteudo: message,
-            tipo: 'texto'
+            tipo: 'texto',
+            isAdmin: true  // ⬅️ FLAG IMPORTANTE!
         };
         
-        // Para mensagens privadas (se seu backend suportar)
-        if (recipientId && mode === 'private') {
-            // Nota: O backend atual NÃO tem suporte para destinatarioId
-            // Você pode marcar a mensagem de outra forma
-            messageData.conteudo = "[PRIVADO] " + message;
-            messageData.tipo = 'privado';
-        }
-        
-        showGlobalLoading(true);
+        console.log('📤 Enviando como admin:', messageData);
         
         const response = await apiRequest('/api/chat/mensagens', {
             method: 'POST',
@@ -2387,19 +2373,21 @@ async function sendChatMessage() {
         });
         
         if (response && response.success) {
-            showAlert('✅ Mensagem enviada com sucesso!', 'success');
+            showAlert('✅ Mensagem administrativa enviada!', 'success');
             messageInput.value = '';
             await loadChatMessages();
+        } else {
+            showAlert('❌ ' + (response?.error || 'Erro ao enviar'), 'error');
         }
         
     } catch (error) {
-        console.error('❌ Erro ao enviar mensagem:', error);
-        showAlert('❌ Erro ao enviar mensagem', 'error');
+        console.error('❌ Erro completo:', error);
+        showAlert('❌ Erro: ' + error.message, 'error');
     } finally {
         showGlobalLoading(false);
     }
 }
-
+        
 async function deleteChatMessage(messageId) {
     showConfirmation('Excluir esta mensagem do chat?', async () => {
         try {
