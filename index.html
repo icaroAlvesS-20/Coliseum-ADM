@@ -1217,11 +1217,12 @@
                     <div class="form-group">
                         <label for="edit-user-curso">Curso *</label>
                         <select id="edit-user-curso" class="form-control" required>
-                            <option value="matematica">Matemática</option>
-                            <option value="csn">CSN</option>
-                            <option value="csh">CSH</option>
-                            <option value="portugues">Português</option>
                             <option value="programacao">Programação</option>
+                            <option value="robotica">Robótica</option>
+                            <option value="games">Games</option>
+                            <option value="preparatorio">Preparatório</option>
+                            <option value="reforco">Reforço</option>
+                            <option value="informatica">Informática</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -1366,11 +1367,12 @@
                             <label for="curso-categoria">Categoria *</label>
                             <select id="curso-categoria" class="form-control" required>
                                 <option value="">Selecione a categoria</option>
-                                <option value="matematica">Matemática</option>
-                                <option value="csn">CSN</option>
-                                <option value="csh">CSH</option>
-                                <option value="portugues">Português</option>
                                 <option value="programacao">Programação</option>
+                                <option value="robotica">Robótica</option>
+                                <option value="games">Games</option>
+                                <option value="preparatorio">Preparatório</option>
+                                <option value="reforco">Reforço</option>
+                                <option value="informatica">Informática</option>
                             </select>
                         </div>
                     </div>
@@ -1511,11 +1513,13 @@
                     <div class="form-group">
                         <label for="new-user-curso">Curso *</label>
                         <select id="new-user-curso" class="form-control" required>
-                            <option value="matematica">Matemática</option>
-                            <option value="csn">CSN</option>
-                            <option value="csh">CSH</option>
-                            <option value="portugues">Português</option>
                             <option value="programacao">Programação</option>
+                            <option value="robotica">Robótica</option>
+                            <option value="games">Games</option>
+                            <option value="preparatorio">Preparatório</option>
+                            <option value="reforco">Reforço</option>
+                            <option value="informatica">Informática</option>
+
                         </select>
                     </div>
                     <div class="form-group">
@@ -2507,10 +2511,11 @@ function getMateriaBadgeClass(materia) {
 
 function getCursoBadgeClass(categoria) {
     const classes = {
-        'matematica': 'primary',
-        'csn': 'success',
-        'csh': 'warning',
-        'portugues': 'danger',
+        'reforco': 'warning',
+        'robotica': 'primary',
+        'games': 'success',
+        'preparatorio': 'warning',
+        'informatica': 'danger',
         'programacao': 'primary'
     };
     return classes[categoria] || 'primary';
@@ -2542,10 +2547,11 @@ function getNivelNome(nivel) {
 
 function getCategoriaNome(categoria) {
     const nomes = {
-        'matematica': 'Matemática',
-        'csn': 'CSN',
-        'csh': 'CSH',
-        'portugues': 'Português',
+        'reforco': 'Reforço',
+        'robotica': 'Robótica',
+        'games': 'Games',
+        'preparatorio': 'Preparatório',
+        'informatica': 'Informática',
         'programacao': 'Programação'
     };
     return nomes[categoria] || categoria;
