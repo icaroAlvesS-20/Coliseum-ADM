@@ -1557,20 +1557,27 @@
 
                     <div class="form-group">
                         <label for="video-materia">Matéria</label>
-                        <select id="video-materia" class="form-control" required>
-                            <option value="">Selecione a matéria</option>
-                            <option value="algebra">Álgebra</option>
-                            <option value="geometria">Geometria</option>
-                            <option value="quimica">Química</option>
-                            <option value="fisica">Física</option>
-                            <option value="historia">História</option>
-                            <option value="geografia">Geografia</option>
-                            <option value="gramatica">Gramática</option>
-                            <option value="interpretacao">Interpretação</option>
-                            <option value="python">Python</option>
-                            <option value="javascript">JavaScript</option>
-                            <option value="Robótica">Robótica</option>
-                            <option value="web">Desenvolvimento Web</option>
+                         <select id="video-materia" class="form-control" required>
+                        <option value="">Selecione a matéria</option>
+                        <option value="algebra">Álgebra</option>
+                        <option value="geometria">Geometria</option>
+                        <option value="quimica">Química</option>
+                        <option value="fisica">Física</option>
+                        <option value="biologia">Biologia</option>
+                        <option value="historia">História</option>
+                        <option value="geografia">Geografia</option>
+                        <option value="gramatica">Gramática</option>
+                        <option value="redacao">Redação</option>
+                        <option value="literatura">Literatura</option>
+                        <option value="filosofia">Filosofia</option>
+                        <option value="sociologia">Sociologia</option>
+                        <option value="informatica">Informática</option>
+                        <option value="robotica">Robótica</option>
+                        <option value="games">Games</option>
+                        <option value="python">Python</option>
+                        <option value="javascript">JavaScript</option>
+                        <option value="web">Desenvolvimento Web</option>
+                           </select>
                     </div>
 
                     <div class="form-group">
@@ -1638,19 +1645,27 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label for="curso-materia">Matéria *</label>
-                            <select id="curso-materia" class="form-control" required>
-                                <option value="algebra">Álgebra</option>
-                                <option value="geometria">Geometria</option>
-                                <option value="quimica">Química</option>
-                                <option value="fisica">Física</option>
-                                <option value="historia">História</option>
-                                <option value="geografia">Geografia</option>
-                                <option value="gramatica">Gramática</option>
-                                <option value="interpretacao">Interpretação</option>
-                                <option value="python">Python</option>
-                                <option value="javascript">JavaScript</option>
-                                <option value="Robótica">Robótica</option>
-                                <option value="web">Desenvolvimento Web</option>
+                    <select id="curso-materia" class="form-control" required>
+                    <option value="">Selecione a matéria</option>
+                    <option value="algebra">Álgebra</option>
+                    <option value="geometria">Geometria</option>
+                    <option value="quimica">Química</option>
+                    <option value="fisica">Física</option>
+                    <option value="biologia">Biologia</option>
+                    <option value="historia">História</option>
+                    <option value="geografia">Geografia</option>
+                    <option value="gramatica">Gramática</option>
+                    <option value="redacao">Redação</option>
+                    <option value="literatura">Literatura</option>
+                    <option value="filosofia">Filosofia</option>
+                    <option value="sociologia">Sociologia</option>
+                    <option value="informatica">Informática</option>
+                    <option value="robotica">Robótica</option>
+                    <option value="games">Games</option>
+                    <option value="python">Python</option>
+                    <option value="javascript">JavaScript</option>
+                    <option value="web">Desenvolvimento Web</option>
+                            </select>
                             </select>
                         </div>
 
@@ -1856,19 +1871,27 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="desafio-materia">Matéria *</label>
-                        <select id="desafio-materia" class="form-control" required>
-                                <option value="algebra">Álgebra</option>
-                                <option value="geometria">Geometria</option>
-                                <option value="quimica">Química</option>
-                                <option value="fisica">Física</option>
-                                <option value="historia">História</option>
-                                <option value="geografia">Geografia</option>
-                                <option value="gramatica">Gramática</option>
-                                <option value="interpretacao">Interpretação</option>
-                                <option value="python">Python</option>
-                                <option value="javascript">JavaScript</option>
-                                <option value="Robótica">Robótica</option>
-                                <option value="web">Desenvolvimento Web</option>
+                <select id="desafio-materia" class="form-control" required>
+                <option value="">Selecione a matéria</option>
+                <option value="algebra">Álgebra</option>
+                <option value="geometria">Geometria</option>
+                <option value="quimica">Química</option>
+                <option value="fisica">Física</option>
+                <option value="biologia">Biologia</option>
+                <option value="historia">História</option>
+                <option value="geografia">Geografia</option>
+                <option value="gramatica">Gramática</option>
+                <option value="redacao">Redação</option>
+                <option value="literatura">Literatura</option>
+                <option value="filosofia">Filosofia</option>
+                <option value="sociologia">Sociologia</option>
+                <option value="informatica">Informática</option>
+                <option value="robotica">Robótica</option>
+                <option value="games">Games</option>
+                <option value="python">Python</option>
+                <option value="javascript">JavaScript</option>
+                <option value="web">Desenvolvimento Web</option>
+                    </select>
                         </select>
                     </div>
 
@@ -3293,20 +3316,25 @@ function displayFullRanking(ranking) {
     });
 }
 
-// Helper functions
 function getMateriaBadgeClass(materia) {
     const classes = {
         'algebra': 'primary',
         'geometria': 'primary',
         'quimica': 'success',
         'fisica': 'success',
+        'biologia': 'success',
         'historia': 'warning',
         'geografia': 'warning',
         'gramatica': 'danger',
-        'interpretacao': 'danger',
+        'redacao': 'danger',
+        'literatura': 'danger',
+        'filosofia': 'warning',
+        'sociologia': 'warning',
+        'informatica': 'primary',
+        'robotica': 'success',
+        'games': 'primary',
         'python': 'primary',
         'javascript': 'primary',
-        'Robótica': 'success',
         'web': 'primary'
     };
     return classes[materia] || 'primary';
@@ -3366,13 +3394,19 @@ function getMateriaNome(materia) {
         'geometria': 'Geometria',
         'quimica': 'Química',
         'fisica': 'Física',
+        'biologia': 'Biologia',
         'historia': 'História',
         'geografia': 'Geografia',
         'gramatica': 'Gramática',
-        'interpretacao': 'Interpretação',
+        'redacao': 'Redação',
+        'literatura': 'Literatura',
+        'filosofia': 'Filosofia',
+        'sociologia': 'Sociologia',
+        'informatica': 'Informática',
+        'robotica': 'Robótica',
+        'games': 'Games',
         'python': 'Python',
         'javascript': 'JavaScript',
-        'Robótica': 'Robótica',
         'web': 'Desenvolvimento Web'
     };
     return nomes[materia] || materia;
