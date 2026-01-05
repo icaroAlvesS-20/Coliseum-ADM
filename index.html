@@ -2743,16 +2743,20 @@ function setupDynamicEventListeners() {
             deleteVideo(videoId);
         }
         
-        // Editar curso
-        if (e.target.closest('.edit-curso')) {
+         if (e.target.closest('.edit-curso')) {
             const cursoId = e.target.closest('.edit-curso').getAttribute('data-id');
+            console.log('🎯 Editando curso ID:', cursoId);
             editCurso(cursoId);
+            e.preventDefault();
+            return;
         }
         
-        // Excluir curso
         if (e.target.closest('.delete-curso')) {
             const cursoId = e.target.closest('.delete-curso').getAttribute('data-id');
+            console.log('🗑️ Excluindo curso ID:', cursoId);
             deleteCurso(cursoId);
+            e.preventDefault();
+            return;
         }
         
         // Remover módulo
@@ -2976,33 +2980,29 @@ async function loadVideos() {
 
 async function loadCursos() {
   try {
+    console.log('📚 Carregando cursos (modo admin)...');
     showLoading();
     
-    console.log('📚 Carregando cursos (modo admin)...');
-    
-    // ✅ CORREÇÃO: Adicionar parâmetro isAdmin para evitar filtro no back-end
-    const cursosData = await apiRequest('/api/cursos?isAdmin=true');
+    // ✅ Buscar com parâmetro isAdmin
+    const cursosData = await apiRequest('/api/cursos?isAdmin=true&debug=true');
     
     console.log('📊 Resposta da API /api/cursos:', cursosData);
     console.log('📊 Tipo:', typeof cursosData);
-    console.log('📊 É array?', Array.isArray(cursosData));
-    console.log('📊 Quantidade:', cursosData ? cursosData.length : 0);
     
     if (cursosData && Array.isArray(cursosData)) {
-      // ✅ CORREÇÃO: Verificar IDs únicos
+      window.cursos = JSON.parse(JSON.stringify(cursosData));
+      displayCursos(window.cursos);
+      
       const ids = cursosData.map(c => c.id);
       const uniqueIds = [...new Set(ids)];
       console.log('📊 IDs únicos:', uniqueIds.length);
-      console.log('📊 IDs:', ids);
       
-      // ✅ CORREÇÃO: Manter cópia local
-      window.cursos = cursosData;
-      displayCursos(cursosData);
-      
-      // ✅ CORREÇÃO: Atualizar estatísticas
       if (document.getElementById('total-cursos')) {
         document.getElementById('total-cursos').textContent = cursosData.length;
       }
+      
+      console.log(`✅ ${cursosData.length} cursos carregados com sucesso`);
+      
     } else if (cursosData && cursosData.error) {
       showAlert(`❌ ${cursosData.error}`, 'error');
       window.cursos = [];
@@ -3014,7 +3014,7 @@ async function loadCursos() {
     }
     
   } catch (error) {
-    console.error('Error loading cursos:', error);
+    console.error('❌ Error loading cursos:', error);
     showAlert('❌ Erro ao carregar cursos: ' + error.message, 'error');
     window.cursos = [];
     displayCursos([]);
@@ -3239,25 +3239,12 @@ function displayCursos(cursosList = []) {
   const container = document.getElementById('cursos-container');
   if (!container) return;
 
-  // Limpar container
   container.innerHTML = '';
 
   const cursosArray = Array.isArray(cursosList) ? cursosList : [];
   
   console.log('🎓 Exibindo cursos:', cursosArray.length);
   
-  // ✅ DEBUG: Mostrar detalhes de cada curso
-  cursosArray.forEach((curso, index) => {
-    console.log(`🎓 Curso ${index + 1}:`, {
-      id: curso.id,
-      titulo: curso.titulo,
-      materia: curso.materia,
-      categoria: curso.categoria,
-      modulos: curso.modulos?.length || 0,
-      aulas: curso.modulos?.reduce((sum, mod) => sum + (mod.aulas?.length || 0), 0) || 0
-    });
-  });
-
   if (cursosArray.length === 0) {
     const emptyMessage = document.createElement('div');
     emptyMessage.style.cssText = 'text-align: center; padding: 40px;';
@@ -3271,7 +3258,12 @@ function displayCursos(cursosList = []) {
   }
 
   cursosArray.forEach((curso, index) => {
-    console.log(`🎓 Criando card para curso ${index + 1}: "${curso.titulo}"`);
+    console.log(`🎓 Criando card para curso ${index + 1}:`, {
+      id: curso.id,
+      titulo: curso.titulo,
+      temModulos: !!curso.modulos,
+      qtdeModulos: curso.modulos?.length || 0
+    });
     
     const cursoCard = document.createElement('div');
     cursoCard.className = 'curso-card';
@@ -3306,10 +3298,12 @@ function displayCursos(cursosList = []) {
           </div>
         </div>
         <div class="actions">
-          <button class="btn btn-primary btn-sm edit-curso" data-id="${curso.id}">
+          <button class="btn btn-primary btn-sm edit-curso" data-id="${curso.id}" 
+                  title="Editar curso">
             <i class="fas fa-edit"></i>
           </button>
-          <button class="btn btn-danger btn-sm delete-curso" data-id="${curso.id}">
+          <button class="btn btn-danger btn-sm delete-curso" data-id="${curso.id}"
+                  title="Excluir curso">
             <i class="fas fa-trash"></i>
           </button>
         </div>
@@ -3325,6 +3319,22 @@ function displayCursos(cursosList = []) {
           ${curso.ativo !== false ? 'Ativo' : 'Inativo'}
         </span>
       </div>`;
+
+    // ✅ DEBUG: Adicionar evento de clique direto para debug
+    const editBtn = cursoCard.querySelector('.edit-curso');
+    const deleteBtn = cursoCard.querySelector('.delete-curso');
+    
+    editBtn.addEventListener('click', function(e) {
+      console.log('✏️ Botão editar clicado - ID:', this.getAttribute('data-id'));
+      editCurso(this.getAttribute('data-id'));
+      e.stopPropagation();
+    });
+    
+    deleteBtn.addEventListener('click', function(e) {
+      console.log('🗑️ Botão excluir clicado - ID:', this.getAttribute('data-id'));
+      deleteCurso(this.getAttribute('data-id'));
+      e.stopPropagation();
+    });
 
     container.appendChild(cursoCard);
   });
@@ -3734,9 +3744,52 @@ function showCursoModal(curso = null) {
     modal.style.display = 'flex';
 }
 
-function editCurso(cursoId) {
-    const curso = cursos.find(c => c.id == cursoId);
-    if (curso) showCursoModal(curso);
+async function editCurso(cursoId) {
+    try {
+        console.log(`🎯 Buscando curso para edição ID: ${cursoId}`);
+        
+
+        let curso;
+        
+        if (window.cursos && Array.isArray(window.cursos)) {
+            curso = window.cursos.find(c => c.id == cursoId);
+            console.log('📊 Curso encontrado na variável global:', curso);
+        }
+        
+        if (!curso) {
+            console.log('🔍 Buscando curso da API...');
+            showGlobalLoading(true);
+            
+            const response = await apiRequest(`/api/cursos/${cursoId}?isAdmin=true`);
+            
+            if (response && response.curso) {
+                curso = response.curso;
+                console.log('✅ Curso carregado da API:', curso.titulo);
+            } else {
+                throw new Error('Curso não encontrado na API');
+            }
+        }
+        
+        if (!curso) {
+            showAlert('❌ Curso não encontrado!', 'error');
+            return;
+        }
+        
+        console.log('📋 Dados do curso para edição:', {
+            id: curso.id,
+            titulo: curso.titulo,
+            materia: curso.materia,
+            modulos: curso.modulos?.length || 0
+        });
+        
+        showCursoModal(curso);
+        
+    } catch (error) {
+        console.error('❌ Erro ao editar curso:', error);
+        showAlert('❌ Erro ao carregar curso para edição: ' + error.message, 'error');
+    } finally {
+        showGlobalLoading(false);
+    }
 }
 
 function addModuloToForm(moduloData = null) {
@@ -3999,41 +4052,83 @@ function initializeMateriaFilter() {
 }
 
 async function deleteCurso(cursoId) {
-    const curso = cursos.find(c => c.id == cursoId);
-    if (!curso) return;
-
-    showConfirmation(`Excluir curso "${curso.titulo}"?`, async () => {
-        try {
-            showGlobalLoading(true);
-            await apiRequest(`/api/cursos/${cursoId}`, { method: 'DELETE' });
-            showAlert('✅ Curso excluído com sucesso!', 'success');
-            await loadCursos();
-        } catch (error) {
-            console.error('❌ Erro ao excluir curso:', error);
-            showAlert('❌ Erro ao excluir curso', 'error');
-        } finally {
-            showGlobalLoading(false);
+    try {
+        console.log(`🗑️ Iniciando exclusão do curso ID: ${cursoId}`);
+        
+        let curso;
+        
+        if (window.cursos && Array.isArray(window.cursos)) {
+            curso = window.cursos.find(c => c.id == cursoId);
         }
-    });
+        
+        if (!curso) {
+            const response = await apiRequest(`/api/cursos/${cursoId}`);
+            if (response && response.curso) {
+                curso = response.curso;
+            }
+        }
+        
+        if (!curso) {
+            showAlert('❌ Curso não encontrado!', 'error');
+            return;
+        }
+        
+        showConfirmation(
+            `Tem certeza que deseja excluir o curso "${curso.titulo}"?`,
+            async () => {
+                try {
+                    showGlobalLoading(true);
+                    console.log(`🗑️ Excluindo curso ID: ${cursoId}...`);
+                    
+                    const response = await apiRequest(`/api/cursos/${cursoId}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    console.log('✅ Resposta da exclusão:', response);
+                    
+                    if (response && response.success) {
+                        showAlert('✅ Curso excluído com sucesso!', 'success');
+                        
+                        if (window.cursos && Array.isArray(window.cursos)) {
+                            window.cursos = window.cursos.filter(c => c.id != cursoId);
+                        }
+                        
+                        await loadCursos();
+                        
+                        if (currentTab === 'dashboard') {
+                            await loadDashboardData();
+                        }
+                    } else {
+                        throw new Error(response?.error || 'Erro ao excluir curso');
+                    }
+                    
+                } catch (error) {
+                    console.error('❌ Erro na exclusão:', error);
+                    showAlert('❌ Erro ao excluir curso: ' + error.message, 'error');
+                } finally {
+                    showGlobalLoading(false);
+                }
+            }
+        );
+        
+    } catch (error) {
+        console.error('❌ Erro ao preparar exclusão:', error);
+        showAlert('❌ Erro ao excluir curso: ' + error.message, 'error');
+    }
 }
 
-// User Management - Add User
 function showAddUserModal() {
-    // Limpa o formulário
     document.getElementById('new-user-name').value = '';
     document.getElementById('new-user-senha').value = '';
-    // Mantém o RA gerado automaticamente
     document.getElementById('new-user-serie').value = '';
-    document.getElementById('new-user-curso').value = 'matematica'; // Valor padrão
+    document.getElementById('new-user-curso').value = 'matematica'; 
     document.getElementById('new-user-status').value = 'ativo';
     
-    // Gera um novo RA
     generateRandomRA('new-user-ra');
     
     document.getElementById('add-user-modal').style.display = 'flex';
 }
 
-// ✅ FUNÇÃO PARA VALIDAÇÃO DO FORMULÁRIO DE USUÁRIO
 function validateUserForm(userData) {
     const errors = [];
 
