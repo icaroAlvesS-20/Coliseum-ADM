@@ -1643,8 +1643,24 @@
                     </div>
 
                     <div class="form-row">
+
+
                         <div class="form-group">
-                            <label for="curso-materia">Matéria *</label>
+                            <label for="curso-categoria">Categoria *</label>
+                            <select id="curso-categoria" class="form-control" required>
+                                <option value="">Selecione a categoria</option>
+                                <option value="programacao">Programação</option>
+                                <option value="robotica">Robótica</option>
+                                <option value="games">Games</option>
+                                <option value="preparatorio">Preparatório</option>
+                                <option value="reforco">Reforço</option>
+                                <option value="informatica">Informática</option>
+                            </select>
+                        </div>
+
+                        
+                        <div class="form-group">
+                    <label for="curso-materia">Matéria *</label>
                     <select id="curso-materia" class="form-control" required>
                     <option value="">Selecione a matéria</option>
                     <option value="algebra">Álgebra</option>
@@ -1669,18 +1685,6 @@
                             </select>
                         </div>
 
-                        <div class="form-group">
-                            <label for="curso-categoria">Categoria *</label>
-                            <select id="curso-categoria" class="form-control" required>
-                                <option value="">Selecione a categoria</option>
-                                <option value="programacao">Programação</option>
-                                <option value="robotica">Robótica</option>
-                                <option value="games">Games</option>
-                                <option value="preparatorio">Preparatório</option>
-                                <option value="reforco">Reforço</option>
-                                <option value="informatica">Informática</option>
-                            </select>
-                        </div>
                     </div>
 
                     <div class="form-row">
@@ -3436,25 +3440,39 @@ function getMateriaNome(materia) {
   const nomes = {
     'algebra': 'Álgebra',
     'geometria': 'Geometria',
+    'matematica': 'Matemática',
     'quimica': 'Química',
     'fisica': 'Física',
     'biologia': 'Biologia',
+    'ciencias': 'Ciências',
+    'python': 'Python',
+    'javascript': 'JavaScript',
+    'web': 'Desenvolvimento Web',
+    'html': 'HTML',
+    'css': 'CSS',
+    'programacao': 'Programação',
+    'robotica': 'Robótica',
+    'arduino': 'Arduino',
+    'eletronica': 'Eletrônica',
+    'automatizacao': 'Automação',
+    'games': 'Games',
+    'unity': 'Unity',
+    'blender': 'Blender',
+    'game': 'Game Design',
     'historia': 'História',
     'geografia': 'Geografia',
     'gramatica': 'Gramática',
     'redacao': 'Redação',
     'literatura': 'Literatura',
+    'portugues': 'Português',
     'filosofia': 'Filosofia',
     'sociologia': 'Sociologia',
     'informatica': 'Informática',
-    'robotica': 'Robótica',
-    'games': 'Games',
-    'python': 'Python',
-    'javascript': 'JavaScript',
-    'web': 'Desenvolvimento Web', 
-    'matematica': 'Matemática',
-    'portugues': 'Português',
-    'ciencias': 'Ciências'
+    'pacote office': 'Pacote Office',
+    'windows': 'Windows',
+    'excel': 'Excel',
+    'word': 'Word',
+    'powerpoint': 'PowerPoint'
   };
   return nomes[materia] || materia;
 }
@@ -3820,7 +3838,7 @@ async function saveCurso() {
   
   if (!modulosValidos) {
     showAlert(`❌ Módulo ${moduloErroIndex} precisa de um título!`, 'error');
-    return; // Não prosseguir
+    return; 
   }
   
   moduloElements.forEach((moduloElement, index) => {
@@ -3924,6 +3942,62 @@ async function saveCurso() {
   }
 }
 
+function initializeMateriaFilter() {
+    const categoriaSelect = document.getElementById('curso-categoria');
+    const materiaSelect = document.getElementById('curso-materia');
+    
+    if (!categoriaSelect || !materiaSelect) return;
+    
+    const categoriasParaMaterias = {
+        'reforco': ['algebra', 'geometria', 'matematica', 'quimica', 'fisica', 'biologia', 'ciencias'],
+        'programacao': ['python', 'javascript', 'web', 'html', 'css', 'programacao'],
+        'robotica': ['robotica', 'arduino', 'eletronica', 'automatizacao'],
+        'games': ['games', 'unity', 'blender', 'game'],
+        'preparatorio': ['historia', 'geografia', 'gramatica', 'redacao', 'literatura', 'portugues', 'filosofia', 'sociologia'],
+        'informatica': ['informatica', 'pacote office', 'windows', 'excel', 'word', 'powerpoint']
+    };
+    
+    const todasMaterias = [
+        'algebra', 'geometria', 'matematica', 'quimica', 'fisica', 'biologia', 'ciencias',
+        'python', 'javascript', 'web', 'html', 'css', 'programacao',
+        'robotica', 'arduino', 'eletronica', 'automatizacao',
+        'games', 'unity', 'blender', 'game',
+        'historia', 'geografia', 'gramatica', 'redacao', 'literatura', 'portugues',
+        'filosofia', 'sociologia',
+        'informatica', 'pacote office', 'windows', 'excel', 'word', 'powerpoint'
+    ];
+    
+    function atualizarMaterias() {
+        const categoriaSelecionada = categoriaSelect.value;
+        let materiasDisponiveis = [];
+        
+        if (categoriaSelecionada && categoriasParaMaterias[categoriaSelecionada]) {
+            materiasDisponiveis = categoriasParaMaterias[categoriaSelecionada];
+        } else {
+            materiasDisponiveis = todasMaterias;
+        }
+        
+        const valorAtual = materiaSelect.value;
+        
+        materiaSelect.innerHTML = '<option value="">Selecione a matéria</option>';
+        
+        materiasDisponiveis.sort().forEach(materia => {
+            const option = document.createElement('option');
+            option.value = materia;
+            option.textContent = getMateriaNome(materia); 
+            materiaSelect.appendChild(option);
+        });
+        
+        if (valorAtual && materiasDisponiveis.includes(valorAtual)) {
+            materiaSelect.value = valorAtual;
+        }
+    }
+    
+    categoriaSelect.addEventListener('change', atualizarMaterias);
+    
+    atualizarMaterias();
+}
+
 async function deleteCurso(cursoId) {
     const curso = cursos.find(c => c.id == cursoId);
     if (!curso) return;
@@ -3990,56 +4064,6 @@ function validateUserForm(userData) {
     return errors;
 }
 
-// ✅ FUNÇÃO PARA ADICIONAR NOVO USUÁRIO
-async function saveNewUser() {
-    const userData = {
-        nome: document.getElementById('new-user-name').value.trim(),
-        ra: document.getElementById('new-user-ra').value.trim(),
-        serie: document.getElementById('new-user-serie').value,
-        senha: document.getElementById('new-user-senha').value.trim(),
-        curso: document.getElementById('new-user-curso').value,
-        status: document.getElementById('new-user-status').value
-    };
-
-    // Usar a função de validação
-    const errors = validateUserForm(userData);
-    if (errors.length > 0) {
-        showAlert(`❌ Erros de validação:\n• ${errors.join('\n• ')}`, 'error');
-        return;
-    }
-
-    if (usedRAs.has(userData.ra)) {
-        showAlert('❌ Este RA já está em uso! Gere um novo RA único.', 'error');
-        return;
-    }
-
-    try {
-        showGlobalLoading(true);
-        await apiRequest('/api/usuarios', {
-            method: 'POST',
-            body: userData
-        });
-        
-        usedRAs.add(userData.ra);
-        showAlert('✅ Usuário cadastrado com sucesso!', 'success');
-        closeModal('add-user-modal');
-        await loadUsers();
-        await loadDashboardData();
-    } catch (error) {
-        console.error('❌ Erro ao cadastrar usuário:', error);
-        
-        let errorMessage = '❌ Erro ao cadastrar usuário';
-        if (error.message.includes('já existe') || error.message.includes('RA já')) {
-            errorMessage = '❌ RA já cadastrado no sistema!';
-            usedRAs.add(userData.ra);
-        }
-        
-        showAlert(errorMessage, 'error');
-    } finally {
-        showGlobalLoading(false);
-    }
-}
-        
 async function saveNewUser() {
     const userData = {
         nome: document.getElementById('new-user-name').value.trim(),
@@ -4088,12 +4112,10 @@ async function saveNewUser() {
     }
 }
 
-// Desafios Management
 function addPerguntaToForm(perguntaData = null) {
     perguntaCount++;
     const perguntaId = `pergunta_${perguntaCount}`;
     
-    // Obter alternativas do perguntaData ou usar padrão
     const alternativas = perguntaData?.alternativas || ['', '', '', ''];
     
     const perguntaHTML = `
