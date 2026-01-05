@@ -2517,14 +2517,9 @@ async function saveEditedMessage(messageId) {
         
         showGlobalLoading(true);
         
-        // Nota: A API atual não tem endpoint para atualizar mensagens de chat
-        // Podemos usar o endpoint DELETE + POST ou criar um endpoint PUT
-        // Por enquanto, vamos mostrar uma mensagem informativa
         showAlert('ℹ️ Funcionalidade de edição em desenvolvimento', 'warning');
         closeModal('edit-message-modal');
-        
-        // Para implementação completa, precisaríamos de um endpoint PUT no backend
-        
+                
     } catch (error) {
         console.error('❌ Erro ao salvar mensagem editada:', error);
         showAlert('❌ Erro ao salvar mensagem editada', 'error');
@@ -2538,14 +2533,7 @@ async function clearAllChatMessages() {
         showGlobalLoading(true);
         console.log('🗑️ Limpando todas as mensagens do chat...');
         
-        // Nota: A API atual não tem endpoint para limpar todas as mensagens
-        // Precisaríamos deletar uma por uma ou criar um endpoint específico
-        
         showAlert('ℹ️ Funcionalidade de limpeza em desenvolvimento', 'warning');
-        
-        // Para implementação completa:
-        // 1. Criar endpoint DELETE /api/chat/mensagens/todas (no backend)
-        // 2. Implementar loop para deletar todas as mensagens
         
     } catch (error) {
         console.error('❌ Erro ao limpar chat:', error);
@@ -2895,43 +2883,47 @@ async function loadInitialData() {
 }
 
 async function loadDashboardData() {
-    try {
-        document.getElementById('ranking-loading').style.display = 'flex';
+  try {
+    document.getElementById('ranking-loading').style.display = 'flex';
 
-        console.log('🔄 Carregando dados do dashboard...');
+    console.log('🔄 Carregando dados do dashboard...');
 
-        const [ranking, cursosData, videosData, usuariosData, desafiosData] = await Promise.all([
-            apiRequest('/api/ranking').catch(() => []),
-            apiRequest('/api/cursos').catch(() => []),
-            apiRequest('/api/videos').catch(() => []),
-            apiRequest('/api/usuarios').catch(() => []),
-            apiRequest('/api/desafios').catch(() => [])
-        ]);
+    const [ranking, cursosData, videosData, usuariosData, desafiosData] = await Promise.all([
+      apiRequest('/api/ranking').catch(() => []),
+      apiRequest('/api/cursos?isAdmin=true').catch(() => []), // ✅ CORREÇÃO: Adicionar isAdmin
+      apiRequest('/api/videos').catch(() => []),
+      apiRequest('/api/usuarios').catch(() => []),
+      apiRequest('/api/desafios').catch(() => [])
+    ]);
 
-        console.log('📊 Dados carregados:', {
-            usuarios: usuariosData.length,
-            cursos: cursosData.length,
-            videos: videosData.length,
-            desafios: desafiosData.length,
-            ranking: ranking.length
-        });
+    console.log('📊 Dados carregados:', {
+      usuarios: usuariosData.length,
+      cursos: cursosData.length,
+      videos: videosData.length,
+      desafios: desafiosData.length,
+      ranking: ranking.length
+    });
 
-        if (ranking.length > 0) {
-            displayRanking(ranking.slice(0, 10));
-        } else {
-            displayRanking([]);
-        }
-
-        updateDashboardStats(ranking, usuariosData, cursosData, videosData, desafiosData);
-
-    } catch (error) {
-        console.error('❌ Erro no dashboard:', error);
-        throw error;
-    } finally {
-        document.getElementById('ranking-loading').style.display = 'none';
+    if (ranking.length > 0) {
+      displayRanking(ranking.slice(0, 10));
+    } else {
+      displayRanking([]);
     }
-}
 
+    // ✅ CORREÇÃO: Manter cópia dos cursos
+    if (cursosData && Array.isArray(cursosData)) {
+      window.cursos = cursosData;
+    }
+
+    updateDashboardStats(ranking, usuariosData, cursosData, videosData, desafiosData);
+
+  } catch (error) {
+    console.error('❌ Erro no dashboard:', error);
+    throw error;
+  } finally {
+    document.getElementById('ranking-loading').style.display = 'none';
+  }
+}
 function updateDashboardStats(ranking, usuariosData, cursosData, videosData, desafiosData) {
     const totalUsers = usuariosData.length || ranking.length;
     const totalPoints = ranking.reduce((sum, user) => sum + (user.pontuacao || 0), 0);
@@ -2979,32 +2971,54 @@ async function loadVideos() {
 }
 
 async function loadCursos() {
-    try {
-        showLoading();
-        const cursosData = await apiRequest('/api/cursos');
-        
-        if (cursosData && Array.isArray(cursosData)) {
-            cursos = cursosData;
-            displayCursos(cursos);
-        } else if (cursosData && cursosData.error) {
-            showAlert(`❌ ${cursosData.error}`, 'error');
-            cursos = [];
-            displayCursos([]);
-        } else {
-            cursos = [];
-            displayCursos([]);
-        }
-        
-    } catch (error) {
-        console.error('Error loading cursos:', error);
-        showAlert('❌ Erro ao carregar cursos', 'error');
-        cursos = [];
-        displayCursos([]);
-    } finally {
-        hideLoading();
+  try {
+    showLoading();
+    
+    console.log('📚 Carregando cursos (modo admin)...');
+    
+    // ✅ CORREÇÃO: Adicionar parâmetro isAdmin para evitar filtro no back-end
+    const cursosData = await apiRequest('/api/cursos?isAdmin=true');
+    
+    console.log('📊 Resposta da API /api/cursos:', cursosData);
+    console.log('📊 Tipo:', typeof cursosData);
+    console.log('📊 É array?', Array.isArray(cursosData));
+    console.log('📊 Quantidade:', cursosData ? cursosData.length : 0);
+    
+    if (cursosData && Array.isArray(cursosData)) {
+      // ✅ CORREÇÃO: Verificar IDs únicos
+      const ids = cursosData.map(c => c.id);
+      const uniqueIds = [...new Set(ids)];
+      console.log('📊 IDs únicos:', uniqueIds.length);
+      console.log('📊 IDs:', ids);
+      
+      // ✅ CORREÇÃO: Manter cópia local
+      window.cursos = cursosData;
+      displayCursos(cursosData);
+      
+      // ✅ CORREÇÃO: Atualizar estatísticas
+      if (document.getElementById('total-cursos')) {
+        document.getElementById('total-cursos').textContent = cursosData.length;
+      }
+    } else if (cursosData && cursosData.error) {
+      showAlert(`❌ ${cursosData.error}`, 'error');
+      window.cursos = [];
+      displayCursos([]);
+    } else {
+      console.log('📊 Dados vazios ou inválidos');
+      window.cursos = [];
+      displayCursos([]);
     }
+    
+  } catch (error) {
+    console.error('Error loading cursos:', error);
+    showAlert('❌ Erro ao carregar cursos: ' + error.message, 'error');
+    window.cursos = [];
+    displayCursos([]);
+  } finally {
+    hideLoading();
+  }
 }
-
+        
 async function loadDesafios() {
     try {
         showLoading();
@@ -3218,72 +3232,100 @@ function displayDesafios(desafiosList) {
 }
 
 function displayCursos(cursosList = []) {
-    const container = document.getElementById('cursos-container');
-    if (!container) return;
+  const container = document.getElementById('cursos-container');
+  if (!container) return;
 
-    container.innerHTML = '';
+  // Limpar container
+  container.innerHTML = '';
 
-    const cursosArray = Array.isArray(cursosList) ? cursosList : [];
-    
-    if (cursosArray.length === 0) {
-        container.innerHTML = `
-            <div style="text-align: center; padding: 40px;">
-                <i class="fas fa-graduation-cap" style="font-size: 3rem; margin-bottom: 15px; color: #ffcf00;"></i>
-                <h3 style="color: #ffcf00; margin-bottom: 10px;">Nenhum curso encontrado</h3>
-                <p style="color: #aaa;">Clique em "Criar Curso" para adicionar o primeiro curso ao sistema.</p>
-            </div>`;
-        return;
-    }
-
-    cursosArray.forEach(curso => {
-        const cursoCard = document.createElement('div');
-        cursoCard.className = 'curso-card';
-
-        const totalAulas = curso.modulos ? curso.modulos.reduce((total, modulo) => 
-            total + (modulo.aulas ? modulo.aulas.length : 0), 0) : 0;
-
-        cursoCard.innerHTML = `
-            <div class="curso-header">
-                <div class="curso-info">
-                    <h4>${curso.titulo}</h4>
-                    <div class="badge ${getMateriaBadgeClass(curso.materia)}">${getMateriaNome(curso.materia)}</div>
-                    <div class="badge ${getCursoBadgeClass(curso.categoria)}" style="margin-left: 5px;">${getCategoriaNome(curso.categoria)}</div>
-                    <div class="curso-meta">
-                        <div class="curso-stat">
-                            <div class="curso-stat-value">${curso.duracao}h</div>
-                            <div class="curso-stat-label">Duração</div>
-                        </div>
-                        <div class="curso-stat">
-                            <div class="curso-stat-value">${curso.modulos ? curso.modulos.length : 0}</div>
-                            <div class="curso-stat-label">Módulos</div>
-                        </div>
-                        <div class="curso-stat">
-                            <div class="curso-stat-value">${totalAulas}</div>
-                            <div class="curso-stat-label">Aulas</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="actions">
-                    <button class="btn btn-primary btn-sm edit-curso" data-id="${curso.id}">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="btn btn-danger btn-sm delete-curso" data-id="${curso.id}">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </div>
-            </div>
-            <div class="curso-description">
-                ${curso.descricao || 'Sem descrição disponível.'}
-            </div>
-            <div class="curso-category">
-                <small style="color: #ffcf00;">Nível: ${getNivelNome(curso.nivel)}</small>
-            </div>
-            <div class="curso-status">
-                <span class="badge success">Ativo</span>
-            </div>`;
-
-        container.appendChild(cursoCard);
+  const cursosArray = Array.isArray(cursosList) ? cursosList : [];
+  
+  console.log('🎓 Exibindo cursos:', cursosArray.length);
+  
+  // ✅ DEBUG: Mostrar detalhes de cada curso
+  cursosArray.forEach((curso, index) => {
+    console.log(`🎓 Curso ${index + 1}:`, {
+      id: curso.id,
+      titulo: curso.titulo,
+      materia: curso.materia,
+      categoria: curso.categoria,
+      modulos: curso.modulos?.length || 0,
+      aulas: curso.modulos?.reduce((sum, mod) => sum + (mod.aulas?.length || 0), 0) || 0
     });
+  });
+
+  if (cursosArray.length === 0) {
+    const emptyMessage = document.createElement('div');
+    emptyMessage.style.cssText = 'text-align: center; padding: 40px;';
+    emptyMessage.innerHTML = `
+      <i class="fas fa-graduation-cap" style="font-size: 3rem; margin-bottom: 15px; color: #ffcf00;"></i>
+      <h3 style="color: #ffcf00; margin-bottom: 10px;">Nenhum curso encontrado</h3>
+      <p style="color: #aaa;">Clique em "Criar Curso" para adicionar o primeiro curso ao sistema.</p>
+    `;
+    container.appendChild(emptyMessage);
+    return;
+  }
+
+  cursosArray.forEach((curso, index) => {
+    console.log(`🎓 Criando card para curso ${index + 1}: "${curso.titulo}"`);
+    
+    const cursoCard = document.createElement('div');
+    cursoCard.className = 'curso-card';
+    cursoCard.setAttribute('data-curso-id', curso.id);
+    
+    const totalAulas = curso.modulos ? curso.modulos.reduce((total, modulo) => 
+      total + (modulo.aulas ? modulo.aulas.length : 0), 0) : 0;
+
+    cursoCard.innerHTML = `
+      <div class="curso-header">
+        <div class="curso-info">
+          <h4>${curso.titulo || 'Sem título'}</h4>
+          <div class="badge ${getMateriaBadgeClass(curso.materia)}">
+            ${getMateriaNome(curso.materia)}
+          </div>
+          <div class="badge ${getCursoBadgeClass(curso.categoria)}" style="margin-left: 5px;">
+            ${getCategoriaNome(curso.categoria)}
+          </div>
+          <div class="curso-meta">
+            <div class="curso-stat">
+              <div class="curso-stat-value">${curso.duracao || 0}h</div>
+              <div class="curso-stat-label">Duração</div>
+            </div>
+            <div class="curso-stat">
+              <div class="curso-stat-value">${curso.modulos ? curso.modulos.length : 0}</div>
+              <div class="curso-stat-label">Módulos</div>
+            </div>
+            <div class="curso-stat">
+              <div class="curso-stat-value">${totalAulas}</div>
+              <div class="curso-stat-label">Aulas</div>
+            </div>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn btn-primary btn-sm edit-curso" data-id="${curso.id}">
+            <i class="fas fa-edit"></i>
+          </button>
+          <button class="btn btn-danger btn-sm delete-curso" data-id="${curso.id}">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+      </div>
+      <div class="curso-description">
+        ${curso.descricao || 'Sem descrição disponível.'}
+      </div>
+      <div class="curso-category">
+        <small style="color: #ffcf00;">Nível: ${getNivelNome(curso.nivel)}</small>
+      </div>
+      <div class="curso-status">
+        <span class="badge ${curso.ativo !== false ? 'success' : 'warning'}">
+          ${curso.ativo !== false ? 'Ativo' : 'Inativo'}
+        </span>
+      </div>`;
+
+    container.appendChild(cursoCard);
+  });
+  
+  console.log(`✅ ${cursosArray.length} cursos exibidos`);
 }
 
 function displayFullRanking(ranking) {
@@ -3317,27 +3359,29 @@ function displayFullRanking(ranking) {
 }
 
 function getMateriaBadgeClass(materia) {
-    const classes = {
-        'algebra': 'primary',
-        'geometria': 'primary',
-        'quimica': 'success',
-        'fisica': 'success',
-        'biologia': 'success',
-        'historia': 'warning',
-        'geografia': 'warning',
-        'gramatica': 'danger',
-        'redacao': 'danger',
-        'literatura': 'danger',
-        'filosofia': 'warning',
-        'sociologia': 'warning',
-        'informatica': 'primary',
-        'robotica': 'success',
-        'games': 'primary',
-        'python': 'primary',
-        'javascript': 'primary',
-        'web': 'primary'
-    };
-    return classes[materia] || 'primary';
+  const classes = {
+    'algebra': 'primary',
+    'geometria': 'primary',
+    'quimica': 'success',
+    'fisica': 'success',
+    'biologia': 'success',
+    'historia': 'warning',
+    'geografia': 'warning',
+    'gramatica': 'danger',
+    'redacao': 'danger',
+    'literatura': 'danger',
+    'filosofia': 'warning',
+    'sociologia': 'warning',
+    'informatica': 'primary',
+    'robotica': 'success',
+    'games': 'primary',
+    'python': 'primary',
+    'javascript': 'primary',
+    'web': 'primary',
+    'matematica': 'primary',
+    'portugues': 'danger'
+  };
+  return classes[materia] || 'primary';
 }
 
 function getCursoBadgeClass(categoria) {
@@ -3389,27 +3433,30 @@ function getCategoriaNome(categoria) {
 }
 
 function getMateriaNome(materia) {
-    const nomes = {
-        'algebra': 'Álgebra',
-        'geometria': 'Geometria',
-        'quimica': 'Química',
-        'fisica': 'Física',
-        'biologia': 'Biologia',
-        'historia': 'História',
-        'geografia': 'Geografia',
-        'gramatica': 'Gramática',
-        'redacao': 'Redação',
-        'literatura': 'Literatura',
-        'filosofia': 'Filosofia',
-        'sociologia': 'Sociologia',
-        'informatica': 'Informática',
-        'robotica': 'Robótica',
-        'games': 'Games',
-        'python': 'Python',
-        'javascript': 'JavaScript',
-        'web': 'Desenvolvimento Web'
-    };
-    return nomes[materia] || materia;
+  const nomes = {
+    'algebra': 'Álgebra',
+    'geometria': 'Geometria',
+    'quimica': 'Química',
+    'fisica': 'Física',
+    'biologia': 'Biologia',
+    'historia': 'História',
+    'geografia': 'Geografia',
+    'gramatica': 'Gramática',
+    'redacao': 'Redação',
+    'literatura': 'Literatura',
+    'filosofia': 'Filosofia',
+    'sociologia': 'Sociologia',
+    'informatica': 'Informática',
+    'robotica': 'Robótica',
+    'games': 'Games',
+    'python': 'Python',
+    'javascript': 'JavaScript',
+    'web': 'Desenvolvimento Web', 
+    'matematica': 'Matemática',
+    'portugues': 'Português',
+    'ciencias': 'Ciências'
+  };
+  return nomes[materia] || materia;
 }
 
 // User Management
@@ -3750,69 +3797,106 @@ function addAulaToModulo(moduloId) {
 }
 
 async function saveCurso() {
-    const cursoId = document.getElementById('curso-id').value;
-    
-    const cursoData = {
-        titulo: document.getElementById('curso-titulo').value,
-        descricao: document.getElementById('curso-descricao').value,
-        materia: document.getElementById('curso-materia').value,
-        categoria: document.getElementById('curso-categoria').value,
-        nivel: document.getElementById('curso-nivel').value,
-        duracao: parseInt(document.getElementById('curso-duracao').value),
-        imagem: document.getElementById('curso-imagem').value || null
+  const cursoId = document.getElementById('curso-id').value;
+  
+  const cursoData = {
+    titulo: document.getElementById('curso-titulo').value,
+    descricao: document.getElementById('curso-descricao').value,
+    materia: document.getElementById('curso-materia').value,
+    categoria: document.getElementById('curso-categoria').value,
+    nivel: document.getElementById('curso-nivel').value,
+    duracao: parseInt(document.getElementById('curso-duracao').value),
+    imagem: document.getElementById('curso-imagem').value || null,
+    ativo: document.getElementById('curso-ativo').value === 'true'
+  };
+
+  const modulos = [];
+  document.querySelectorAll('.modulo-item').forEach((moduloElement, index) => {
+    const modulo = {
+      titulo: moduloElement.querySelector('.modulo-titulo').value,
+      descricao: moduloElement.querySelector('.modulo-descricao')?.value || '',
+      ordem: index + 1,
+      aulas: []
     };
 
-    const modulos = [];
-    document.querySelectorAll('.modulo-item').forEach((moduloElement, index) => {
-        const modulo = {
-            titulo: moduloElement.querySelector('.modulo-titulo').value,
-            ordem: index + 1,
-            aulas: []
-        };
-
-        moduloElement.querySelectorAll('.aula-item').forEach((aulaElement, aulaIndex) => {
-            const aula = {
-                titulo: aulaElement.querySelector('.aula-titulo').value,
-                descricao: aulaElement.querySelector('.aula-descricao').value,
-                duracao: parseInt(aulaElement.querySelector('.aula-duracao').value) || 15,
-                ordem: parseInt(aulaElement.querySelector('.aula-ordem').value) || (aulaIndex + 1),
-                videoUrl: aulaElement.querySelector('.aula-video-url').value || null,
-                conteudo: aulaElement.querySelector('.aula-conteudo').value || ''
-            };
-            modulo.aulas.push(aula);
-        });
-
-        modulos.push(modulo);
+    moduloElement.querySelectorAll('.aula-item').forEach((aulaElement, aulaIndex) => {
+      const aula = {
+        titulo: aulaElement.querySelector('.aula-titulo').value,
+        descricao: aulaElement.querySelector('.aula-descricao')?.value || '',
+        conteudo: aulaElement.querySelector('.aula-conteudo')?.value || '',
+        duracao: parseInt(aulaElement.querySelector('.aula-duracao').value) || 15,
+        ordem: parseInt(aulaElement.querySelector('.aula-ordem').value) || (aulaIndex + 1),
+        videoUrl: aulaElement.querySelector('.aula-video-url')?.value || null
+      };
+      modulo.aulas.push(aula);
     });
 
-    cursoData.modulos = modulos;
+    modulos.push(modulo);
+  });
 
-    try {
-        showGlobalLoading(true);
+  cursoData.modulos = modulos;
 
-        let response;
-        if (cursoId) {
-            response = await apiRequest(`/api/cursos/${cursoId}`, {
-                method: 'PUT',
-                body: cursoData
-            });
-        } else {
-            response = await apiRequest('/api/cursos', {
-                method: 'POST',
-                body: cursoData
-            });
-        }
+  try {
+    showGlobalLoading(true);
 
-        showAlert('✅ Curso salvo com sucesso!', 'success');
-        closeModal('curso-modal');
-        await loadCursos();
+    console.log('📤 Salvando curso:', {
+      id: cursoId || 'Novo',
+      titulo: cursoData.titulo,
+      totalModulos: cursoData.modulos.length,
+      totalAulas: cursoData.modulos.reduce((sum, mod) => sum + mod.aulas.length, 0)
+    });
 
-    } catch (error) {
-        console.error('❌ Erro ao salvar curso:', error);
-        showAlert('❌ Erro ao salvar curso', 'error');
-    } finally {
-        showGlobalLoading(false);
+    let response;
+    if (cursoId) {
+      response = await apiRequest(`/api/cursos/${cursoId}`, {
+        method: 'PUT',
+        body: cursoData
+      });
+      
+      console.log('✅ Curso atualizado:', response);
+      
+      const index = window.cursos.findIndex(c => c.id == cursoId);
+      if (index !== -1) {
+        window.cursos[index] = response.curso || response;
+      }
+    } else {
+      response = await apiRequest('/api/cursos', {
+        method: 'POST',
+        body: cursoData
+      });
+      
+      console.log('✅ Curso criado:', response);
+      
+      if (response && (response.curso || response.id)) {
+        const novoCurso = response.curso || response;
+        window.cursos.push(novoCurso);
+        console.log('📊 Array cursos após adição:', window.cursos.length);
+      }
     }
+
+    showAlert('✅ Curso salvo com sucesso!', 'success');
+    closeModal('curso-modal');
+    
+    displayCursos(window.cursos);
+    
+    if (document.querySelector('.tab.active').dataset.tab === 'dashboard') {
+      await loadDashboardData();
+    }
+
+  } catch (error) {
+    console.error('❌ Erro ao salvar curso:', error);
+    
+    let errorMessage = '❌ Erro ao salvar curso';
+    if (error.message.includes('Dados incompletos')) {
+      errorMessage = '❌ Dados incompletos. Preencha todos os campos obrigatórios.';
+    } else if (error.message.includes('módulo') || error.message.includes('aula')) {
+      errorMessage = `❌ ${error.message}`;
+    }
+    
+    showAlert(errorMessage, 'error');
+  } finally {
+    showGlobalLoading(false);
+  }
 }
 
 async function deleteCurso(cursoId) {
