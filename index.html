@@ -3746,42 +3746,34 @@ function showCursoModal(curso = null) {
 
 async function editCurso(cursoId) {
     try {
-        console.log(`🎯 Buscando curso para edição ID: ${cursoId}`);
+        console.log(`🎯 Iniciando edição do curso ID: ${cursoId}`);
         
-
-        let curso;
+        showGlobalLoading(true);
         
-        if (window.cursos && Array.isArray(window.cursos)) {
-            curso = window.cursos.find(c => c.id == cursoId);
-            console.log('📊 Curso encontrado na variável global:', curso);
+        // Buscar curso da API
+        const response = await apiRequest(`/api/cursos/${cursoId}?isAdmin=true`);
+        
+        if (!response || !response.success) {
+            throw new Error('Curso não encontrado ou erro na API');
         }
         
-        if (!curso) {
-            console.log('🔍 Buscando curso da API...');
-            showGlobalLoading(true);
-            
-            const response = await apiRequest(`/api/cursos/${cursoId}?isAdmin=true`);
-            
-            if (response && response.curso) {
-                curso = response.curso;
-                console.log('✅ Curso carregado da API:', curso.titulo);
-            } else {
-                throw new Error('Curso não encontrado na API');
-            }
-        }
-        
-        if (!curso) {
-            showAlert('❌ Curso não encontrado!', 'error');
-            return;
-        }
+        const curso = response.curso;
         
         console.log('📋 Dados do curso para edição:', {
             id: curso.id,
             titulo: curso.titulo,
             materia: curso.materia,
-            modulos: curso.modulos?.length || 0
+            totalModulos: curso.modulos?.length || 0,
+            totalAulas: curso.modulos?.reduce((sum, mod) => sum + (mod.aulas?.length || 0), 0) || 0
         });
         
+        // Verificar se o modal está disponível
+        const modal = document.getElementById('curso-modal');
+        if (!modal) {
+            throw new Error('Modal de curso não encontrado');
+        }
+        
+        // Preencher modal com dados do curso
         showCursoModal(curso);
         
     } catch (error) {
