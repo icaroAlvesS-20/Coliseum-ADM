@@ -3895,8 +3895,7 @@ async function saveCurso() {
       nivel: document.getElementById('curso-nivel').value.trim(),
       duracao: parseInt(document.getElementById('curso-duracao').value) || 0,
       imagem: document.getElementById('curso-imagem').value.trim() || null,
-      ativo: document.getElementById('curso-ativo').value === 'true',
-      isAdmin: true // ✅ ADICIONAR ESTA FLAG
+      ativo: document.getElementById('curso-ativo').value === 'true'
     };
 
     // VALIDAÇÕES BÁSICAS
@@ -3910,7 +3909,7 @@ async function saveCurso() {
       return;
     }
 
-    // COLETAR MÓDULOS
+    // COLETAR MÓDULOS CORRETAMENTE
     const modulos = [];
     const moduloElements = document.querySelectorAll('.modulo-item');
     
@@ -3938,6 +3937,7 @@ async function saveCurso() {
       }
 
       // Verificar todas as aulas deste módulo
+      const aulas = [];
       for (let j = 0; j < aulaElements.length; j++) {
         const aulaElement = aulaElements[j];
         const tituloAula = aulaElement.querySelector('.aula-titulo').value.trim();
@@ -3948,59 +3948,41 @@ async function saveCurso() {
           aulaElement.querySelector('.aula-titulo').focus();
           return;
         }
-      }
-    }
 
-    // Agora coletar os dados (após validação)
-    moduloElements.forEach((moduloElement, index) => {
-      const tituloModulo = moduloElement.querySelector('.modulo-titulo').value.trim();
-      const moduloDescricao = moduloElement.querySelector('.modulo-descricao')?.value.trim() || '';
-
-      const modulo = {
-        titulo: tituloModulo,
-        descricao: moduloDescricao,
-        ordem: index + 1,
-        aulas: []
-      };
-
-      // COLETAR AULAS
-      const aulaElements = moduloElement.querySelectorAll('.aula-item');
-      aulaElements.forEach((aulaElement, aulaIndex) => {
+        // Coletar dados da aula
         const aula = {
-          titulo: aulaElement.querySelector('.aula-titulo').value.trim(),
+          titulo: tituloAula,
           descricao: aulaElement.querySelector('.aula-descricao')?.value.trim() || '',
           conteudo: aulaElement.querySelector('.aula-conteudo')?.value.trim() || '',
           duracao: parseInt(aulaElement.querySelector('.aula-duracao')?.value) || 15,
-          ordem: aulaIndex + 1,
+          ordem: aulaElement.querySelector('.aula-ordem')?.value || (j + 1),
           videoUrl: aulaElement.querySelector('.aula-video-url')?.value.trim() || null
         };
+        aulas.push(aula);
+      }
 
-        modulo.aulas.push(aula);
+      // Adicionar módulo com suas aulas
+      modulos.push({
+        titulo: tituloModulo,
+        descricao: moduloElement.querySelector('.modulo-descricao')?.value.trim() || '',
+        ordem: i + 1,
+        aulas: aulas
       });
-
-      modulos.push(modulo);
-    });
+    }
 
     cursoData.modulos = modulos;
 
-    console.log('📤 Dados do curso para salvar:', {
-      id: cursoId || 'Novo',
-      titulo: cursoData.titulo,
-      materia: cursoData.materia,
-      totalModulos: cursoData.modulos.length,
-      totalAulas: cursoData.modulos.reduce((sum, mod) => sum + mod.aulas.length, 0),
-      dadosCompletos: cursoData
-    });
+    console.log('📤 Dados do curso para salvar:', JSON.stringify(cursoData, null, 2));
 
     showGlobalLoading(true);
 
     let endpoint, method;
     
     if (cursoId) {
-      endpoint = `/api/cursos/${cursoId}?isAdmin=true`; // ✅ ADICIONAR PARÂMETRO
+      endpoint = `/api/cursos/${cursoId}`;
       method = 'PUT';
     } else {
-      endpoint = '/api/cursos?isAdmin=true'; // ✅ ADICIONAR PARÂMETRO
+      endpoint = '/api/cursos';
       method = 'POST';
     }
 
@@ -4050,7 +4032,7 @@ async function saveCurso() {
     showGlobalLoading(false);
   }
 }
-
+        
 function initializeMateriaFilter() {
     const categoriaSelect = document.getElementById('curso-categoria');
     const materiaSelect = document.getElementById('curso-materia');
