@@ -3865,12 +3865,14 @@ async function saveCurso() {
     ativo: document.getElementById('curso-ativo').value === 'true'
   };
 
+  // COLETAR MÓDULOS DO FORMULÁRIO CORRETAMENTE
   const modulos = [];
   const moduloElements = document.querySelectorAll('.modulo-item');
   
   let modulosValidos = true;
   let moduloErroIndex = -1;
   
+  // Primeiro validar se todos os módulos têm título
   moduloElements.forEach((moduloElement, index) => {
     const titulo = moduloElement.querySelector('.modulo-titulo').value.trim();
     if (!titulo) {
@@ -3886,6 +3888,7 @@ async function saveCurso() {
     return; 
   }
   
+  // Coletar dados dos módulos e aulas
   moduloElements.forEach((moduloElement, index) => {
     const modulo = {
       titulo: moduloElement.querySelector('.modulo-titulo').value.trim(),
@@ -3894,11 +3897,16 @@ async function saveCurso() {
       aulas: []
     };
 
-    moduloElement.querySelectorAll('.aula-item').forEach((aulaElement, aulaIndex) => {
+    // Coletar aulas do módulo
+    const aulaElements = moduloElement.querySelectorAll('.aula-item');
+    let aulasValidas = true;
+    
+    aulaElements.forEach((aulaElement, aulaIndex) => {
       const tituloAula = aulaElement.querySelector('.aula-titulo').value.trim();
       
+      // Validar se aula tem título
       if (!tituloAula) {
-        modulosValidos = false;
+        aulasValidas = false;
         aulaElement.querySelector('.aula-titulo').style.borderColor = '#f72585';
         aulaElement.querySelector('.aula-titulo').focus();
       }
@@ -3911,9 +3919,14 @@ async function saveCurso() {
         ordem: parseInt(aulaElement.querySelector('.aula-ordem').value) || (aulaIndex + 1),
         videoUrl: aulaElement.querySelector('.aula-video-url')?.value.trim() || null
       };
+      
       modulo.aulas.push(aula);
     });
-
+    
+    if (!aulasValidas) {
+      modulosValidos = false;
+    }
+    
     modulos.push(modulo);
   });
   
@@ -3936,39 +3949,34 @@ async function saveCurso() {
 
     let response;
     if (cursoId) {
+      console.log('✏️ Atualizando curso existente...');
+      
       response = await apiRequest(`/api/cursos/${cursoId}`, {
         method: 'PUT',
         body: cursoData
       });
-      
-      console.log('✅ Curso atualizado:', response);
-      
-      const index = window.cursos.findIndex(c => c.id == cursoId);
-      if (index !== -1) {
-        window.cursos[index] = response.curso || response;
-      }
     } else {
+      console.log('➕ Criando novo curso...');
+      
       response = await apiRequest('/api/cursos', {
         method: 'POST',
         body: cursoData
       });
-      
-      console.log('✅ Curso criado:', response);
-      
-      if (response && (response.curso || response.id)) {
-        const novoCurso = response.curso || response;
-        window.cursos.push(novoCurso);
-        console.log('📊 Array cursos após adição:', window.cursos.length);
-      }
     }
 
-    showAlert('✅ Curso salvo com sucesso!', 'success');
-    closeModal('curso-modal');
+    console.log('✅ Resposta do servidor:', response);
     
-    displayCursos(window.cursos);
-    
-    if (document.querySelector('.tab.active').dataset.tab === 'dashboard') {
-      await loadDashboardData();
+    if (response && response.success) {
+      showAlert('✅ Curso salvo com sucesso!', 'success');
+      closeModal('curso-modal');
+      await loadCursos(); // Recarregar lista de cursos
+      
+      // Atualizar dashboard se necessário
+      if (document.querySelector('.tab.active').dataset.tab === 'dashboard') {
+        await loadDashboardData();
+      }
+    } else {
+      throw new Error(response?.error || 'Erro desconhecido');
     }
 
   } catch (error) {
@@ -3979,6 +3987,8 @@ async function saveCurso() {
       errorMessage = '❌ Dados incompletos. Preencha todos os campos obrigatórios.';
     } else if (error.message.includes('módulo') || error.message.includes('aula')) {
       errorMessage = `❌ ${error.message}`;
+    } else if (error.message.includes('já existe')) {
+      errorMessage = '❌ Já existe um curso com este título.';
     }
     
     showAlert(errorMessage, 'error');
@@ -3986,7 +3996,6 @@ async function saveCurso() {
     showGlobalLoading(false);
   }
 }
-
 function initializeMateriaFilter() {
     const categoriaSelect = document.getElementById('curso-categoria');
     const materiaSelect = document.getElementById('curso-materia');
