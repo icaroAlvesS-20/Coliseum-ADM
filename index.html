@@ -3841,6 +3841,7 @@ function addAulaToModulo(moduloId) {
     moduloElement.insertAdjacentHTML('beforeend', aulaHTML);
 }
 
+       //ori 
 async function saveCurso() {
   try {
     const cursoId = document.getElementById('curso-id').value;
@@ -3992,14 +3993,12 @@ async function saveCurso() {
     showGlobalLoading(false);
   }
 }
-  // COLETAR MÓDULOS DO FORMULÁRIO CORRETAMENTE
   const modulos = [];
   const moduloElements = document.querySelectorAll('.modulo-item');
   
   let modulosValidos = true;
   let moduloErroIndex = -1;
   
-  // Primeiro validar se todos os módulos têm título
   moduloElements.forEach((moduloElement, index) => {
     const titulo = moduloElement.querySelector('.modulo-titulo').value.trim();
     if (!titulo) {
@@ -4122,7 +4121,7 @@ async function saveCurso() {
   } finally {
     showGlobalLoading(false);
   }
-}
+        
 function initializeMateriaFilter() {
     const categoriaSelect = document.getElementById('curso-categoria');
     const materiaSelect = document.getElementById('curso-materia');
