@@ -2983,26 +2983,15 @@ async function loadCursos() {
     console.log('📚 Carregando cursos (modo admin)...');
     showLoading();
     
-    // ✅ Buscar com parâmetro isAdmin
+    // ✅ BUSCAR COM PARÂMETRO isAdmin PARA DESABILITAR FILTROS
     const cursosData = await apiRequest('/api/cursos?isAdmin=true&debug=true');
     
     console.log('📊 Resposta da API /api/cursos:', cursosData);
-    console.log('📊 Tipo:', typeof cursosData);
     
     if (cursosData && Array.isArray(cursosData)) {
-      window.cursos = JSON.parse(JSON.stringify(cursosData));
+      window.cursos = cursosData;
       displayCursos(window.cursos);
-      
-      const ids = cursosData.map(c => c.id);
-      const uniqueIds = [...new Set(ids)];
-      console.log('📊 IDs únicos:', uniqueIds.length);
-      
-      if (document.getElementById('total-cursos')) {
-        document.getElementById('total-cursos').textContent = cursosData.length;
-      }
-      
       console.log(`✅ ${cursosData.length} cursos carregados com sucesso`);
-      
     } else if (cursosData && cursosData.error) {
       showAlert(`❌ ${cursosData.error}`, 'error');
       window.cursos = [];
@@ -3710,80 +3699,81 @@ async function deleteVideo(videoId) {
     });
 }
 
-// Curso Management
 function showCursoModal(curso = null) {
-    const modal = document.getElementById('curso-modal');
-    const title = document.getElementById('curso-modal-title');
-    
-    moduloCount = 0;
-    aulaCount = 0;
-    document.getElementById('modulos-container').innerHTML = '';
+  const modal = document.getElementById('curso-modal');
+  const title = document.getElementById('curso-modal-title');
+  
+  // Resetar contadores
+  moduloCount = 0;
+  aulaCount = 0;
+  document.getElementById('modulos-container').innerHTML = '';
 
-    if (curso) {
-        title.textContent = 'Editar Curso';
-        document.getElementById('curso-id').value = curso.id;
-        document.getElementById('curso-titulo').value = curso.titulo;
-        document.getElementById('curso-descricao').value = curso.descricao || '';
-        document.getElementById('curso-materia').value = curso.materia;
-        document.getElementById('curso-categoria').value = curso.categoria;
-        document.getElementById('curso-nivel').value = curso.nivel;
-        document.getElementById('curso-duracao').value = curso.duracao;
-        document.getElementById('curso-imagem').value = curso.imagem || '';
+  if (curso) {
+    title.textContent = 'Editar Curso';
+    document.getElementById('curso-id').value = curso.id;
+    document.getElementById('curso-titulo').value = curso.titulo || '';
+    document.getElementById('curso-descricao').value = curso.descricao || '';
+    document.getElementById('curso-materia').value = curso.materia || '';
+    document.getElementById('curso-categoria').value = curso.categoria || '';
+    document.getElementById('curso-nivel').value = curso.nivel || '';
+    document.getElementById('curso-duracao').value = curso.duracao || '';
+    document.getElementById('curso-imagem').value = curso.imagem || '';
+    document.getElementById('curso-ativo').value = curso.ativo !== false ? 'true' : 'false';
 
-        if (curso.modulos && curso.modulos.length > 0) {
-            curso.modulos.forEach(modulo => addModuloToForm(modulo));
-        } else {
-            addModuloToForm();
-        }
+    // ✅ VERIFICAR SE HÁ MÓDULOS
+    if (curso.modulos && curso.modulos.length > 0) {
+      console.log(`📚 Carregando ${curso.modulos.length} módulos para edição`);
+      curso.modulos.forEach(modulo => {
+        addModuloToForm(modulo);
+      });
     } else {
-        title.textContent = 'Criar Curso';
-        document.getElementById('curso-form').reset();
-        addModuloToForm();
+      console.log('ℹ️ Curso sem módulos, adicionando módulo padrão');
+      addModuloToForm();
     }
+  } else {
+    title.textContent = 'Criar Curso';
+    document.getElementById('curso-form').reset();
+    document.getElementById('curso-id').value = '';
+    document.getElementById('curso-ativo').value = 'true';
+    addModuloToForm();
+  }
 
-    modal.style.display = 'flex';
+  modal.style.display = 'flex';
 }
-
 async function editCurso(cursoId) {
-    try {
-        console.log(`🎯 Iniciando edição do curso ID: ${cursoId}`);
-        
-        showGlobalLoading(true);
-        
-        // Buscar curso da API
-        const response = await apiRequest(`/api/cursos/${cursoId}?isAdmin=true`);
-        
-        if (!response || !response.success) {
-            throw new Error('Curso não encontrado ou erro na API');
-        }
-        
-        const curso = response.curso;
-        
-        console.log('📋 Dados do curso para edição:', {
-            id: curso.id,
-            titulo: curso.titulo,
-            materia: curso.materia,
-            totalModulos: curso.modulos?.length || 0,
-            totalAulas: curso.modulos?.reduce((sum, mod) => sum + (mod.aulas?.length || 0), 0) || 0
-        });
-        
-        // Verificar se o modal está disponível
-        const modal = document.getElementById('curso-modal');
-        if (!modal) {
-            throw new Error('Modal de curso não encontrado');
-        }
-        
-        // Preencher modal com dados do curso
-        showCursoModal(curso);
-        
-    } catch (error) {
-        console.error('❌ Erro ao editar curso:', error);
-        showAlert('❌ Erro ao carregar curso para edição: ' + error.message, 'error');
-    } finally {
-        showGlobalLoading(false);
+  try {
+    console.log(`🎯 Iniciando edição do curso ID: ${cursoId}`);
+    
+    showGlobalLoading(true);
+    
+    // ✅ BUSCAR CURSO COM PARÂMETRO isAdmin
+    const response = await apiRequest(`/api/cursos/${cursoId}?isAdmin=true`);
+    
+    if (!response || !response.success) {
+      throw new Error('Curso não encontrado ou erro na API');
     }
+    
+    const curso = response.curso;
+    
+    console.log('📋 Dados do curso para edição:', {
+      id: curso.id,
+      titulo: curso.titulo,
+      materia: curso.materia,
+      totalModulos: curso.modulos?.length || 0,
+      totalAulas: curso.modulos?.reduce((sum, mod) => sum + (mod.aulas?.length || 0), 0) || 0
+    });
+    
+    // Preencher modal com dados do curso
+    showCursoModal(curso);
+    
+  } catch (error) {
+    console.error('❌ Erro ao editar curso:', error);
+    showAlert('❌ Erro ao carregar curso para edição: ' + error.message, 'error');
+  } finally {
+    showGlobalLoading(false);
+  }
 }
-
+        
 function addModuloToForm(moduloData = null) {
     moduloCount++;
     const moduloId = `modulo_${moduloCount}`;
@@ -3852,19 +3842,156 @@ function addAulaToModulo(moduloId) {
 }
 
 async function saveCurso() {
-  const cursoId = document.getElementById('curso-id').value;
-  
-  const cursoData = {
-    titulo: document.getElementById('curso-titulo').value,
-    descricao: document.getElementById('curso-descricao').value,
-    materia: document.getElementById('curso-materia').value,
-    categoria: document.getElementById('curso-categoria').value,
-    nivel: document.getElementById('curso-nivel').value,
-    duracao: parseInt(document.getElementById('curso-duracao').value),
-    imagem: document.getElementById('curso-imagem').value || null,
-    ativo: document.getElementById('curso-ativo').value === 'true'
-  };
+  try {
+    const cursoId = document.getElementById('curso-id').value;
+    
+    // COLETAR DADOS BÁSICOS
+    const cursoData = {
+      titulo: document.getElementById('curso-titulo').value.trim(),
+      descricao: document.getElementById('curso-descricao').value.trim() || '',
+      materia: document.getElementById('curso-materia').value.trim(),
+      categoria: document.getElementById('curso-categoria').value.trim(),
+      nivel: document.getElementById('curso-nivel').value.trim(),
+      duracao: parseInt(document.getElementById('curso-duracao').value) || 0,
+      imagem: document.getElementById('curso-imagem').value.trim() || null,
+      ativo: document.getElementById('curso-ativo').value === 'true',
+      isAdmin: true // ✅ ADICIONAR ESTA FLAG
+    };
 
+    // VALIDAÇÕES BÁSICAS
+    if (!cursoData.titulo) {
+      showAlert('❌ O título do curso é obrigatório!', 'error');
+      return;
+    }
+
+    if (!cursoData.duracao || cursoData.duracao <= 0) {
+      showAlert('❌ A duração do curso deve ser maior que zero!', 'error');
+      return;
+    }
+
+    // COLETAR MÓDULOS
+    const modulos = [];
+    const moduloElements = document.querySelectorAll('.modulo-item');
+    
+    if (moduloElements.length === 0) {
+      showAlert('❌ O curso deve ter pelo menos um módulo!', 'error');
+      return;
+    }
+
+    moduloElements.forEach((moduloElement, index) => {
+      const tituloModulo = moduloElement.querySelector('.modulo-titulo').value.trim();
+      if (!tituloModulo) {
+        showAlert(`❌ Módulo ${index + 1} precisa de um título!`, 'error');
+        moduloElement.querySelector('.modulo-titulo').style.borderColor = '#f72585';
+        moduloElement.querySelector('.modulo-titulo').focus();
+        throw new Error('Módulo sem título');
+      }
+
+      const modulo = {
+        titulo: tituloModulo,
+        descricao: moduloElement.querySelector('.modulo-descricao')?.value.trim() || '',
+        ordem: index + 1,
+        aulas: []
+      };
+
+      // COLETAR AULAS
+      const aulaElements = moduloElement.querySelectorAll('.aula-item');
+      if (aulaElements.length === 0) {
+        showAlert(`❌ Módulo "${tituloModulo}" deve ter pelo menos uma aula!`, 'error');
+        throw new Error('Módulo sem aulas');
+      }
+
+      aulaElements.forEach((aulaElement, aulaIndex) => {
+        const tituloAula = aulaElement.querySelector('.aula-titulo').value.trim();
+        if (!tituloAula) {
+          showAlert(`❌ Aula ${aulaIndex + 1} do módulo "${tituloModulo}" precisa de título!`, 'error');
+          aulaElement.querySelector('.aula-titulo').style.borderColor = '#f72585';
+          aulaElement.querySelector('.aula-titulo').focus();
+          throw new Error('Aula sem título');
+        }
+
+        const aula = {
+          titulo: tituloAula,
+          descricao: aulaElement.querySelector('.aula-descricao')?.value.trim() || '',
+          conteudo: aulaElement.querySelector('.aula-conteudo')?.value.trim() || '',
+          duracao: parseInt(aulaElement.querySelector('.aula-duracao').value) || 15,
+          ordem: aulaElement.querySelector('.aula-ordem') ? 
+                 parseInt(aulaElement.querySelector('.aula-ordem').value) : (aulaIndex + 1),
+          videoUrl: aulaElement.querySelector('.aula-video-url')?.value.trim() || null
+        };
+
+        modulo.aulas.push(aula);
+      });
+
+      modulos.push(modulo);
+    });
+
+    cursoData.modulos = modulos;
+
+    console.log('📤 Dados do curso para salvar:', {
+      id: cursoId || 'Novo',
+      titulo: cursoData.titulo,
+      materia: cursoData.materia,
+      totalModulos: cursoData.modulos.length,
+      totalAulas: cursoData.modulos.reduce((sum, mod) => sum + mod.aulas.length, 0)
+    });
+
+    showGlobalLoading(true);
+
+    let endpoint, method;
+    
+    if (cursoId) {
+      endpoint = `/api/cursos/${cursoId}?isAdmin=true`; // ✅ ADICIONAR PARÂMETRO
+      method = 'PUT';
+    } else {
+      endpoint = '/api/cursos?isAdmin=true'; // ✅ ADICIONAR PARÂMETRO
+      method = 'POST';
+    }
+
+    const response = await apiRequest(endpoint, {
+      method: method,
+      body: cursoData
+    });
+
+    console.log('✅ Resposta do servidor:', response);
+
+    if (response && response.success) {
+      showAlert('✅ Curso salvo com sucesso!', 'success');
+      closeModal('curso-modal');
+      
+      // Atualizar a lista de cursos
+      await loadCursos();
+      
+      // Se estiver no dashboard, atualizar também
+      if (currentTab === 'dashboard') {
+        await loadDashboardData();
+      }
+      
+      return response.curso || response;
+    } else {
+      throw new Error(response?.error || 'Erro desconhecido ao salvar curso');
+    }
+
+  } catch (error) {
+    console.error('❌ Erro ao salvar curso:', error);
+    
+    let errorMessage = '❌ Erro ao salvar curso';
+    if (error.message.includes('Dados incompletos')) {
+      errorMessage = '❌ Preencha todos os campos obrigatórios!';
+    } else if (error.message.includes('Módulo sem')) {
+      errorMessage = error.message;
+    } else if (error.message.includes('Aula sem')) {
+      errorMessage = error.message;
+    } else if (error.message.includes('já existe')) {
+      errorMessage = '❌ Já existe um curso com este título!';
+    }
+    
+    showAlert(errorMessage, 'error');
+    return null;
+  } finally {
+    showGlobalLoading(false);
+  }
+}
   // COLETAR MÓDULOS DO FORMULÁRIO CORRETAMENTE
   const modulos = [];
   const moduloElements = document.querySelectorAll('.modulo-item');
