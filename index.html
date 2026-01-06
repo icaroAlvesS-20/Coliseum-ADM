@@ -3779,31 +3779,31 @@ async function editCurso(cursoId) {
         
 function addModuloToForm(moduloData = null) {
     moduloCount++;
-    const moduloId = `modulo_${moduloCount}`;
+    const moduloId = `modulo_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`; // ID único
     
     // Preparar HTML das aulas se existirem
     let aulasHTML = '';
     if (moduloData && moduloData.aulas && moduloData.aulas.length > 0) {
       console.log(`📚 Carregando ${moduloData.aulas.length} aulas do módulo:`, moduloData.titulo);
       aulasHTML = moduloData.aulas.map((aula, idx) => `
-        <div class="aula-item">
+        <div class="aula-item" data-aula-id="${Date.now()}_${idx}">
           <div style="flex: 1;">
             <input type="text" class="form-control aula-titulo" placeholder="Título da Aula *" 
-                   value="${aula.titulo || ''}" required>
+                   value="${escapeHtml(aula.titulo || '')}" required>
             <input type="text" class="form-control aula-descricao" placeholder="Descrição da aula (opcional)"
-                   value="${aula.descricao || ''}" style="margin-top: 5px;">
+                   value="${escapeHtml(aula.descricao || '')}" style="margin-top: 5px;">
             <div style="display: flex; gap: 10px; margin-top: 5px;">
               <input type="number" class="form-control aula-duracao" placeholder="Duração (min)" 
-                     value="${aula.duracao || 15}" min="1">
+                     value="${aula.duracao || 15}" min="1" required>
               <input type="number" class="form-control aula-ordem" placeholder="Ordem" 
-                     value="${aula.ordem || (idx + 1)}" min="1">
+                     value="${aula.ordem || (idx + 1)}" min="1" required>
             </div>
             <input type="text" class="form-control aula-video-url" placeholder="URL do vídeo (opcional)"
-                   value="${aula.videoUrl || ''}" style="margin-top: 5px;">
+                   value="${escapeHtml(aula.videoUrl || '')}" style="margin-top: 5px;">
             <textarea class="form-control aula-conteudo" placeholder="Conteúdo da aula..." 
-                      rows="3" style="margin-top: 5px;">${aula.conteudo || ''}</textarea>
+                      rows="3" style="margin-top: 5px;">${escapeHtml(aula.conteudo || '')}</textarea>
           </div>
-          <button type="button" class="btn btn-danger btn-sm remove-aula">
+          <button type="button" class="btn btn-danger btn-sm remove-aula" title="Remover aula">
             <i class="fas fa-times"></i>
           </button>
         </div>
@@ -3812,18 +3812,18 @@ function addModuloToForm(moduloData = null) {
       // Aula padrão se não houver aulas
       console.log('➕ Adicionando aula padrão para novo módulo');
       aulasHTML = `
-        <div class="aula-item">
+        <div class="aula-item" data-aula-id="${Date.now()}_1">
           <div style="flex: 1;">
             <input type="text" class="form-control aula-titulo" placeholder="Título da Aula *" required>
             <input type="text" class="form-control aula-descricao" placeholder="Descrição da aula (opcional)" style="margin-top: 5px;">
             <div style="display: flex; gap: 10px; margin-top: 5px;">
-              <input type="number" class="form-control aula-duracao" placeholder="Duração (min)" value="15" min="1">
-              <input type="number" class="form-control aula-ordem" placeholder="Ordem" value="1" min="1">
+              <input type="number" class="form-control aula-duracao" placeholder="Duração (min)" value="15" min="1" required>
+              <input type="number" class="form-control aula-ordem" placeholder="Ordem" value="1" min="1" required>
             </div>
             <input type="text" class="form-control aula-video-url" placeholder="URL do vídeo (opcional)" style="margin-top: 5px;">
             <textarea class="form-control aula-conteudo" placeholder="Conteúdo da aula..." rows="3" style="margin-top: 5px;"></textarea>
           </div>
-          <button type="button" class="btn btn-danger btn-sm remove-aula">
+          <button type="button" class="btn btn-danger btn-sm remove-aula" title="Remover aula">
             <i class="fas fa-times"></i>
           </button>
         </div>
@@ -3835,11 +3835,11 @@ function addModuloToForm(moduloData = null) {
             <div class="modulo-header">
                 <div style="flex: 1;">
                     <input type="text" class="form-control modulo-titulo" placeholder="Título do Módulo *" 
-                           value="${moduloData?.titulo || ''}" required>
+                           value="${moduloData?.titulo ? escapeHtml(moduloData.titulo) : ''}" required>
                     <input type="text" class="form-control modulo-descricao" placeholder="Descrição do módulo (opcional)" 
-                           value="${moduloData?.descricao || ''}" style="margin-top: 8px;">
+                           value="${moduloData?.descricao ? escapeHtml(moduloData.descricao) : ''}" style="margin-top: 8px;">
                 </div>
-                <button type="button" class="btn btn-danger btn-sm remove-modulo">
+                <button type="button" class="btn btn-danger btn-sm remove-modulo" title="Remover módulo">
                     <i class="fas fa-trash"></i>
                 </button>
             </div>
@@ -3848,7 +3848,7 @@ function addModuloToForm(moduloData = null) {
                 ${aulasHTML}
             </div>
             
-            <button type="button" class="btn btn-secondary btn-sm add-aula" style="margin-top: 10px;">
+            <button type="button" class="btn btn-secondary btn-sm add-aula" style="margin-top: 10px;" title="Adicionar aula">
                 <i class="fas fa-plus"></i> Adicionar Outra Aula
             </button>
         </div>`;
@@ -3905,6 +3905,21 @@ async function saveCurso() {
       return;
     }
 
+    if (!cursoData.materia) {
+      showAlert('❌ A matéria do curso é obrigatória!', 'error');
+      return;
+    }
+
+    if (!cursoData.categoria) {
+      showAlert('❌ A categoria do curso é obrigatória!', 'error');
+      return;
+    }
+
+    if (!cursoData.nivel) {
+      showAlert('❌ O nível do curso é obrigatório!', 'error');
+      return;
+    }
+
     if (!cursoData.duracao || cursoData.duracao <= 0) {
       showAlert('❌ A duração do curso deve ser maior que zero!', 'error');
       return;
@@ -3952,6 +3967,15 @@ async function saveCurso() {
           aulaElement.querySelector('.aula-titulo').focus();
           return;
         }
+        
+        const duracaoAula = parseInt(aulaElement.querySelector('.aula-duracao')?.value);
+        if (!duracaoAula || duracaoAula <= 0) {
+          errorMessage = `❌ Aula "${tituloAula}" deve ter uma duração válida!`;
+          validationPassed = false;
+          aulaElement.querySelector('.aula-duracao').style.borderColor = '#f72585';
+          aulaElement.querySelector('.aula-duracao').focus();
+          return;
+        }
       });
     });
 
@@ -3996,6 +4020,8 @@ async function saveCurso() {
       id: cursoId || 'Novo',
       titulo: cursoData.titulo,
       materia: cursoData.materia,
+      categoria: cursoData.categoria,
+      nivel: cursoData.nivel,
       totalModulos: cursoData.modulos.length,
       totalAulas: cursoData.modulos.reduce((sum, mod) => sum + mod.aulas.length, 0)
     });
@@ -4010,10 +4036,15 @@ async function saveCurso() {
     if (cursoId) {
       endpoint = `/api/cursos/${cursoId}`;
       method = 'PUT';
+      console.log(`🔄 Editando curso existente ID: ${cursoId}`);
     } else {
       endpoint = '/api/cursos';
       method = 'POST';
+      console.log('🆕 Criando novo curso');
     }
+
+    console.log(`📤 Enviando para: ${endpoint}`);
+    console.log(`📤 Método: ${method}`);
 
     const response = await apiRequest(endpoint, {
       method: method,
