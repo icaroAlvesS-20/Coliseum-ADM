@@ -1980,6 +1980,7 @@
 </div>
     
     <script>// Variáveis globais// Variáveis globais
+// Variáveis globais
 const API_BASE_URL = 'https://coliseum-api.onrender.com';
 let users = [];
 let videos = [];
@@ -2743,7 +2744,7 @@ function setupDynamicEventListeners() {
             deleteVideo(videoId);
         }
         
-         if (e.target.closest('.edit-curso')) {
+        if (e.target.closest('.edit-curso')) {
             const cursoId = e.target.closest('.edit-curso').getAttribute('data-id');
             console.log('🎯 Editando curso ID:', cursoId);
             editCurso(cursoId);
@@ -2932,6 +2933,7 @@ async function loadDashboardData() {
     document.getElementById('ranking-loading').style.display = 'none';
   }
 }
+
 function updateDashboardStats(ranking, usuariosData, cursosData, videosData, desafiosData) {
     const totalUsers = usuariosData.length || ranking.length;
     const totalPoints = ranking.reduce((sum, user) => sum + (user.pontuacao || 0), 0);
@@ -3740,6 +3742,7 @@ function showCursoModal(curso = null) {
 
   modal.style.display = 'flex';
 }
+
 async function editCurso(cursoId) {
   try {
     console.log(`🎯 Iniciando edição do curso ID: ${cursoId}`);
@@ -3797,7 +3800,6 @@ function addModuloToForm(moduloData = null) {
                             <div style="flex: 1;">
                                 <input type="text" class="form-control aula-titulo" placeholder="Título da Aula *" 
                                        value="${aula.titulo}" required>
-                                <!-- ... resto do código ... -->
                             </div>
                         </div>
                     `).join('') 
@@ -3993,135 +3995,7 @@ async function saveCurso() {
     showGlobalLoading(false);
   }
 }
-  const modulos = [];
-  const moduloElements = document.querySelectorAll('.modulo-item');
-  
-  let modulosValidos = true;
-  let moduloErroIndex = -1;
-  
-  moduloElements.forEach((moduloElement, index) => {
-    const titulo = moduloElement.querySelector('.modulo-titulo').value.trim();
-    if (!titulo) {
-      modulosValidos = false;
-      moduloErroIndex = index + 1;
-      moduloElement.querySelector('.modulo-titulo').style.borderColor = '#f72585';
-      moduloElement.querySelector('.modulo-titulo').focus();
-    }
-  });
-  
-  if (!modulosValidos) {
-    showAlert(`❌ Módulo ${moduloErroIndex} precisa de um título!`, 'error');
-    return; 
-  }
-  
-  // Coletar dados dos módulos e aulas
-  moduloElements.forEach((moduloElement, index) => {
-    const modulo = {
-      titulo: moduloElement.querySelector('.modulo-titulo').value.trim(),
-      descricao: moduloElement.querySelector('.modulo-descricao')?.value.trim() || '',
-      ordem: index + 1,
-      aulas: []
-    };
 
-    // Coletar aulas do módulo
-    const aulaElements = moduloElement.querySelectorAll('.aula-item');
-    let aulasValidas = true;
-    
-    aulaElements.forEach((aulaElement, aulaIndex) => {
-      const tituloAula = aulaElement.querySelector('.aula-titulo').value.trim();
-      
-      // Validar se aula tem título
-      if (!tituloAula) {
-        aulasValidas = false;
-        aulaElement.querySelector('.aula-titulo').style.borderColor = '#f72585';
-        aulaElement.querySelector('.aula-titulo').focus();
-      }
-      
-      const aula = {
-        titulo: tituloAula,
-        descricao: aulaElement.querySelector('.aula-descricao')?.value.trim() || '',
-        conteudo: aulaElement.querySelector('.aula-conteudo')?.value.trim() || '',
-        duracao: parseInt(aulaElement.querySelector('.aula-duracao').value) || 15,
-        ordem: parseInt(aulaElement.querySelector('.aula-ordem').value) || (aulaIndex + 1),
-        videoUrl: aulaElement.querySelector('.aula-video-url')?.value.trim() || null
-      };
-      
-      modulo.aulas.push(aula);
-    });
-    
-    if (!aulasValidas) {
-      modulosValidos = false;
-    }
-    
-    modulos.push(modulo);
-  });
-  
-  if (!modulosValidos) {
-    showAlert('❌ Algumas aulas não têm título! Verifique todos os campos.', 'error');
-    return;
-  }
-
-  cursoData.modulos = modulos;
-
-  try {
-    showGlobalLoading(true);
-
-    console.log('📤 Salvando curso:', {
-      id: cursoId || 'Novo',
-      titulo: cursoData.titulo,
-      totalModulos: cursoData.modulos.length,
-      totalAulas: cursoData.modulos.reduce((sum, mod) => sum + mod.aulas.length, 0)
-    });
-
-    let response;
-    if (cursoId) {
-      console.log('✏️ Atualizando curso existente...');
-      
-      response = await apiRequest(`/api/cursos/${cursoId}`, {
-        method: 'PUT',
-        body: cursoData
-      });
-    } else {
-      console.log('➕ Criando novo curso...');
-      
-      response = await apiRequest('/api/cursos', {
-        method: 'POST',
-        body: cursoData
-      });
-    }
-
-    console.log('✅ Resposta do servidor:', response);
-    
-    if (response && response.success) {
-      showAlert('✅ Curso salvo com sucesso!', 'success');
-      closeModal('curso-modal');
-      await loadCursos(); // Recarregar lista de cursos
-      
-      // Atualizar dashboard se necessário
-      if (document.querySelector('.tab.active').dataset.tab === 'dashboard') {
-        await loadDashboardData();
-      }
-    } else {
-      throw new Error(response?.error || 'Erro desconhecido');
-    }
-
-  } catch (error) {
-    console.error('❌ Erro ao salvar curso:', error);
-    
-    let errorMessage = '❌ Erro ao salvar curso';
-    if (error.message.includes('Dados incompletos')) {
-      errorMessage = '❌ Dados incompletos. Preencha todos os campos obrigatórios.';
-    } else if (error.message.includes('módulo') || error.message.includes('aula')) {
-      errorMessage = `❌ ${error.message}`;
-    } else if (error.message.includes('já existe')) {
-      errorMessage = '❌ Já existe um curso com este título.';
-    }
-    
-    showAlert(errorMessage, 'error');
-  } finally {
-    showGlobalLoading(false);
-  }
-        
 function initializeMateriaFilter() {
     const categoriaSelect = document.getElementById('curso-categoria');
     const materiaSelect = document.getElementById('curso-materia');
