@@ -3784,7 +3784,8 @@ function addModuloToForm(moduloData = null) {
     // Preparar HTML das aulas se existirem
     let aulasHTML = '';
     if (moduloData && moduloData.aulas && moduloData.aulas.length > 0) {
-      aulasHTML = moduloData.aulas.map(aula => `
+      console.log(`📚 Carregando ${moduloData.aulas.length} aulas do módulo:`, moduloData.titulo);
+      aulasHTML = moduloData.aulas.map((aula, idx) => `
         <div class="aula-item">
           <div style="flex: 1;">
             <input type="text" class="form-control aula-titulo" placeholder="Título da Aula *" 
@@ -3795,7 +3796,7 @@ function addModuloToForm(moduloData = null) {
               <input type="number" class="form-control aula-duracao" placeholder="Duração (min)" 
                      value="${aula.duracao || 15}" min="1">
               <input type="number" class="form-control aula-ordem" placeholder="Ordem" 
-                     value="${aula.ordem || 1}" min="1">
+                     value="${aula.ordem || (idx + 1)}" min="1">
             </div>
             <input type="text" class="form-control aula-video-url" placeholder="URL do vídeo (opcional)"
                    value="${aula.videoUrl || ''}" style="margin-top: 5px;">
@@ -3809,6 +3810,7 @@ function addModuloToForm(moduloData = null) {
       `).join('');
     } else {
       // Aula padrão se não houver aulas
+      console.log('➕ Adicionando aula padrão para novo módulo');
       aulasHTML = `
         <div class="aula-item">
           <div style="flex: 1;">
@@ -3881,7 +3883,6 @@ function addAulaToModulo(moduloId) {
     moduloElement.insertAdjacentHTML('beforeend', aulaHTML);
 }
 
-// ✅ FUNÇÃO saveCurso CORRETA E ÚNICA
 async function saveCurso() {
   try {
     const cursoId = document.getElementById('curso-id').value;
@@ -3919,12 +3920,15 @@ async function saveCurso() {
     }
 
     // Verificar todos os módulos antes de coletar
-    for (let i = 0; i < moduloElements.length; i++) {
-      const moduloElement = moduloElements[i];
+    let validationPassed = true;
+    let errorMessage = '';
+    
+    moduloElements.forEach((moduloElement, index) => {
       const tituloModulo = moduloElement.querySelector('.modulo-titulo').value.trim();
       
       if (!tituloModulo) {
-        showAlert(`❌ Módulo ${i + 1} precisa de um título!`, 'error');
+        errorMessage = `❌ Módulo ${index + 1} precisa de um título!`;
+        validationPassed = false;
         moduloElement.querySelector('.modulo-titulo').style.borderColor = '#f72585';
         moduloElement.querySelector('.modulo-titulo').focus();
         return;
@@ -3932,47 +3936,72 @@ async function saveCurso() {
 
       const aulaElements = moduloElement.querySelectorAll('.aula-item');
       if (aulaElements.length === 0) {
-        showAlert(`❌ Módulo "${tituloModulo}" deve ter pelo menos uma aula!`, 'error');
+        errorMessage = `❌ Módulo "${tituloModulo}" deve ter pelo menos uma aula!`;
+        validationPassed = false;
         return;
       }
 
       // Verificar todas as aulas deste módulo
-      const aulas = [];
-      for (let j = 0; j < aulaElements.length; j++) {
-        const aulaElement = aulaElements[j];
+      aulaElements.forEach((aulaElement, aulaIndex) => {
         const tituloAula = aulaElement.querySelector('.aula-titulo').value.trim();
         
         if (!tituloAula) {
-          showAlert(`❌ Aula ${j + 1} do módulo "${tituloModulo}" precisa de título!`, 'error');
+          errorMessage = `❌ Aula ${aulaIndex + 1} do módulo "${tituloModulo}" precisa de título!`;
+          validationPassed = false;
           aulaElement.querySelector('.aula-titulo').style.borderColor = '#f72585';
           aulaElement.querySelector('.aula-titulo').focus();
           return;
         }
+      });
+    });
 
-        // Coletar dados da aula
+    if (!validationPassed) {
+      showAlert(errorMessage, 'error');
+      return;
+    }
+
+    // Agora coletar os dados (após validação)
+    moduloElements.forEach((moduloElement, index) => {
+      const tituloModulo = moduloElement.querySelector('.modulo-titulo').value.trim();
+      const moduloDescricao = moduloElement.querySelector('.modulo-descricao')?.value.trim() || '';
+
+      const modulo = {
+        titulo: tituloModulo,
+        descricao: moduloDescricao,
+        ordem: index + 1,
+        aulas: []
+      };
+
+      // COLETAR AULAS
+      const aulaElements = moduloElement.querySelectorAll('.aula-item');
+      aulaElements.forEach((aulaElement, aulaIndex) => {
         const aula = {
-          titulo: tituloAula,
+          titulo: aulaElement.querySelector('.aula-titulo').value.trim(),
           descricao: aulaElement.querySelector('.aula-descricao')?.value.trim() || '',
           conteudo: aulaElement.querySelector('.aula-conteudo')?.value.trim() || '',
           duracao: parseInt(aulaElement.querySelector('.aula-duracao')?.value) || 15,
-          ordem: aulaElement.querySelector('.aula-ordem')?.value || (j + 1),
+          ordem: aulaIndex + 1,
           videoUrl: aulaElement.querySelector('.aula-video-url')?.value.trim() || null
         };
-        aulas.push(aula);
-      }
 
-      // Adicionar módulo com suas aulas
-      modulos.push({
-        titulo: tituloModulo,
-        descricao: moduloElement.querySelector('.modulo-descricao')?.value.trim() || '',
-        ordem: i + 1,
-        aulas: aulas
+        modulo.aulas.push(aula);
       });
-    }
+
+      modulos.push(modulo);
+    });
 
     cursoData.modulos = modulos;
 
-    console.log('📤 Dados do curso para salvar:', JSON.stringify(cursoData, null, 2));
+    console.log('📤 Dados do curso para salvar:', {
+      id: cursoId || 'Novo',
+      titulo: cursoData.titulo,
+      materia: cursoData.materia,
+      totalModulos: cursoData.modulos.length,
+      totalAulas: cursoData.modulos.reduce((sum, mod) => sum + mod.aulas.length, 0)
+    });
+
+    // Log completo dos dados (apenas para debug)
+    console.log('🔍 Dados completos:', JSON.stringify(cursoData, null, 2));
 
     showGlobalLoading(true);
 
@@ -4024,6 +4053,8 @@ async function saveCurso() {
       errorMessage = '❌ Dados inválidos enviados para a API. Verifique o formato dos dados.';
     } else if (error.message.includes('Erro 500')) {
       errorMessage = '❌ Erro interno no servidor. Tente novamente.';
+    } else if (error.message.includes('Network')) {
+      errorMessage = '❌ Problema de conexão com o servidor. Verifique sua internet.';
     }
     
     showAlert(errorMessage, 'error');
