@@ -886,6 +886,222 @@
             .message-type-warning .message-type-indicator {
                 background: #f72585;
             }
+
+/* Estilos para Autorização em Massa */
+.select-multiple {
+    min-height: 150px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.usuario-selecionado {
+    padding: 8px 12px;
+    margin: 5px 0;
+    background: rgba(255, 207, 0, 0.1);
+    border: 1px solid #ffcf00;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.usuario-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.usuario-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ffcf00, #e6ba00);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #000;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.usuario-detalhes {
+    flex: 1;
+}
+
+.usuario-nome {
+    font-weight: bold;
+    color: #fff;
+    font-size: 0.95rem;
+}
+
+.usuario-meta {
+    font-size: 0.8rem;
+    color: #aaa;
+    margin-top: 2px;
+}
+
+.usuario-remover {
+    background: none;
+    border: none;
+    color: #f72585;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.stat-card {
+    background: linear-gradient(145deg, #383838, #282828);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    border: 1px solid #555;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #ffcf00;
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: #aaa;
+}
+
+.stat-subtitle {
+    font-size: 0.8rem;
+    color: #888;
+    margin-top: 5px;
+}
+
+.progresso-usuario {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #444;
+}
+
+.progresso-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.progresso-bar {
+    height: 10px;
+    background: #333;
+    border-radius: 5px;
+    overflow: hidden;
+    margin: 10px 0;
+}
+
+.progresso-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #4caf50, #8bc34a);
+    border-radius: 5px;
+    transition: width 0.3s ease;
+}
+
+.preview-item {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    border-left: 4px solid;
+}
+
+.preview-item.success {
+    border-left-color: #4caf50;
+}
+
+.preview-item.info {
+    border-left-color: #2196f3;
+}
+
+.preview-item.warning {
+    border-left-color: #ff9800;
+}
+
+.preview-icon {
+    font-size: 1.5rem;
+    margin-right: 10px;
+}
+
+.historico-item {
+    background: rgba(255, 255, 255, 0.03);
+    margin-bottom: 10px;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.historico-header {
+    background: rgba(255, 207, 0, 0.1);
+    padding: 12px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+}
+
+.historico-data {
+    font-weight: bold;
+    color: #ffcf00;
+}
+
+.historico-curso {
+    color: #4cc9f0;
+    font-weight: 600;
+}
+
+.historico-tipo {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+.tipo-liberar {
+    background: rgba(76, 175, 80, 0.2);
+    color: #4caf50;
+}
+
+.tipo-resetar {
+    background: rgba(255, 152, 0, 0.2);
+    color: #ff9800;
+}
+
+.historico-detalhes {
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.2);
+    display: none;
+}
+
+.historico-detalhes.ativo {
+    display: block;
+}
+
+.usuarios-lista {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.usuario-badge {
+    background: rgba(255, 207, 0, 0.1);
+    border: 1px solid #ffcf00;
+    padding: 4px 10px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    color: #ffcf00;
+}}
         
         @media (max-width: 768px) {
             body {
@@ -1061,7 +1277,7 @@
             <div class="tab" data-tab="desafios">Gerenciar Desafios</div>
             <div class="tab" data-tab="ranking">Ranking Completo</div>
             <div class="tab" data-tab="chat">Chat Geral-ADM</div>
-            <div class="tab" data-tab="chat">Autorização de Aulas</div>
+            <div class="tab" data-tab="autorizacao">Autorização de Aulas</div>
             <div class="tab" data-tab="settings">Configurações</div>
         </div>
 
@@ -1442,6 +1658,150 @@
                 </button>
             </div>
         </div>
+    </div>
+</div>
+
+<!-- Substitua a aba "Autorização de Aulas" por este código: -->
+<div id="autorizacao" class="tab-content">
+    <div class="form-container">
+        <h3><i class="fas fa-user-check"></i> Autorização de Aulas em Massa</h3>
+        <p style="color: #aaa; margin-bottom: 15px;">Libere todas as aulas de um curso para usuários específicos de uma só vez.</p>
+        
+        <div class="form-row">
+            <div class="form-group" style="flex: 2;">
+                <label for="autorizacao-curso-massa">Selecionar Curso *</label>
+                <select id="autorizacao-curso-massa" class="form-control" required>
+                    <option value="">Selecione um curso...</option>
+                    <!-- Cursos serão carregados dinamicamente -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="autorizacao-tipo">Tipo de Autorização *</label>
+                <select id="autorizacao-tipo" class="form-control" required>
+                    <option value="liberar_todas">Liberar Todas as Aulas</option>
+                    <option value="liberar_modulo">Liberar Módulo Específico</option>
+                    <option value="resetar">Resetar Progresso</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-row" id="modulo-container" style="display: none;">
+            <div class="form-group" style="flex: 2;">
+                <label for="autorizacao-modulo-massa">Selecionar Módulo</label>
+                <select id="autorizacao-modulo-massa" class="form-control">
+                    <option value="">Selecione um módulo...</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group" style="flex: 1;">
+                <label for="autorizacao-usuarios">Usuários *</label>
+                <select id="autorizacao-usuarios" class="form-control" multiple style="height: 150px;">
+                    <!-- Usuários serão carregados dinamicamente -->
+                </select>
+                <small style="color: #888; font-size: 12px;">
+                    Segure Ctrl (Cmd no Mac) para selecionar múltiplos usuários
+                </small>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group" style="flex: 2;">
+                <label for="autorizacao-observacao">Observação (opcional)</label>
+                <textarea id="autorizacao-observacao" class="form-control" rows="3" 
+                          placeholder="Ex: Autorização especial para alunos que participaram do evento..."></textarea>
+            </div>
+        </div>
+
+        <div class="form-row" style="margin-top: 20px;">
+            <div class="form-group" style="flex: 1;">
+                <button class="btn btn-primary" id="carregar-detalhes-curso">
+                    <i class="fas fa-chart-bar"></i> Ver Estatísticas do Curso
+                </button>
+            </div>
+            <div class="form-group" style="flex: 1; text-align: right;">
+                <button class="btn btn-warning" id="preview-autorizacao">
+                    <i class="fas fa-eye"></i> Pré-visualizar
+                </button>
+                <button class="btn btn-success" id="executar-autorizacao">
+                    <i class="fas fa-play"></i> Executar Autorização
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-container" id="estatisticas-container" style="display: none;">
+        <div class="table-header">
+            <h3><i class="fas fa-chart-pie"></i> Estatísticas do Curso</h3>
+            <div style="color: #aaa;">
+                <span id="total-aulas-curso">0</span> aulas • 
+                <span id="total-modulos-curso">0</span> módulos
+            </div>
+        </div>
+        
+        <div class="loading" id="estatisticas-loading">
+            <div class="spinner"></div>
+        </div>
+        
+        <div id="estatisticas-content" style="padding: 20px;">
+            <!-- Estatísticas serão carregadas aqui -->
+        </div>
+    </div>
+
+    <div class="table-container" id="preview-container" style="display: none;">
+        <div class="table-header">
+            <h3><i class="fas fa-clipboard-check"></i> Pré-visualização da Autorização</h3>
+            <button class="btn btn-sm btn-warning" id="fechar-preview">
+                <i class="fas fa-times"></i> Fechar
+            </button>
+        </div>
+        
+        <div id="preview-content" style="padding: 20px;">
+            <!-- Pré-visualização será carregada aqui -->
+        </div>
+        
+        <div style="padding: 15px; border-top: 1px solid #555; background: rgba(255, 207, 0, 0.05);">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <div style="color: #aaa; font-size: 0.9rem;">Resumo da operação:</div>
+                    <div style="color: #ffcf00; font-weight: bold;" id="preview-resumo"></div>
+                </div>
+                <button class="btn btn-success" id="confirmar-execucao">
+                    <i class="fas fa-check"></i> Confirmar e Executar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <div class="table-header">
+            <h3><i class="fas fa-history"></i> Histórico de Autorizações</h3>
+            <button class="btn btn-sm btn-primary" id="refresh-historico">
+                <i class="fas fa-sync-alt"></i> Atualizar
+            </button>
+        </div>
+        
+        <div class="loading" id="historico-loading">
+            <div class="spinner"></div>
+        </div>
+        
+        <table id="historico-table">
+            <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Curso</th>
+                    <th>Usuários</th>
+                    <th>Tipo</th>
+                    <th>Aulas</th>
+                    <th>Admin</th>
+                    <th>Observação</th>
+                </tr>
+            </thead>
+            <tbody id="historico-body">
+                <!-- Histórico será carregado aqui -->
+            </tbody>
+        </table>
     </div>
 </div>
         <!-- Settings Tab -->
@@ -2000,6 +2360,12 @@ let currentChatFilter = 'all';
 let chatPage = 1;
 let chatLimit = 20;
 let allUsersForChat = [];
+let cursosAutorizacaoMassa = [];
+let usuariosAutorizacaoMassa = [];
+let cursoSelecionadoMassa = null;
+let moduloSelecionadoMassa = null;
+let usuariosSelecionadosMassa = new Set();
+let autorizacoesHistorico = [];
 
 // DOM Elements
 const tabs = document.querySelectorAll('.tab');
@@ -4687,6 +5053,881 @@ function filterDesafiosByStatus(status) {
         displayDesafios(filteredDesafios);
     }
 }
+// Inicializar sistema de autorização em massa
+function initializeAutorizacaoMassa() {
+    console.log('🔐 Inicializando sistema de autorização em massa...');
+    
+    // Carregar cursos e usuários
+    loadCursosParaAutorizacao();
+    loadUsuariosParaAutorizacao();
+    loadHistoricoAutorizacoes();
+    
+    // Configurar event listeners
+    setupAutorizacaoMassaEventListeners();
+}
+
+// Carregar cursos para dropdown
+async function loadCursosParaAutorizacao() {
+    try {
+        console.log('📚 Carregando cursos para autorização...');
+        const cursos = await apiRequest('/api/cursos');
+        cursosAutorizacaoMassa = Array.isArray(cursos) ? cursos : [];
+        
+        const cursoSelect = document.getElementById('autorizacao-curso-massa');
+        if (cursoSelect) {
+            cursoSelect.innerHTML = '<option value="">Selecione um curso...</option>';
+            
+            cursosAutorizacaoMassa
+                .filter(curso => curso.ativo !== false)
+                .sort((a, b) => a.titulo.localeCompare(b.titulo))
+                .forEach(curso => {
+                    const option = document.createElement('option');
+                    option.value = curso.id;
+                    option.textContent = `${curso.titulo} (${getMateriaNome(curso.materia)})`;
+                    cursoSelect.appendChild(option);
+                });
+        }
+        
+        console.log(`✅ ${cursosAutorizacaoMassa.length} cursos carregados para autorização`);
+    } catch (error) {
+        console.error('❌ Erro ao carregar cursos:', error);
+        showAlert('❌ Erro ao carregar cursos', 'error');
+    }
+}
+
+// Carregar usuários para seleção múltipla
+async function loadUsuariosParaAutorizacao() {
+    try {
+        console.log('👥 Carregando usuários para autorização...');
+        const usuarios = await apiRequest('/api/usuarios');
+        usuariosAutorizacaoMassa = Array.isArray(usuarios) ? usuarios : [];
+        
+        const usuariosSelect = document.getElementById('autorizacao-usuarios');
+        if (usuariosSelect) {
+            usuariosSelect.innerHTML = '';
+            
+            usuariosAutorizacaoMassa
+                .filter(user => user.status === 'ativo')
+                .sort((a, b) => a.nome.localeCompare(b.nome))
+                .forEach(user => {
+                    const option = document.createElement('option');
+                    option.value = user.id;
+                    option.textContent = `${user.nome} (RA: ${user.ra}) - ${user.curso}`;
+                    usuariosSelect.appendChild(option);
+                });
+        }
+        
+        console.log(`✅ ${usuariosAutorizacaoMassa.length} usuários carregados para autorização`);
+    } catch (error) {
+        console.error('❌ Erro ao carregar usuários:', error);
+        showAlert('❌ Erro ao carregar usuários', 'error');
+    }
+}
+
+// Carregar histórico de autorizações do backend
+async function loadHistoricoAutorizacoes() {
+    try {
+        showLoadingElement('historico-loading', true);
+        
+        console.log('📜 Carregando histórico de autorizações do backend...');
+        const response = await apiRequest('/api/autorizacoes/historico');
+        
+        if (response && response.success) {
+            autorizacoesHistorico = response.historico || [];
+            console.log(`✅ ${autorizacoesHistorico.length} autorizações no histórico`);
+        } else {
+            autorizacoesHistorico = [];
+            console.log('ℹ️ Nenhum histórico encontrado');
+        }
+        
+        displayHistoricoAutorizacoes();
+        
+    } catch (error) {
+        console.error('❌ Erro ao carregar histórico do backend:', error);
+        
+        // Tentar carregar do localStorage como fallback
+        const historicoLocal = localStorage.getItem('historico_autorizacoes');
+        autorizacoesHistorico = historicoLocal ? JSON.parse(historicoLocal) : [];
+        
+        showAlert('⚠️ Usando histórico local (offline)', 'warning');
+        displayHistoricoAutorizacoes();
+    } finally {
+        showLoadingElement('historico-loading', false);
+    }
+}
+
+// Configurar event listeners
+function setupAutorizacaoMassaEventListeners() {
+    // Seleção de curso
+    const cursoSelect = document.getElementById('autorizacao-curso-massa');
+    if (cursoSelect) {
+        cursoSelect.addEventListener('change', function() {
+            const cursoId = this.value;
+            cursoSelecionadoMassa = cursoId ? cursosAutorizacaoMassa.find(c => c.id == cursoId) : null;
+            
+            // Carregar módulos do curso selecionado
+            if (cursoSelecionadoMassa) {
+                loadModulosCurso(cursoSelecionadoMassa.id);
+            } else {
+                document.getElementById('modulo-container').style.display = 'none';
+            }
+        });
+    }
+    
+    // Tipo de autorização
+    const tipoSelect = document.getElementById('autorizacao-tipo');
+    if (tipoSelect) {
+        tipoSelect.addEventListener('change', function() {
+            const tipo = this.value;
+            const moduloContainer = document.getElementById('modulo-container');
+            
+            if (tipo === 'liberar_modulo') {
+                moduloContainer.style.display = 'flex';
+            } else {
+                moduloContainer.style.display = 'none';
+            }
+        });
+    }
+    
+    // Botões
+    setupButton('#carregar-detalhes-curso', carregarEstatisticasCurso);
+    setupButton('#preview-autorizacao', mostrarPreviewAutorizacao);
+    setupButton('#executar-autorizacao', mostrarPreviewAutorizacao);
+    setupButton('#fechar-preview', () => {
+        document.getElementById('preview-container').style.display = 'none';
+    });
+    setupButton('#confirmar-execucao', executarAutorizacaoEmMassa);
+    setupButton('#refresh-historico', loadHistoricoAutorizacoes);
+}
+
+// Carregar módulos do curso selecionado
+async function loadModulosCurso(cursoId) {
+    try {
+        console.log(`📦 Carregando módulos do curso ID: ${cursoId}`);
+        
+        // Buscar curso com módulos
+        const curso = await apiRequest(`/api/cursos/${cursoId}`);
+        
+        const moduloSelect = document.getElementById('autorizacao-modulo-massa');
+        if (moduloSelect && curso && curso.modulos) {
+            moduloSelect.innerHTML = '<option value="">Selecione um módulo...</option>';
+            
+            curso.modulos.forEach(modulo => {
+                const option = document.createElement('option');
+                option.value = modulo.id;
+                option.textContent = `${modulo.titulo} (${modulo.aulas ? modulo.aulas.length : 0} aulas)`;
+                moduloSelect.appendChild(option);
+            });
+            
+            moduloSelecionadoMassa = null;
+        }
+        
+    } catch (error) {
+        console.error('❌ Erro ao carregar módulos:', error);
+    }
+}
+
+// Carregar estatísticas do curso
+async function carregarEstatisticasCurso() {
+    if (!cursoSelecionadoMassa) {
+        showAlert('❌ Selecione um curso primeiro!', 'error');
+        return;
+    }
+    
+    try {
+        showLoadingElement('estatisticas-loading', true);
+        
+        console.log(`📊 Carregando estatísticas do curso: ${cursoSelecionadoMassa.titulo}`);
+        
+        // Buscar curso com módulos e aulas
+        const cursoCompleto = await apiRequest(`/api/cursos/${cursoSelecionadoMassa.id}`);
+        
+        if (!cursoCompleto) {
+            throw new Error('Curso não encontrado');
+        }
+        
+        const totalModulos = cursoCompleto.modulos ? cursoCompleto.modulos.length : 0;
+        const totalAulas = cursoCompleto.modulos ? 
+            cursoCompleto.modulos.reduce((sum, mod) => sum + (mod.aulas ? mod.aulas.length : 0), 0) : 0;
+        
+        // Buscar estatísticas de progresso dos usuários selecionados
+        const usuariosSelect = document.getElementById('autorizacao-usuarios');
+        const usuarioIds = Array.from(usuariosSelect.selectedOptions).map(opt => parseInt(opt.value));
+        
+        let estatisticasUsuarios = [];
+        if (usuarioIds.length > 0) {
+            // Buscar progresso de cada usuário
+            const promessasProgresso = usuarioIds.map(async (usuarioId) => {
+                try {
+                    const progresso = await apiRequest(`/api/progresso/cursos/${cursoSelecionadoMassa.id}?usuarioId=${usuarioId}`);
+                    const usuario = usuariosAutorizacaoMassa.find(u => u.id === usuarioId);
+                    
+                    return {
+                        usuarioId,
+                        usuarioNome: usuario ? usuario.nome : `Usuário ${usuarioId}`,
+                        progresso: progresso ? progresso.progresso : 0,
+                        aulasConcluidas: progresso ? progresso.aulasConcluidas : 0,
+                        aulasTotais: progresso ? progresso.aulasTotais : totalAulas
+                    };
+                } catch (error) {
+                    console.warn(`⚠️ Erro ao buscar progresso do usuário ${usuarioId}:`, error);
+                    return null;
+                }
+            });
+            
+            const resultados = await Promise.all(promessasProgresso);
+            estatisticasUsuarios = resultados.filter(r => r !== null);
+        }
+        
+        // Atualizar contadores
+        document.getElementById('total-aulas-curso').textContent = totalAulas;
+        document.getElementById('total-modulos-curso').textContent = totalModulos;
+        
+        // Criar estatísticas
+        const estatisticasHTML = `
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">${totalAulas}</div>
+                    <div class="stat-label">Total de Aulas</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-value">${totalModulos}</div>
+                    <div class="stat-label">Módulos</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-value">${cursoCompleto.duracao || 0}h</div>
+                    <div class="stat-label">Duração Total</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-value">${getMateriaNome(cursoCompleto.materia)}</div>
+                    <div class="stat-label">Matéria</div>
+                </div>
+            </div>
+            
+            ${estatisticasUsuarios.length > 0 ? `
+                <h4 style="color: #ffcf00; margin: 20px 0 10px 0;">
+                    <i class="fas fa-user-graduate"></i> Progresso dos Usuários Selecionados
+                </h4>
+                
+                ${estatisticasUsuarios.map(estatistica => `
+                    <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; margin-bottom: 10px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <div>
+                                <strong style="color: #fff;">${estatistica.usuarioNome}</strong>
+                                <div style="color: #aaa; font-size: 0.9rem; margin-top: 2px;">
+                                    ${estatistica.aulasConcluidas} de ${estatistica.aulasTotais} aulas concluídas
+                                </div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="color: #4cc9f0; font-weight: bold; font-size: 1.2rem;">
+                                    ${estatistica.progresso}%
+                                </div>
+                                <div style="color: #888; font-size: 0.8rem;">progresso</div>
+                            </div>
+                        </div>
+                        
+                        <div class="progresso-bar">
+                            <div class="progresso-fill" style="width: ${estatistica.progresso}%;"></div>
+                        </div>
+                    </div>
+                `).join('')}
+            ` : ''}
+            
+            <h4 style="color: #ffcf00; margin: 20px 0 10px 0;">
+                <i class="fas fa-layer-group"></i> Módulos do Curso
+            </h4>
+            
+            ${cursoCompleto.modulos ? cursoCompleto.modulos.map((modulo, index) => `
+                <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; margin-bottom: 10px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <strong style="color: #fff;">${modulo.titulo}</strong>
+                            <div style="color: #aaa; font-size: 0.9rem; margin-top: 5px;">
+                                ${modulo.descricao || 'Sem descrição'}
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="color: #4cc9f0; font-weight: bold;">${modulo.aulas ? modulo.aulas.length : 0}</div>
+                            <div style="color: #888; font-size: 0.8rem;">aulas</div>
+                        </div>
+                    </div>
+                    
+                    ${modulo.aulas && modulo.aulas.length > 0 ? `
+                        <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #444;">
+                            <div style="color: #aaa; font-size: 0.9rem; margin-bottom: 5px;">Aulas:</div>
+                            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                                ${modulo.aulas.slice(0, 5).map(aula => `
+                                    <div style="background: rgba(255,255,255,0.03); padding: 6px 10px; border-radius: 6px; font-size: 0.8rem;">
+                                        ${aula.titulo}
+                                    </div>
+                                `).join('')}
+                                ${modulo.aulas.length > 5 ? `
+                                    <div style="background: rgba(255,207,0,0.1); padding: 6px 10px; border-radius: 6px; font-size: 0.8rem; color: #ffcf00;">
+                                        +${modulo.aulas.length - 5} mais
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('') : '<p style="color: #888; text-align: center;">Nenhum módulo encontrado</p>'}
+            
+            <div style="margin-top: 20px; padding: 15px; background: rgba(255, 207, 0, 0.05); border-radius: 10px; border: 1px solid #555;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-info-circle" style="color: #ffcf00; font-size: 1.2rem;"></i>
+                    <div>
+                        <strong style="color: #ffcf00;">Informação:</strong>
+                        <div style="color: #aaa; margin-top: 5px;">
+                            Este curso contém <strong>${totalAulas}</strong> aulas distribuídas em <strong>${totalModulos}</strong> módulos.
+                            ${estatisticasUsuarios.length > 0 ? 
+                                `Média de progresso dos usuários selecionados: <strong>${Math.round(estatisticasUsuarios.reduce((sum, e) => sum + e.progresso, 0) / estatisticasUsuarios.length)}%</strong>` 
+                                : ''
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.getElementById('estatisticas-content').innerHTML = estatisticasHTML;
+        document.getElementById('estatisticas-container').style.display = 'block';
+        
+    } catch (error) {
+        console.error('❌ Erro ao carregar estatísticas:', error);
+        showAlert('❌ Erro ao carregar estatísticas do curso', 'error');
+    } finally {
+        showLoadingElement('estatisticas-loading', false);
+    }
+}
+
+// Mostrar pré-visualização da autorização
+async function mostrarPreviewAutorizacao() {
+    const cursoId = document.getElementById('autorizacao-curso-massa').value;
+    const tipo = document.getElementById('autorizacao-tipo').value;
+    const moduloId = tipo === 'liberar_modulo' ? document.getElementById('autorizacao-modulo-massa').value : null;
+    const usuariosSelect = document.getElementById('autorizacao-usuarios');
+    const observacao = document.getElementById('autorizacao-observacao').value.trim();
+    
+    // Validações
+    if (!cursoId) {
+        showAlert('❌ Selecione um curso!', 'error');
+        return;
+    }
+    
+    if (!usuariosSelect || usuariosSelect.selectedOptions.length === 0) {
+        showAlert('❌ Selecione pelo menos um usuário!', 'error');
+        return;
+    }
+    
+    if (tipo === 'liberar_modulo' && !moduloId) {
+        showAlert('❌ Selecione um módulo!', 'error');
+        return;
+    }
+    
+    try {
+        showGlobalLoading(true);
+        console.log('👁️ Criando pré-visualização da autorização...');
+        
+        // Coletar IDs dos usuários selecionados
+        const usuarioIds = Array.from(usuariosSelect.selectedOptions).map(opt => parseInt(opt.value));
+        const usuarios = usuariosAutorizacaoMassa.filter(u => usuarioIds.includes(u.id));
+        
+        // Buscar informações do curso
+        const curso = await apiRequest(`/api/cursos/${cursoId}`);
+        if (!curso) throw new Error('Curso não encontrado');
+        
+        let totalAulas = 0;
+        let detalhesAulas = '';
+        
+        if (tipo === 'liberar_todas') {
+            // Todas as aulas do curso
+            totalAulas = curso.modulos ? 
+                curso.modulos.reduce((sum, mod) => sum + (mod.aulas ? mod.aulas.length : 0), 0) : 0;
+            
+            detalhesAulas = `
+                <div class="preview-item success">
+                    <div style="display: flex; align-items: center;">
+                        <i class="fas fa-check-circle preview-icon" style="color: #4caf50;"></i>
+                        <div>
+                            <strong>Liberar todas as aulas do curso</strong>
+                            <div style="color: #aaa; margin-top: 5px;">
+                                ${totalAulas} aulas em ${curso.modulos ? curso.modulos.length : 0} módulos
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+        } else if (tipo === 'liberar_modulo' && moduloId) {
+            // Aulas de um módulo específico
+            const modulo = curso.modulos ? curso.modulos.find(m => m.id == moduloId) : null;
+            if (modulo) {
+                totalAulas = modulo.aulas ? modulo.aulas.length : 0;
+                
+                detalhesAulas = `
+                    <div class="preview-item info">
+                        <div style="display: flex; align-items: center;">
+                            <i class="fas fa-folder-open preview-icon" style="color: #2196f3;"></i>
+                            <div>
+                                <strong>Liberar módulo específico</strong>
+                                <div style="color: #aaa; margin-top: 5px;">
+                                    Módulo: <strong>${modulo.titulo}</strong>
+                                </div>
+                                <div style="color: #aaa;">
+                                    ${totalAulas} aulas serão liberadas
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        } else if (tipo === 'resetar') {
+            // Resetar progresso
+            totalAulas = curso.modulos ? 
+                curso.modulos.reduce((sum, mod) => sum + (mod.aulas ? mod.aulas.length : 0), 0) : 0;
+            
+            detalhesAulas = `
+                <div class="preview-item warning">
+                    <div style="display: flex; align-items: center;">
+                        <i class="fas fa-undo preview-icon" style="color: #ff9800;"></i>
+                        <div>
+                            <strong>Resetar progresso do curso</strong>
+                            <div style="color: #aaa; margin-top: 5px;">
+                                O progresso de ${totalAulas} aulas será reiniciado
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Lista de usuários
+        const usuariosHTML = usuarios.map(usuario => `
+            <div class="usuario-selecionado">
+                <div class="usuario-info">
+                    <div class="usuario-avatar">
+                        ${usuario.nome.charAt(0).toUpperCase()}
+                    </div>
+                    <div class="usuario-detalhes">
+                        <div class="usuario-nome">${usuario.nome}</div>
+                        <div class="usuario-meta">
+                            RA: ${usuario.ra} • Curso: ${usuario.curso}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+        
+        // Montar pré-visualização
+        const previewHTML = `
+            <h4 style="color: #ffcf00; margin-bottom: 15px;">Detalhes da Autorização</h4>
+            
+            ${detalhesAulas}
+            
+            <div class="preview-item">
+                <div style="display: flex; align-items: center;">
+                    <i class="fas fa-book preview-icon" style="color: #ffcf00;"></i>
+                    <div>
+                        <strong>Curso</strong>
+                        <div style="color: #aaa; margin-top: 5px;">
+                            ${curso.titulo} (${getMateriaNome(curso.materia)})
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="preview-item">
+                <div style="display: flex; align-items: center;">
+                    <i class="fas fa-users preview-icon" style="color: #4cc9f0;"></i>
+                    <div>
+                        <strong>Usuários Selecionados (${usuarios.length})</strong>
+                        <div style="color: #aaa; margin-top: 5px;">
+                            A autorização será aplicada aos seguintes usuários:
+                        </div>
+                    </div>
+                </div>
+                <div style="margin-top: 10px; max-height: 200px; overflow-y: auto;">
+                    ${usuariosHTML}
+                </div>
+            </div>
+            
+            ${observacao ? `
+                <div class="preview-item">
+                    <div style="display: flex; align-items: center;">
+                        <i class="fas fa-sticky-note preview-icon" style="color: #9c27b0;"></i>
+                        <div>
+                            <strong>Observação</strong>
+                            <div style="color: #aaa; margin-top: 5px;">
+                                ${escapeHtml(observacao)}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            ` : ''}
+        `;
+        
+        // Atualizar resumo
+        const tipoTexto = {
+            'liberar_todas': 'Liberar todas as aulas',
+            'liberar_modulo': 'Liberar módulo específico',
+            'resetar': 'Resetar progresso'
+        }[tipo] || 'Autorização';
+        
+        document.getElementById('preview-resumo').textContent = 
+            `${tipoTexto} • ${usuarios.length} usuário(s) • ${totalAulas} aula(s)`;
+        
+        document.getElementById('preview-content').innerHTML = previewHTML;
+        document.getElementById('preview-container').style.display = 'block';
+        
+        // Armazenar dados para execução
+        document.getElementById('preview-container').dataset.autorizacaoData = JSON.stringify({
+            cursoId: parseInt(cursoId),
+            tipo: tipo,
+            moduloId: moduloId ? parseInt(moduloId) : null,
+            usuarioIds: usuarioIds,
+            observacao: observacao,
+            adminId: 1, // ID do admin (no sistema real seria dinâmico)
+            adminNome: 'Administrador'
+        });
+        
+    } catch (error) {
+        console.error('❌ Erro ao criar pré-visualização:', error);
+        showAlert('❌ Erro ao criar pré-visualização', 'error');
+    } finally {
+        showGlobalLoading(false);
+    }
+}
+
+// Executar autorização em massa usando o novo endpoint
+async function executarAutorizacaoEmMassa() {
+    const dataContainer = document.getElementById('preview-container');
+    if (!dataContainer.dataset.autorizacaoData) {
+        showAlert('❌ Dados da autorização não encontrados!', 'error');
+        return;
+    }
+    
+    const autorizacaoData = JSON.parse(dataContainer.dataset.autorizacaoData);
+    
+    try {
+        showGlobalLoading(true);
+        console.log('🚀 Executando autorização em massa via endpoint...', autorizacaoData);
+        
+        // Enviar requisição para o novo endpoint
+        const response = await apiRequest('/api/autorizacoes/massa', {
+            method: 'POST',
+            body: autorizacaoData
+        });
+        
+        console.log('✅ Resposta do backend:', response);
+        
+        if (response && response.success) {
+            const sucessos = response.resultados ? response.resultados.filter(r => r.sucesso).length : 0;
+            const erros = response.resultados ? response.resultados.filter(r => !r.sucesso).length : 0;
+            
+            const mensagemResultado = erros === 0 ? 
+                `✅ Autorização concluída com sucesso! ${sucessos} usuário(s) processado(s).` :
+                `⚠️ Autorização parcialmente concluída. ${sucessos} sucesso(s), ${erros} erro(s).`;
+            
+            showAlert(mensagemResultado, erros === 0 ? 'success' : 'warning');
+            
+            // Mostrar detalhes se houver erros
+            if (erros > 0 && response.resultados) {
+                const errosDetalhes = response.resultados
+                    .filter(r => !r.sucesso)
+                    .map(r => {
+                        const usuario = usuariosAutorizacaoMassa.find(u => u.id === r.usuarioId);
+                        return `• ${usuario ? usuario.nome : `Usuário ${r.usuarioId}`}: ${r.mensagem}`;
+                    })
+                    .join('\n');
+                
+                if (errosDetalhes) {
+                    setTimeout(() => {
+                        showAlert(`❌ Erros encontrados:\n${errosDetalhes}`, 'error', 10000);
+                    }, 1000);
+                }
+            }
+            
+            // Atualizar estatísticas se houver usuários selecionados
+            if (autorizacaoData.usuarioIds && autorizacaoData.usuarioIds.length > 0) {
+                setTimeout(() => {
+                    carregarEstatisticasCurso();
+                }, 1500);
+            }
+            
+        } else {
+            throw new Error(response?.error || 'Erro desconhecido do backend');
+        }
+        
+        // Fechar preview
+        document.getElementById('preview-container').style.display = 'none';
+        
+        // Limpar formulário
+        document.getElementById('autorizacao-observacao').value = '';
+        
+        // Atualizar histórico
+        await loadHistoricoAutorizacoes();
+        
+    } catch (error) {
+        console.error('❌ Erro na autorização em massa:', error);
+        showAlert(`❌ Erro na autorização: ${error.message}`, 'error');
+    } finally {
+        showGlobalLoading(false);
+    }
+}
+
+// Exibir histórico de autorizações
+function displayHistoricoAutorizacoes() {
+    const tbody = document.getElementById('historico-body');
+    if (!tbody) return;
+    
+    tbody.innerHTML = '';
+    
+    if (autorizacoesHistorico.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="7" style="text-align: center; padding: 30px; color: #888;">
+                    <i class="fas fa-history"></i>
+                    <div style="margin-top: 10px;">Nenhuma autorização registrada</div>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    autorizacoesHistorico.forEach(item => {
+        const dataFormatada = new Date(item.criadoEm || item.data).toLocaleString('pt-BR');
+        const tipoTexto = {
+            'liberar_todas': 'Todas as Aulas',
+            'liberar_modulo': 'Módulo Específico',
+            'resetar': 'Resetar Progresso'
+        }[item.tipo] || item.tipo;
+        
+        const tipoClasse = {
+            'liberar_todas': 'tipo-liberar',
+            'liberar_modulo': 'tipo-liberar',
+            'resetar': 'tipo-resetar'
+        }[item.tipo] || '';
+        
+        const usuarios = item.usuarioIds ? item.usuarioIds.length : 0;
+        const cursoTitulo = item.curso ? item.curso.titulo : item.cursoTitulo || 'Curso desconhecido';
+        
+        tbody.innerHTML += `
+            <tr>
+                <td>${dataFormatada}</td>
+                <td>
+                    <strong>${cursoTitulo}</strong>
+                    ${item.curso && item.curso.materia ? 
+                        `<div style="color: #888; font-size: 0.8rem;">${getMateriaNome(item.curso.materia)}</div>` : ''}
+                </td>
+                <td>${usuarios} usuário(s)</td>
+                <td><span class="historico-tipo ${tipoClasse}">${tipoTexto}</span></td>
+                <td>
+                    <div style="color: #4caf50;">${item.sucessos || 0} ✓</div>
+                    ${item.erros ? `<div style="color: #f72585;">${item.erros} ✗</div>` : ''}
+                </td>
+                <td>${item.adminNome || 'Admin'}</td>
+                <td>
+                    ${item.observacao ? 
+                        `<span title="${escapeHtml(item.observacao)}" style="cursor: help; border-bottom: 1px dotted #888;">
+                            <i class="fas fa-sticky-note"></i> Ver
+                        </span>` 
+                        : '—'}
+                    <button class="btn btn-sm btn-secondary" onclick="verDetalhesAutorizacao(${item.id})" style="margin-left: 5px;">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+    });
+}
+
+// Função para ver detalhes da autorização
+window.verDetalhesAutorizacao = async function(autorizacaoId) {
+    try {
+        showGlobalLoading(true);
+        
+        // Buscar detalhes da autorização (no sistema real, teria um endpoint específico)
+        const autorizacao = autorizacoesHistorico.find(a => a.id === autorizacaoId);
+        
+        if (!autorizacao) {
+            showAlert('❌ Autorização não encontrada no histórico local', 'error');
+            return;
+        }
+        
+        const usuariosDetalhes = [];
+        if (autorizacao.usuarioIds && Array.isArray(autorizacao.usuarioIds)) {
+            autorizacao.usuarioIds.forEach(usuarioId => {
+                const usuario = usuariosAutorizacaoMassa.find(u => u.id === usuarioId);
+                const resultado = autorizacao.resultados ? 
+                    autorizacao.resultados.find(r => r.usuarioId === usuarioId) : null;
+                
+                usuariosDetalhes.push({
+                    usuario: usuario,
+                    sucesso: resultado ? resultado.sucesso : false,
+                    mensagem: resultado ? resultado.mensagem : 'Sem informações'
+                });
+            });
+        }
+        
+        const detalhesHTML = `
+            <div class="modal-content" style="max-width: 700px;">
+                <div class="modal-header">
+                    <h3><i class="fas fa-info-circle"></i> Detalhes da Autorização</h3>
+                    <button class="modal-close" onclick="closeModal('detalhes-autorizacao-modal')">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div style="margin-bottom: 20px;">
+                        <div style="display: flex; gap: 20px; margin-bottom: 15px;">
+                            <div>
+                                <strong style="color: #aaa;">Data:</strong>
+                                <div style="color: #fff;">${new Date(autorizacao.criadoEm || autorizacao.data).toLocaleString('pt-BR')}</div>
+                            </div>
+                            <div>
+                                <strong style="color: #aaa;">Tipo:</strong>
+                                <div style="color: #ffcf00; font-weight: bold;">
+                                    ${{
+                                        'liberar_todas': 'Liberar Todas as Aulas',
+                                        'liberar_modulo': 'Liberar Módulo Específico',
+                                        'resetar': 'Resetar Progresso'
+                                    }[autorizacao.tipo] || autorizacao.tipo}
+                                </div>
+                            </div>
+                            <div>
+                                <strong style="color: #aaa;">Admin:</strong>
+                                <div style="color: #fff;">${autorizacao.adminNome || 'Administrador'}</div>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <strong style="color: #aaa;">Curso:</strong>
+                            <div style="color: #fff; font-weight: bold;">
+                                ${autorizacao.curso ? autorizacao.curso.titulo : autorizacao.cursoTitulo}
+                            </div>
+                            ${autorizacao.curso && autorizacao.curso.materia ? 
+                                `<div style="color: #888; font-size: 0.9rem;">
+                                    Matéria: ${getMateriaNome(autorizacao.curso.materia)}
+                                </div>` : ''}
+                        </div>
+                        
+                        ${autorizacao.observacao ? `
+                            <div style="margin-bottom: 15px;">
+                                <strong style="color: #aaa;">Observação:</strong>
+                                <div style="color: #ccc; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 8px; margin-top: 5px;">
+                                    ${escapeHtml(autorizacao.observacao)}
+                                </div>
+                            </div>
+                        ` : ''}
+                        
+                        <div style="display: flex; gap: 20px; margin-bottom: 15px;">
+                            <div style="text-align: center;">
+                                <div style="font-size: 2rem; color: #4caf50;">${autorizacao.sucessos || 0}</div>
+                                <div style="color: #aaa; font-size: 0.9rem;">Sucessos</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 2rem; color: ${autorizacao.erros ? '#f72585' : '#888'};">${autorizacao.erros || 0}</div>
+                                <div style="color: #aaa; font-size: 0.9rem;">Erros</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 2rem; color: #ffcf00;">${(autorizacao.sucessos || 0) + (autorizacao.erros || 0)}</div>
+                                <div style="color: #aaa; font-size: 0.9rem;">Total</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h4 style="color: #ffcf00; margin-bottom: 10px;">
+                        <i class="fas fa-users"></i> Usuários Afetados (${usuariosDetalhes.length})
+                    </h4>
+                    
+                    <div style="max-height: 300px; overflow-y: auto;">
+                        ${usuariosDetalhes.map(detalhe => `
+                            <div style="padding: 12px; margin-bottom: 8px; background: rgba(255,255,255,0.03); border-radius: 8px; border-left: 4px solid ${detalhe.sucesso ? '#4caf50' : '#f72585'};">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <div>
+                                        <strong style="color: #fff;">${detalhe.usuario ? detalhe.usuario.nome : `Usuário ID: ${detalhe.usuarioId}`}</strong>
+                                        ${detalhe.usuario ? `
+                                            <div style="color: #888; font-size: 0.8rem; margin-top: 2px;">
+                                                RA: ${detalhe.usuario.ra} • Curso: ${detalhe.usuario.curso}
+                                            </div>
+                                        ` : ''}
+                                    </div>
+                                    <div style="color: ${detalhe.sucesso ? '#4caf50' : '#f72585'};">
+                                        ${detalhe.sucesso ? '✅ Sucesso' : '❌ Erro'}
+                                    </div>
+                                </div>
+                                ${!detalhe.sucesso ? `
+                                    <div style="color: #f72585; font-size: 0.9rem; margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(247, 37, 133, 0.3);">
+                                        <strong>Erro:</strong> ${detalhe.mensagem}
+                                    </div>
+                                ` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" onclick="closeModal('detalhes-autorizacao-modal')">Fechar</button>
+                </div>
+            </div>
+        `;
+        
+        // Criar ou atualizar modal
+        let modal = document.getElementById('detalhes-autorizacao-modal');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'detalhes-autorizacao-modal';
+            modal.className = 'modal';
+            document.body.appendChild(modal);
+        }
+        
+        modal.innerHTML = detalhesHTML;
+        modal.style.display = 'flex';
+        
+        // Configurar fechamento ao clicar fora
+        modal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal('detalhes-autorizacao-modal');
+            }
+        });
+        
+    } catch (error) {
+        console.error('❌ Erro ao carregar detalhes:', error);
+        showAlert('❌ Erro ao carregar detalhes da autorização', 'error');
+    } finally {
+        showGlobalLoading(false);
+    }
+};
+
+// Função auxiliar para mostrar loading
+function showLoadingElement(elementId, show) {
+    const element = document.getElementById(elementId);
+    if (element) {
+        element.style.display = show ? 'flex' : 'none';
+    }
+}
+
+// Adicionar ao sistema de tabs
+tabs.forEach(tab => {
+    tab.addEventListener('click', function() {
+        const tabId = this.getAttribute('data-tab');
+        
+        if (tabId === 'autorizacao') {
+            // Inicializar sistema de autorização em massa
+            if (typeof initializeAutorizacaoMassa === 'function') {
+                initializeAutorizacaoMassa();
+            }
+        }
+    });
+});
+
+// Adicionar função de fechar modal globalmente
+window.closeModal = function(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.style.display = 'none';
+    }
+};
 
 // Settings Management
 async function handleSaveSettings() {
