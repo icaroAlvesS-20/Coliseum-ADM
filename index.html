@@ -1862,6 +1862,48 @@
         <div class="loading" id="historico-loading">
             <div class="spinner"></div>
         </div>
+
+        <!-- SEÇÃO 6: SOLICITAÇÕES DE AUTORIZAÇÃO -->
+<div class="table-container">
+    <div class="table-header">
+        <h3><i class="fas fa-inbox"></i> Solicitações Pendentes</h3>
+        <div style="display: flex; gap: 10px;">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="busca-solicitacoes" placeholder="Buscar solicitações...">
+            </div>
+            <button class="btn btn-sm btn-primary" id="refresh-solicitacoes">
+                <i class="fas fa-sync-alt"></i> Atualizar
+            </button>
+        </div>
+    </div>
+    
+    <div class="loading" id="solicitacoes-loading">
+        <div class="spinner"></div>
+    </div>
+    
+    <table id="solicitacoes-table">
+        <thead>
+            <tr>
+                <th>Data</th>
+                <th>Aluno</th>
+                <th>Curso</th>
+                <th>Aula</th>
+                <th>Motivo</th>
+                <th>Status</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody id="solicitacoes-body">
+            <!-- Solicitações serão carregadas aqui -->
+        </tbody>
+    </table>
+    
+    <div style="padding: 15px; border-top: 1px solid #555; text-align: center; color: #aaa;">
+        <i class="fas fa-info-circle"></i>
+        <span id="total-solicitacoes">0</span> solicitações pendentes
+    </div>
+</div>
         
         <!-- FILTROS RÁPIDOS -->
         <div style="padding: 15px; background: rgba(0,0,0,0.2); border-bottom: 1px solid #555;">
@@ -5720,6 +5762,317 @@ function configurarEventosAutorizacao() {
         buscarAutorizacoes(e.target.value);
     });
 }
+
+// Sistema de Solicitações de Autorização para Admin
+
+let solicitacoesPendentes = [];
+
+// Função para carregar solicitações
+async function carregarSolicitacoesPendentes() {
+    try {
+        showLoadingElement('solicitacoes-loading', true);
+        
+        const response = await apiRequest('/api/solicitacoes-autorizacao/pendentes');
+        
+        if (response && response.success) {
+            solicitacoesPendentes = response.solicitacoes || [];
+            exibirSolicitacoes();
+            document.getElementById('total-solicitacoes').textContent = solicitacoesPendentes.length;
+        }
+    } catch (error) {
+        console.error('❌ Erro ao carregar solicitações:', error);
+        showAlert('❌ Erro ao carregar solicitações', 'error');
+    } finally {
+        showLoadingElement('solicitacoes-loading', false);
+    }
+}
+
+// Função para exibir solicitações na tabela
+function exibirSolicitacoes() {
+    const tbody = document.getElementById('solicitacoes-body');
+    if (!tbody) return;
+    
+    tbody.innerHTML = '';
+    
+    if (solicitacoesPendentes.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="7" style="text-align: center; padding: 30px; color: #888;">
+                    <i class="fas fa-inbox"></i>
+                    <div style="margin-top: 10px;">Nenhuma solicitação pendente</div>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    solicitacoesPendentes.forEach(solicitacao => {
+        const dataCriacao = new Date(solicitacao.criadoEm);
+        
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>
+                <div>${dataCriacao.toLocaleDateString('pt-BR')}</div>
+                <div style="color: #888; font-size: 0.8rem;">
+                    ${dataCriacao.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}
+                </div>
+            </td>
+            <td>
+                <strong>${solicitacao.usuario.nome}</strong>
+                <div style="color: #888; font-size: 0.8rem;">
+                    RA: ${solicitacao.usuario.ra} • ${solicitacao.usuario.curso}
+                </div>
+            </td>
+            <td>
+                ${solicitacao.curso.titulo}
+                <div style="color: #888; font-size: 0.8rem;">
+                    ${solicitacao.curso.materia}
+                </div>
+            </td>
+            <td>
+                Aula ID: ${solicitacao.aulaId}
+                ${solicitacao.moduloId ? `<div style="color: #888; font-size: 0.8rem;">Módulo ID: ${solicitacao.moduloId}</div>` : ''}
+            </td>
+            <td>
+                <div style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;">
+                    ${solicitacao.motivo || 'Sem motivo especificado'}
+                </div>
+            </td>
+            <td>
+                <span class="status-badge status-ativo" style="background: rgba(255, 193, 7, 0.2); color: #ffc107;">
+                    Pendente
+                </span>
+            </td>
+            <td>
+                <div class="actions" style="display: flex; gap: 5px;">
+                    <button class="btn btn-sm btn-success" onclick="aprovarSolicitacao(${solicitacao.id})" title="Aprovar">
+                        <i class="fas fa-check"></i>
+                    </button>
+                    <button class="btn btn-sm btn-danger" onclick="rejeitarSolicitacao(${solicitacao.id})" title="Rejeitar">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <button class="btn btn-sm btn-primary" onclick="verDetalhesSolicitacao(${solicitacao.id})" title="Ver detalhes">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+            </td>
+        `;
+        
+        tbody.appendChild(row);
+    });
+}
+
+// Função para aprovar solicitação
+async function aprovarSolicitacao(solicitacaoId) {
+    if (!confirm('Deseja aprovar esta solicitação e liberar o acesso ao aluno?')) {
+        return;
+    }
+    
+    try {
+        showGlobalLoading(true);
+        
+        const response = await apiRequest(`/api/solicitacoes-autorizacao/${solicitacaoId}/aprovar`, {
+            method: 'PUT',
+            body: {
+                adminId: 1 // ID do admin atual
+            }
+        });
+        
+        if (response && response.success) {
+            showAlert('✅ Solicitação aprovada! O aluno agora pode acessar a aula.', 'success');
+            await carregarSolicitacoesPendentes();
+        } else {
+            showAlert('❌ Erro ao aprovar solicitação', 'error');
+        }
+    } catch (error) {
+        console.error('❌ Erro ao aprovar solicitação:', error);
+        showAlert('❌ Erro ao aprovar solicitação', 'error');
+    } finally {
+        showGlobalLoading(false);
+    }
+}
+
+// Função para rejeitar solicitação
+async function rejeitarSolicitacao(solicitacaoId) {
+    const motivo = prompt('Digite o motivo da rejeição:');
+    
+    if (motivo === null) return; // Usuário cancelou
+    
+    try {
+        showGlobalLoading(true);
+        
+        const response = await apiRequest(`/api/solicitacoes-autorizacao/${solicitacaoId}/rejeitar`, {
+            method: 'PUT',
+            body: {
+                adminId: 1,
+                motivoRejeicao: motivo
+            }
+        });
+        
+        if (response && response.success) {
+            showAlert('✅ Solicitação rejeitada!', 'success');
+            await carregarSolicitacoesPendentes();
+        } else {
+            showAlert('❌ Erro ao rejeitar solicitação', 'error');
+        }
+    } catch (error) {
+        console.error('❌ Erro ao rejeitar solicitação:', error);
+        showAlert('❌ Erro ao rejeitar solicitação', 'error');
+    } finally {
+        showGlobalLoading(false);
+    }
+}
+
+// Função para ver detalhes
+function verDetalhesSolicitacao(solicitacaoId) {
+    const solicitacao = solicitacoesPendentes.find(s => s.id === solicitacaoId);
+    if (!solicitacao) return;
+    
+    const modalHTML = `
+        <div class="modal" id="detalhes-solicitacao-modal">
+            <div class="modal-content" style="max-width: 600px;">
+                <div class="modal-header">
+                    <h3>Detalhes da Solicitação</h3>
+                    <button class="modal-close" onclick="closeModal('detalhes-solicitacao-modal')">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div style="padding: 20px;">
+                        <h4 style="color: #ffcf00; margin-bottom: 20px;">
+                            <i class="fas fa-file-alt"></i> Informações da Solicitação
+                        </h4>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                            <div>
+                                <h5 style="color: #aaa; margin-bottom: 5px;">Aluno</h5>
+                                <div style="font-size: 1.1rem; color: white;">
+                                    ${solicitacao.usuario.nome}
+                                </div>
+                                <div style="color: #888; font-size: 0.9rem;">
+                                    RA: ${solicitacao.usuario.ra}
+                                </div>
+                                <div style="color: #888; font-size: 0.9rem;">
+                                    Curso: ${solicitacao.usuario.curso}
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h5 style="color: #aaa; margin-bottom: 5px;">Curso</h5>
+                                <div style="font-size: 1.1rem; color: white;">
+                                    ${solicitacao.curso.titulo}
+                                </div>
+                                <div style="color: #888; font-size: 0.9rem;">
+                                    Matéria: ${solicitacao.curso.materia}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <h5 style="color: #aaa; margin-bottom: 5px;">Aula Solicitada</h5>
+                            <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px;">
+                                <div style="color: white; font-weight: bold;">
+                                    ID: ${solicitacao.aulaId}
+                                </div>
+                                ${solicitacao.moduloId ? 
+                                    `<div style="color: #888; margin-top: 5px;">Módulo ID: ${solicitacao.moduloId}</div>` : 
+                                    ''}
+                            </div>
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <h5 style="color: #aaa; margin-bottom: 5px;">Motivo</h5>
+                            <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; color: #ccc;">
+                                ${solicitacao.motivo || 'Sem motivo especificado'}
+                            </div>
+                        </div>
+                        
+                        <div style="color: #888; font-size: 0.9rem;">
+                            <i class="fas fa-clock"></i> Solicitado em: ${new Date(solicitacao.criadoEm).toLocaleString('pt-BR')}
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-danger" onclick="rejeitarSolicitacao(${solicitacao.id}); closeModal('detalhes-solicitacao-modal')">
+                        <i class="fas fa-times"></i> Rejeitar
+                    </button>
+                    <button class="btn btn-success" onclick="aprovarSolicitacao(${solicitacao.id}); closeModal('detalhes-solicitacao-modal')">
+                        <i class="fas fa-check"></i> Aprovar
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Adicionar modal ao documento
+    if (!document.getElementById('detalhes-solicitacao-modal')) {
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+    }
+    
+    // Mostrar modal
+    document.getElementById('detalhes-solicitacao-modal').style.display = 'flex';
+}
+
+// Configurar eventos
+document.addEventListener('DOMContentLoaded', function() {
+    // Botão de atualizar
+    document.getElementById('refresh-solicitacoes')?.addEventListener('click', carregarSolicitacoesPendentes);
+    
+    // Busca
+    document.getElementById('busca-solicitacoes')?.addEventListener('input', function(e) {
+        buscarSolicitacoes(e.target.value);
+    });
+});
+
+// Função de busca
+function buscarSolicitacoes(termo) {
+    if (!termo.trim()) {
+        exibirSolicitacoes();
+        return;
+    }
+    
+    const termoLower = termo.toLowerCase();
+    const solicitacoesFiltradas = solicitacoesPendentes.filter(s => {
+        return (
+            s.usuario.nome.toLowerCase().includes(termoLower) ||
+            s.usuario.ra.toLowerCase().includes(termoLower) ||
+            s.curso.titulo.toLowerCase().includes(termoLower) ||
+            s.motivo?.toLowerCase().includes(termoLower)
+        );
+    });
+    
+    const tbody = document.getElementById('solicitacoes-body');
+    if (!tbody) return;
+    
+    if (solicitacoesFiltradas.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="7" style="text-align: center; padding: 30px; color: #888;">
+                    <i class="fas fa-search"></i>
+                    <div style="margin-top: 10px;">Nenhuma solicitação encontrada</div>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    const temp = solicitacoesPendentes;
+    solicitacoesPendentes = solicitacoesFiltradas;
+    exibirSolicitacoes();
+    solicitacoesPendentes = temp;
+}
+
+// Adicionar ao sistema de tabs
+tabs.forEach(tab => {
+    tab.addEventListener('click', function() {
+        const tabId = this.getAttribute('data-tab');
+        
+        if (tabId === 'autorizacao') {
+            // Carregar solicitações pendentes
+            setTimeout(() => {
+                carregarSolicitacoesPendentes();
+            }, 100);
+        }
+    });
+});
 
 // Aplicar filtro ao histórico
 function aplicarFiltroHistorico(filtro) {
