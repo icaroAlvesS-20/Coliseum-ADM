@@ -1661,244 +1661,200 @@
     </div>
 </div>
 
-<!-- ABA AUTORIZAÇÃO DE AULAS - VERSÃO CORRIGIDA -->
 <div id="autorizacao" class="tab-content">
-    <!-- PRIMEIRA SEÇÃO: CONFIGURAÇÃO DO CURSO -->
+    <!-- SEÇÃO 1: CONFIGURAÇÃO DO SISTEMA -->
     <div class="form-container">
-        <h3><i class="fas fa-user-check"></i> Sistema de Autorização</h3>
-        <p style="color: #aaa; margin-bottom: 15px;">Configure como os alunos podem avançar nos cursos e faça autorizações específicas.</p>
+        <h3><i class="fas fa-cogs"></i> Configuração do Sistema</h3>
+        <p style="color: #aaa; margin-bottom: 15px;">
+            <i class="fas fa-exclamation-triangle" style="color: #ffcf00;"></i>
+            <strong>SISTEMA ATUAL: BLOQUEIO TOTAL</strong> - Os alunos NÃO podem avançar sem autorização do administrador.
+        </p>
         
-        <!-- CONFIGURAÇÃO GLOBAL DO CURSO -->
         <div class="form-row">
             <div class="form-group" style="flex: 2;">
-                <label for="config-curso">Selecionar Curso *</label>
-                <select id="config-curso" class="form-control" required>
-                    <option value="">Selecione um curso para configurar...</option>
-                    <!-- Cursos serão carregados dinamicamente -->
+                <label for="config-curso-global">Curso para Configurar</label>
+                <select id="config-curso-global" class="form-control">
+                    <option value="">Selecione um curso...</option>
                 </select>
             </div>
             <div class="form-group">
-                <label for="modo-progresso">Modo de Progresso</label>
-                <select id="modo-progresso" class="form-control">
-                    <option value="auto">Automático (alunos avançam naturalmente)</option>
-                    <option value="controlado">Controlado (admin libera cada aula)</option>
-                    <option value="misto">Misto (automático + controle especial)</option>
-                </select>
-            </div>
-        </div>
-        
-        <div class="form-row">
-            <div class="form-group" style="flex: 1;">
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <input type="checkbox" id="permite-avancar" checked>
-                    <label for="permite-avancar" style="margin: 0;">Permitir avanço automático</label>
-                </div>
-            </div>
-            <div class="form-group" style="flex: 1;">
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <input type="checkbox" id="bloqueio-progressivo">
-                    <label for="bloqueio-progressivo" style="margin: 0;">Bloqueio progressivo</label>
+                <label>Sistema de Bloqueio</label>
+                <div style="margin-top: 5px;">
+                    <span class="badge danger" style="font-size: 14px;">
+                        <i class="fas fa-lock"></i> BLOQUEIO TOTAL ATIVADO
+                    </span>
                 </div>
             </div>
         </div>
         
         <div class="form-row">
-            <button class="btn btn-primary" id="salvar-config">
-                <i class="fas fa-save"></i> Salvar Configuração
-            </button>
-            <button class="btn btn-secondary" id="carregar-config">
-                <i class="fas fa-sync"></i> Carregar Configuração Atual
-            </button>
+            <div class="form-group" style="flex: 1;">
+                <div style="background: rgba(255, 0, 0, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #f00;">
+                    <strong style="color: #f00;">
+                        <i class="fas fa-exclamation-circle"></i> AVISO IMPORTANTE:
+                    </strong>
+                    <p style="color: #ff6b6b; margin: 5px 0 0 0; font-size: 14px;">
+                        Os alunos NÃO podem avançar automaticamente. 
+                        Todas as aulas requerem autorização do administrador.
+                    </p>
+                </div>
+            </div>
         </div>
     </div>
-
-    <!-- SEGUNDA SEÇÃO: AUTORIZAÇÃO EM MASSA -->
+    
+    <!-- SEÇÃO 2: AUTORIZAÇÃO INDIVIDUAL RÁPIDA -->
     <div class="form-container">
-        <h3><i class="fas fa-users"></i> Autorização em Massa</h3>
-        <p style="color: #aaa; margin-bottom: 15px;">Libere aulas para múltiplos usuários de uma só vez.</p>
+        <h3><i class="fas fa-bolt"></i> Autorização Rápida</h3>
+        <p style="color: #aaa; margin-bottom: 15px;">Libere uma aula específica para um aluno rapidamente.</p>
         
         <div class="form-row">
-            <div class="form-group" style="flex: 2;">
-                <label for="autorizacao-curso-massa">Curso para Autorização *</label>
-                <select id="autorizacao-curso-massa" class="form-control" required>
-                    <option value="">Selecione um curso...</option>
-                    <!-- Cursos serão carregados dinamicamente -->
+            <div class="form-group">
+                <label for="rapido-aluno">Aluno *</label>
+                <select id="rapido-aluno" class="form-control">
+                    <option value="">Selecione um aluno...</option>
                 </select>
             </div>
             <div class="form-group">
-                <label for="autorizacao-tipo">Tipo de Autorização *</label>
-                <select id="autorizacao-tipo" class="form-control" required>
-                    <option value="liberar_todas">Liberar Todas as Aulas</option>
-                    <option value="liberar_modulo">Liberar Módulo Específico</option>
-                    <option value="liberar_aula">Liberar Aula Específica</option>
-                    <option value="pular_aula">Pular para Aula Específica</option>
-                    <option value="resetar">Resetar Progresso</option>
+                <label for="rapido-curso">Curso *</label>
+                <select id="rapido-curso" class="form-control">
+                    <option value="">Selecione um curso...</option>
                 </select>
             </div>
-        </div>
-
-        <!-- CONTAINER PARA MÓDULO (APARECE SOMENTE QUANDO NECESSÁRIO) -->
-        <div class="form-row" id="modulo-container" style="display: none;">
-            <div class="form-group" style="flex: 2;">
-                <label for="autorizacao-modulo-massa">Selecionar Módulo</label>
-                <select id="autorizacao-modulo-massa" class="form-control">
-                    <option value="">Selecione um módulo...</option>
-                </select>
-            </div>
-        </div>
-
-        <!-- CONTAINER PARA AULA (APARECE SOMENTE QUANDO NECESSÁRIO) -->
-        <div class="form-row" id="aula-container" style="display: none;">
-            <div class="form-group" style="flex: 2;">
-                <label for="autorizacao-aula-massa">Selecionar Aula</label>
-                <select id="autorizacao-aula-massa" class="form-control">
+            <div class="form-group">
+                <label for="rapido-aula">Aula *</label>
+                <select id="rapido-aula" class="form-control">
                     <option value="">Selecione uma aula...</option>
                 </select>
             </div>
         </div>
-
-        <!-- SELEÇÃO DE USUÁRIOS -->
+        
+        <div class="form-row">
+            <div class="form-group" style="flex: 2;">
+                <label for="rapido-motivo">Motivo da Autorização</label>
+                <textarea id="rapido-motivo" class="form-control" rows="2" 
+                          placeholder="Ex: Aluno completou atividade extra, participação em evento..."></textarea>
+            </div>
+            <div class="form-group">
+                <label for="rapido-expira">Expira em</label>
+                <input type="date" id="rapido-expira" class="form-control">
+                <small style="color: #888;">Deixe em branco para permanente</small>
+            </div>
+        </div>
+        
+        <div class="form-row" style="margin-top: 10px;">
+            <button class="btn btn-success" id="liberar-rapido">
+                <i class="fas fa-unlock"></i> Liberar Apenas Esta Aula
+            </button>
+            <button class="btn btn-warning" id="liberar-proximas">
+                <i class="fas fa-forward"></i> Liberar Esta + Próximas 3 Aulas
+            </button>
+            <button class="btn btn-primary" id="liberar-modulo">
+                <i class="fas fa-layer-group"></i> Liberar Todo o Módulo
+            </button>
+        </div>
+    </div>
+    
+    <!-- SEÇÃO 3: AUTORIZAÇÃO EM MASSA -->
+    <div class="form-container">
+        <h3><i class="fas fa-users"></i> Autorização em Massa</h3>
+        <p style="color: #aaa; margin-bottom: 15px;">Libere aulas para múltiplos alunos de uma só vez.</p>
+        
+        <div class="form-row">
+            <div class="form-group" style="flex: 2;">
+                <label for="massa-tipo">Tipo de Autorização *</label>
+                <select id="massa-tipo" class="form-control">
+                    <option value="liberar_aula">Liberar Aula Específica</option>
+                    <option value="liberar_modulo">Liberar Módulo Inteiro</option>
+                    <option value="liberar_todas">Liberar Todas as Aulas do Curso</option>
+                    <option value="pular_progresso">Pular para Ponto Específico</option>
+                    <option value="resetar">Resetar Progresso (bloquear tudo)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="massa-curso">Curso *</label>
+                <select id="massa-curso" class="form-control">
+                    <option value="">Selecione um curso...</option>
+                </select>
+            </div>
+        </div>
+        
+        <!-- Container dinâmico para detalhes -->
+        <div id="massa-detalhes-container">
+            <!-- Será preenchido dinamicamente -->
+        </div>
+        
+        <!-- Seleção de alunos -->
         <div class="form-row">
             <div class="form-group" style="flex: 1;">
-                <label for="autorizacao-usuarios">Usuários *</label>
-                <div style="display: flex; gap: 10px;">
-                    <select id="autorizacao-usuarios" class="form-control" multiple style="height: 150px; flex: 2;">
-                        <!-- Usuários serão carregados dinamicamente -->
-                    </select>
-                    <div style="display: flex; flex-direction: column; gap: 5px; flex: 1;">
-                        <button class="btn btn-sm btn-secondary" id="selecionar-todos">
-                            <i class="fas fa-check-double"></i> Todos
-                        </button>
-                        <button class="btn btn-sm btn-secondary" id="limpar-selecao">
-                            <i class="fas fa-times"></i> Limpar
-                        </button>
-                        <button class="btn btn-sm btn-secondary" id="filtrar-ativos">
-                            <i class="fas fa-user-check"></i> Apenas Ativos
-                        </button>
-                        <button class="btn btn-sm btn-secondary" id="filtrar-curso">
-                            <i class="fas fa-graduation-cap"></i> Por Curso
-                        </button>
+                <label>Selecionar Alunos *</label>
+                <div style="display: flex; gap: 10px; margin-top: 5px;">
+                    <button class="btn btn-sm btn-secondary" id="selecionar-todos">
+                        <i class="fas fa-check-double"></i> Todos os Alunos
+                    </button>
+                    <button class="btn btn-sm btn-secondary" id="selecionar-ativos">
+                        <i class="fas fa-user-check"></i> Apenas Alunos Ativos
+                    </button>
+                    <button class="btn btn-sm btn-secondary" id="selecionar-curso">
+                        <i class="fas fa-graduation-cap"></i> Por Curso do Aluno
+                    </button>
+                </div>
+                
+                <div style="margin-top: 10px; max-height: 200px; overflow-y: auto; border: 1px solid #555; border-radius: 8px; padding: 10px;">
+                    <div id="lista-alunos-checkbox">
+                        <!-- Lista de alunos com checkboxes -->
                     </div>
                 </div>
-                <small style="color: #888; font-size: 12px; margin-top: 5px;">
-                    Segure Ctrl (Cmd no Mac) para selecionar múltiplos usuários. 
-                    <span id="contador-usuarios">0 usuários selecionados</span>
+                <small style="color: #888;">
+                    <span id="contador-alunos">0</span> aluno(s) selecionado(s)
                 </small>
             </div>
         </div>
-
-        <!-- OBSERVAÇÃO E DETALHES -->
+        
+        <!-- Observação e execução -->
         <div class="form-row">
             <div class="form-group" style="flex: 2;">
-                <label for="autorizacao-observacao">Observação (opcional)</label>
-                <textarea id="autorizacao-observacao" class="form-control" rows="3" 
-                          placeholder="Ex: Autorização especial para alunos que participaram do evento, promoção de fim de ano, etc..."></textarea>
+                <label for="massa-observacao">Observação para os Alunos</label>
+                <textarea id="massa-observacao" class="form-control" rows="3"
+                          placeholder="Esta mensagem será exibida para os alunos ao acessarem as aulas liberadas..."></textarea>
             </div>
         </div>
-
-        <!-- DATA DE EXPIRAÇÃO -->
-        <div class="form-row">
-            <div class="form-group" style="flex: 1;">
-                <label for="data-expiracao">Data de Expiração (opcional)</label>
-                <input type="date" id="data-expiracao" class="form-control">
-                <small style="color: #888; font-size: 12px;">Deixe em branco para autorização permanente</small>
-            </div>
-            <div class="form-group" style="flex: 1;">
-                <label for="notificar-usuarios">Notificação</label>
-                <div style="display: flex; align-items: center; gap: 10px; margin-top: 8px;">
-                    <input type="checkbox" id="notificar-usuarios" checked>
-                    <label for="notificar-usuarios" style="margin: 0;">Notificar usuários por email/chat</label>
-                </div>
-            </div>
-        </div>
-
-        <!-- BOTÕES DE AÇÃO -->
+        
         <div class="form-row" style="margin-top: 20px; border-top: 1px solid #555; padding-top: 20px;">
-            <div class="form-group" style="flex: 1;">
-                <button class="btn btn-primary" id="carregar-detalhes-curso">
-                    <i class="fas fa-chart-bar"></i> Ver Estatísticas
-                </button>
-                <button class="btn btn-secondary" id="testar-autorizacao">
-                    <i class="fas fa-vial"></i> Testar Simulação
-                </button>
-            </div>
-            <div class="form-group" style="flex: 1; text-align: right;">
-                <button class="btn btn-warning" id="preview-autorizacao">
-                    <i class="fas fa-eye"></i> Pré-visualizar
-                </button>
-                <button class="btn btn-success" id="executar-autorizacao">
-                    <i class="fas fa-play"></i> Executar Autorização
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- TERCEIRA SEÇÃO: ESTATÍSTICAS DO CURSO -->
-    <div class="table-container" id="estatisticas-container" style="display: none;">
-        <div class="table-header">
-            <h3><i class="fas fa-chart-pie"></i> Estatísticas do Curso</h3>
-            <div style="color: #aaa;">
-                <span id="total-aulas-curso">0</span> aulas • 
-                <span id="total-modulos-curso">0</span> módulos •
-                <span id="total-usuarios-curso">0</span> usuários
-            </div>
-        </div>
-        
-        <div class="loading" id="estatisticas-loading">
-            <div class="spinner"></div>
-        </div>
-        
-        <div id="estatisticas-content" style="padding: 20px;">
-            <!-- Estatísticas serão carregadas aqui -->
-        </div>
-    </div>
-
-    <!-- QUARTA SEÇÃO: PRÉ-VISUALIZAÇÃO DA AUTORIZAÇÃO -->
-    <div class="table-container" id="preview-container" style="display: none;">
-        <div class="table-header">
-            <h3><i class="fas fa-clipboard-check"></i> Pré-visualização da Autorização</h3>
-            <button class="btn btn-sm btn-warning" id="fechar-preview">
-                <i class="fas fa-times"></i> Fechar
-            </button>
-        </div>
-        
-        <div id="preview-content" style="padding: 20px;">
-            <!-- Pré-visualização será carregada aqui -->
-        </div>
-        
-        <div style="padding: 15px; border-top: 1px solid #555; background: rgba(255, 207, 0, 0.05);">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; justify-content: space-between; width: 100%;">
                 <div>
-                    <div style="color: #aaa; font-size: 0.9rem;">Resumo da operação:</div>
-                    <div style="color: #ffcf00; font-weight: bold;" id="preview-resumo"></div>
-                    <div style="color: #888; font-size: 0.8rem; margin-top: 5px;" id="preview-detalhes"></div>
-                </div>
-                <div style="display: flex; gap: 10px;">
-                    <button class="btn btn-secondary" id="voltar-editar">
-                        <i class="fas fa-edit"></i> Voltar para Editar
+                    <button class="btn btn-warning" id="preview-massa">
+                        <i class="fas fa-eye"></i> Pré-visualizar
                     </button>
-                    <button class="btn btn-success" id="confirmar-execucao">
-                        <i class="fas fa-check"></i> Confirmar e Executar
+                    <button class="btn btn-secondary" id="testar-massa">
+                        <i class="fas fa-vial"></i> Testar Simulação
+                    </button>
+                </div>
+                <div>
+                    <button class="btn btn-danger" id="cancelar-massa">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                    <button class="btn btn-success" id="executar-massa">
+                        <i class="fas fa-play"></i> Executar Autorização
                     </button>
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- QUINTA SEÇÃO: AUTORIZAÇÕES INDIVIDUAIS -->
+    
+    <!-- SEÇÃO 4: HISTÓRICO E CONTROLE -->
     <div class="table-container">
         <div class="table-header">
-            <h3><i class="fas fa-user-cog"></i> Autorizações Individuais</h3>
+            <h3><i class="fas fa-history"></i> Histórico de Autorizações</h3>
             <div style="display: flex; gap: 10px;">
                 <div class="search-box">
                     <i class="fas fa-search"></i>
-                    <input type="text" id="busca-autorizacoes" placeholder="Buscar autorizações...">
+                    <input type="text" id="busca-autorizacoes" placeholder="Buscar por aluno, curso ou aula...">
                 </div>
                 <button class="btn btn-sm btn-primary" id="refresh-historico">
                     <i class="fas fa-sync-alt"></i> Atualizar
                 </button>
-                <button class="btn btn-sm btn-danger" id="limpar-temporarias">
-                    <i class="fas fa-trash"></i> Limpar Temporárias
+                <button class="btn btn-sm btn-danger" id="exportar-historico">
+                    <i class="fas fa-file-export"></i> Exportar
                 </button>
             </div>
         </div>
@@ -1907,17 +1863,41 @@
             <div class="spinner"></div>
         </div>
         
+        <!-- FILTROS RÁPIDOS -->
+        <div style="padding: 15px; background: rgba(0,0,0,0.2); border-bottom: 1px solid #555;">
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <span style="color: #aaa; align-self: center;">Filtrar:</span>
+                <button class="btn btn-sm btn-primary filtro-ativo" data-filtro="todas">
+                    Todas
+                </button>
+                <button class="btn btn-sm btn-secondary" data-filtro="hoje">
+                    Hoje
+                </button>
+                <button class="btn btn-sm btn-secondary" data-filtro="ativas">
+                    Ativas
+                </button>
+                <button class="btn btn-sm btn-secondary" data-filtro="expiradas">
+                    Expiradas
+                </button>
+                <button class="btn btn-sm btn-secondary" data-filtro="por-revogar">
+                    Por Revogar
+                </button>
+                <select class="form-control" style="width: 150px; height: 30px; font-size: 12px;" id="filtro-curso">
+                    <option value="">Todos os cursos</option>
+                </select>
+            </div>
+        </div>
+        
         <table id="historico-table">
             <thead>
                 <tr>
-                    <th>Data</th>
-                    <th>Usuário</th>
+                    <th>Data/Hora</th>
+                    <th>Aluno</th>
                     <th>Curso</th>
-                    <th>Tipo</th>
-                    <th>Detalhes</th>
+                    <th>Liberação</th>
                     <th>Expira</th>
-                    <th>Admin</th>
                     <th>Status</th>
+                    <th>Admin</th>
                     <th>Ações</th>
                 </tr>
             </thead>
@@ -1926,33 +1906,45 @@
             </tbody>
         </table>
         
+        <!-- PAGINAÇÃO -->
         <div style="padding: 15px; border-top: 1px solid #555; display: flex; justify-content: space-between; align-items: center;">
             <div style="color: #aaa; font-size: 0.9rem;">
-                Total: <span id="total-autorizacoes">0</span> autorizações •
-                Ativas: <span id="autorizacoes-ativas">0</span> •
+                Total: <span id="total-autorizacoes">0</span> autorizações
+                <span style="margin: 0 10px;">•</span>
+                Ativas: <span id="autorizacoes-ativas">0</span>
+                <span style="margin: 0 10px;">•</span>
                 Expiradas: <span id="autorizacoes-expiradas">0</span>
             </div>
             <div style="display: flex; gap: 5px;">
                 <button class="btn btn-sm btn-secondary" id="pagina-anterior" disabled>
                     <i class="fas fa-chevron-left"></i>
                 </button>
-                <span style="padding: 5px 10px; color: #ffcf00; font-weight: bold;">Página <span id="pagina-atual">1</span></span>
+                <span style="padding: 5px 10px; color: #ffcf00; font-weight: bold;">
+                    Página <span id="pagina-atual">1</span> de <span id="total-paginas">1</span>
+                </span>
                 <button class="btn btn-sm btn-secondary" id="proxima-pagina">
                     <i class="fas fa-chevron-right"></i>
                 </button>
             </div>
         </div>
     </div>
-
-    <div class="table-container" id="relatorio-container" style="display: none;">
+    
+    <!-- SEÇÃO 5: RELATÓRIO DE BLOQUEIOS -->
+    <div class="table-container">
         <div class="table-header">
-            <h3><i class="fas fa-chart-line"></i> Relatório de Impacto</h3>
-            <button class="btn btn-sm btn-primary" id="exportar-relatorio">
-                <i class="fas fa-download"></i> Exportar CSV
-            </button>
+            <h3><i class="fas fa-user-lock"></i> Alunos Bloqueados</h3>
+            <div style="color: #ffcf00;">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span id="total-bloqueados">0</span> alunos aguardando autorização
+            </div>
         </div>
         
-        <div id="relatorio-content" style="padding: 20px;">
+        <div class="loading" id="bloqueados-loading">
+            <div class="spinner"></div>
+        </div>
+        
+        <div id="bloqueados-content" style="padding: 20px;">
+            <!-- Lista de alunos bloqueados será carregada aqui -->
         </div>
     </div>
 </div>
@@ -5207,430 +5199,658 @@ function filterDesafiosByStatus(status) {
 }
 // FUNÇÕES PRINCIPAIS PARA A ABA DE AUTORIZAÇÃO
 
-class SistemaAutorizacao {
-    constructor() {
-        this.API_BASE = 'https://coliseum-api.onrender.com/api';
-        this.cursos = [];
-        this.usuarios = [];
-        this.autorizacoes = [];
-        this.paginaAtual = 1;
-        this.itensPorPagina = 10;
-    }
+let sistemaAutorizacao = {
+    cursos: [],
+    usuarios: [],
+    autorizacoes: [],
+    alunosBloqueados: [],
+    paginaAtual: 1,
+    itensPorPagina: 10,
+    alunosSelecionados: new Set()
+};
 
-    // Carregar cursos para os dropdowns
-    async carregarCursos() {
-        try {
-            const response = await fetch(`${this.API_BASE}/cursos`);
-            this.cursos = await response.json();
-            
-            // Popular dropdowns
-            this.popularDropdown('config-curso', this.cursos);
-            this.popularDropdown('autorizacao-curso-massa', this.cursos);
-            
-            console.log(`✅ ${this.cursos.length} cursos carregados`);
-        } catch (error) {
-            console.error('❌ Erro ao carregar cursos:', error);
-        }
-    }
+// Inicializar sistema
+async function inicializarSistemaAutorizacao() {
+    console.log('🔐 Inicializando sistema de BLOQUEIO TOTAL...');
+    
+    // Carregar dados iniciais
+    await carregarCursos();
+    await carregarUsuarios();
+    await carregarHistorico();
+    await carregarBloqueados();
+    
+    // Configurar eventos
+    configurarEventosAutorizacao();
+}
 
-    // Carregar usuários
-    async carregarUsuarios() {
-        try {
-            const response = await fetch(`${this.API_BASE}/usuarios`);
-            this.usuarios = await response.json();
-            
-            this.popularDropdownUsuarios('autorizacao-usuarios', this.usuarios);
-            this.atualizarContadorUsuarios();
-            
-            console.log(`✅ ${this.usuarios.length} usuários carregados`);
-        } catch (error) {
-            console.error('❌ Erro ao carregar usuários:', error);
-        }
+// Carregar cursos
+async function carregarCursos() {
+    try {
+        const response = await apiRequest('/api/cursos');
+        sistemaAutorizacao.cursos = Array.isArray(response) ? response : [];
+        
+        // Popular dropdowns de cursos
+        popularDropdown('config-curso-global', sistemaAutorizacao.cursos, 'Selecione um curso...');
+        popularDropdown('rapido-curso', sistemaAutorizacao.cursos, 'Selecione um curso...');
+        popularDropdown('massa-curso', sistemaAutorizacao.cursos, 'Selecione um curso...');
+        popularDropdown('filtro-curso', sistemaAutorizacao.cursos, 'Todos os cursos');
+        
+        console.log(`✅ ${sistemaAutorizacao.cursos.length} cursos carregados`);
+    } catch (error) {
+        console.error('❌ Erro ao carregar cursos:', error);
     }
+}
 
-    // Popular dropdown com cursos
-    popularDropdown(elementId, items) {
-        const select = document.getElementById(elementId);
-        if (!select) return;
+// Carregar usuários
+async function carregarUsuarios() {
+    try {
+        const response = await apiRequest('/api/usuarios');
+        sistemaAutorizacao.usuarios = Array.isArray(response) ? response : [];
         
-        select.innerHTML = '<option value="">Selecione...</option>';
-        items.forEach(item => {
-            const option = document.createElement('option');
-            option.value = item.id;
-            option.textContent = `${item.titulo} (${item.materia})`;
-            select.appendChild(option);
-        });
+        // Popular dropdown de alunos
+        popularDropdown('rapido-aluno', sistemaAutorizacao.usuarios.filter(u => u.status === 'ativo'), 'Selecione um aluno...');
+        
+        // Criar lista de checkboxes para seleção em massa
+        criarListaAlunosCheckbox();
+        
+        console.log(`✅ ${sistemaAutorizacao.usuarios.length} usuários carregados`);
+    } catch (error) {
+        console.error('❌ Erro ao carregar usuários:', error);
     }
+}
 
-    // Popular dropdown com usuários
-    popularDropdownUsuarios(elementId, usuarios) {
-        const select = document.getElementById(elementId);
-        if (!select) return;
-        
-        select.innerHTML = '';
-        usuarios.forEach(usuario => {
-            if (usuario.status === 'ativo') {
-                const option = document.createElement('option');
-                option.value = usuario.id;
-                option.textContent = `${usuario.nome} (RA: ${usuario.ra}) - ${usuario.curso}`;
-                option.title = `Pontuação: ${usuario.pontuacao}, Desafios: ${usuario.desafiosCompletados}`;
-                select.appendChild(option);
-            }
-        });
-    }
-
-    // Atualizar contador de usuários selecionados
-    atualizarContadorUsuarios() {
-        const select = document.getElementById('autorizacao-usuarios');
-        const contador = document.getElementById('contador-usuarios');
-        if (!select || !contador) return;
-        
-        const selecionados = Array.from(select.selectedOptions).length;
-        contador.textContent = `${selecionados} usuário${selecionados !== 1 ? 's' : ''} selecionado${selecionados !== 1 ? 's' : ''}`;
-    }
-
-    // Salvar configuração do curso
-    async salvarConfiguracao() {
-        const cursoId = document.getElementById('config-curso').value;
-        const modoProgresso = document.getElementById('modo-progresso').value;
-        const permiteAvancar = document.getElementById('permite-avancar').checked;
-        const bloqueioProgressivo = document.getElementById('bloqueio-progressivo').checked;
-        
-        if (!cursoId) {
-            this.mostrarAlerta('Selecione um curso primeiro!', 'error');
-            return;
-        }
-        
-        try {
-            const response = await fetch(`${this.API_BASE}/cursos/${cursoId}/config-progresso`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    modoProgresso,
-                    permiteAvancar,
-                    bloqueioProgressivo
-                })
-            });
-            
-            const data = await response.json();
-            
-            if (data.success) {
-                this.mostrarAlerta('Configuração salva com sucesso!', 'success');
-            } else {
-                this.mostrarAlerta(data.error, 'error');
-            }
-        } catch (error) {
-            console.error('❌ Erro ao salvar configuração:', error);
-            this.mostrarAlerta('Erro ao salvar configuração', 'error');
-        }
-    }
-
-    // Executar autorização em massa
-    async executarAutorizacaoMassa() {
-        const cursoId = document.getElementById('autorizacao-curso-massa').value;
-        const tipo = document.getElementById('autorizacao-tipo').value;
-        const usuariosSelect = document.getElementById('autorizacao-usuarios');
-        const observacao = document.getElementById('autorizacao-observacao').value;
-        const dataExpiracao = document.getElementById('data-expiracao').value;
-        const notificar = document.getElementById('notificar-usuarios').checked;
-        
-        // Validações
-        if (!cursoId || !tipo) {
-            this.mostrarAlerta('Preencha todos os campos obrigatórios!', 'error');
-            return;
-        }
-        
-        const usuarioIds = Array.from(usuariosSelect.selectedOptions).map(opt => parseInt(opt.value));
-        
-        if (usuarioIds.length === 0) {
-            this.mostrarAlerta('Selecione pelo menos um usuário!', 'error');
-            return;
-        }
-        
-        // Dados adicionais conforme o tipo
-        const dadosAdicionais = {};
-        
-        if (tipo === 'liberar_modulo') {
-            const moduloId = document.getElementById('autorizacao-modulo-massa').value;
-            if (!moduloId) {
-                this.mostrarAlerta('Selecione um módulo!', 'error');
-                return;
-            }
-            dadosAdicionais.moduloId = moduloId;
-        }
-        
-        if (tipo === 'liberar_aula' || tipo === 'pular_aula') {
-            const aulaId = document.getElementById('autorizacao-aula-massa').value;
-            if (!aulaId) {
-                this.mostrarAlerta('Selecione uma aula!', 'error');
-                return;
-            }
-            dadosAdicionais.aulaId = aulaId;
-        }
-        
-        try {
-            const response = await fetch(`${this.API_BASE}/autorizacoes/massa`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    cursoId: parseInt(cursoId),
-                    tipo: tipo,
-                    usuarioIds: usuarioIds,
-                    observacao: observacao,
-                    dataExpiracao: dataExpiracao || null,
-                    notificarUsuarios: notificar,
-                    ...dadosAdicionais
-                })
-            });
-            
-            const data = await response.json();
-            
-            if (data.success) {
-                this.mostrarAlerta(`Autorização executada com sucesso! ${data.processados} usuários afetados.`, 'success');
-                this.limparFormulario();
-                this.carregarHistorico();
-            } else {
-                this.mostrarAlerta(data.error, 'error');
-            }
-        } catch (error) {
-            console.error('❌ Erro ao executar autorização:', error);
-            this.mostrarAlerta('Erro ao executar autorização', 'error');
-        }
-    }
-
-    // Limpar formulário
-    limparFormulario() {
-        document.getElementById('autorizacao-observacao').value = '';
-        document.getElementById('data-expiracao').value = '';
-        document.getElementById('notificar-usuarios').checked = true;
-        
-        const usuariosSelect = document.getElementById('autorizacao-usuarios');
-        Array.from(usuariosSelect.options).forEach(option => {
-            option.selected = false;
-        });
-        
-        this.atualizarContadorUsuarios();
-    }
-
-    // Carregar histórico de autorizações
-    async carregarHistorico() {
-        try {
-            document.getElementById('historico-loading').style.display = 'flex';
-            
-            const response = await fetch(
-                `${this.API_BASE}/autorizacoes/historico?pagina=${this.paginaAtual}&limite=${this.itensPorPagina}`
-            );
-            
-            const data = await response.json();
-            
-            if (data.success) {
-                this.autorizacoes = data.autorizacoes;
-                this.exibirHistorico();
-                this.atualizarPaginacao(data.total, data.paginas);
-            }
-        } catch (error) {
-            console.error('❌ Erro ao carregar histórico:', error);
-        } finally {
-            document.getElementById('historico-loading').style.display = 'none';
-        }
-    }
-
-    // Exibir histórico na tabela
-    exibirHistorico() {
-        const tbody = document.getElementById('historico-body');
-        if (!tbody) return;
-        
-        tbody.innerHTML = '';
-        
-        this.autorizacoes.forEach(auth => {
-            const row = document.createElement('tr');
-            
-            // Determinar status e classe CSS
-            let statusClasse = '';
-            let statusTexto = '';
-            
-            if (auth.dataExpiracao && new Date(auth.dataExpiracao) < new Date()) {
-                statusClasse = 'status-inativo';
-                statusTexto = 'Expirada';
-            } else if (!auth.ativo) {
-                statusClasse = 'status-inativo';
-                statusTexto = 'Inativa';
-            } else {
-                statusClasse = 'status-ativo';
-                statusTexto = 'Ativa';
-            }
-            
-            row.innerHTML = `
-                <td>${new Date(auth.criadoEm).toLocaleDateString('pt-BR')}</td>
-                <td>
-                    <strong>${auth.usuario?.nome || 'Usuário ' + auth.usuarioId}</strong>
-                    <div style="color: #888; font-size: 0.8rem;">RA: ${auth.usuario?.ra || 'N/A'}</div>
-                </td>
-                <td>${auth.curso?.titulo || 'Curso ' + auth.cursoId}</td>
-                <td>
-                    <span class="badge ${this.getBadgeClassePorTipo(auth.tipo)}">
-                        ${this.getTextoPorTipo(auth.tipo)}
-                    </span>
-                </td>
-                <td>
-                    ${auth.observacao ? 
-                        `<span title="${auth.observacao}" style="cursor: help; color: #888;">
-                            <i class="fas fa-sticky-note"></i>
-                        </span>` 
-                        : '—'
-                    }
-                    ${auth.aulaId ? `<div style="font-size: 0.8rem; color: #aaa;">Aula: ${auth.aulaId}</div>` : ''}
-                    ${auth.moduloId ? `<div style="font-size: 0.8rem; color: #aaa;">Módulo: ${auth.moduloId}</div>` : ''}
-                </td>
-                <td>${auth.dataExpiracao ? new Date(auth.dataExpiracao).toLocaleDateString('pt-BR') : 'Permanente'}</td>
-                <td>${auth.admin?.nome || 'Admin'}</td>
-                <td><span class="status-badge ${statusClasse}">${statusTexto}</span></td>
-                <td>
-                    <button class="btn btn-sm btn-danger" onclick="sistemaAutorizacao.revogarAutorizacao(${auth.id})" title="Revogar">
-                        <i class="fas fa-ban"></i>
-                    </button>
-                    <button class="btn btn-sm btn-secondary" onclick="sistemaAutorizacao.verDetalhes(${auth.id})" title="Detalhes">
-                        <i class="fas fa-info-circle"></i>
-                    </button>
-                </td>
+// Criar lista de alunos com checkboxes
+function criarListaAlunosCheckbox() {
+    const container = document.getElementById('lista-alunos-checkbox');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    sistemaAutorizacao.usuarios
+        .filter(usuario => usuario.status === 'ativo')
+        .forEach(usuario => {
+            const div = document.createElement('div');
+            div.className = 'checkbox-item';
+            div.style.cssText = `
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 8px;
+                border-radius: 6px;
+                margin-bottom: 5px;
+                background: rgba(255,255,255,0.03);
+                transition: background 0.3s;
             `;
             
-            tbody.appendChild(row);
+            div.innerHTML = `
+                <input type="checkbox" 
+                       id="aluno-${usuario.id}" 
+                       value="${usuario.id}"
+                       onchange="atualizarSelecaoAluno(${usuario.id}, this.checked)"
+                       style="cursor: pointer;">
+                <label for="aluno-${usuario.id}" style="cursor: pointer; flex: 1;">
+                    <strong>${usuario.nome}</strong>
+                    <div style="color: #888; font-size: 0.85rem;">
+                        RA: ${usuario.ra} • Curso: ${usuario.curso}
+                    </div>
+                </label>
+            `;
+            
+            container.appendChild(div);
         });
-    }
+    
+    atualizarContadorAlunos();
+}
 
-    // Helper para badge por tipo
-    getBadgeClassePorTipo(tipo) {
-        const classes = {
-            'liberar_todas': 'success',
-            'liberar_modulo': 'primary',
-            'liberar_aula': 'warning',
-            'pular_aula': 'info',
-            'resetar': 'danger'
-        };
-        return classes[tipo] || 'secondary';
+// Atualizar seleção de aluno
+function atualizarSelecaoAluno(alunoId, selecionado) {
+    if (selecionado) {
+        sistemaAutorizacao.alunosSelecionados.add(alunoId);
+    } else {
+        sistemaAutorizacao.alunosSelecionados.delete(alunoId);
     }
+    atualizarContadorAlunos();
+}
 
-    // Helper para texto por tipo
-    getTextoPorTipo(tipo) {
-        const textos = {
-            'liberar_todas': 'Todas as Aulas',
-            'liberar_modulo': 'Módulo',
-            'liberar_aula': 'Aula',
-            'pular_aula': 'Pular',
-            'resetar': 'Resetar'
-        };
-        return textos[tipo] || tipo;
+// Atualizar contador de alunos
+function atualizarContadorAlunos() {
+    const contador = document.getElementById('contador-alunos');
+    if (contador) {
+        contador.textContent = sistemaAutorizacao.alunosSelecionados.size;
+        contador.style.color = sistemaAutorizacao.alunosSelecionados.size > 0 ? '#ffcf00' : '#888';
     }
+}
 
-    // Atualizar paginação
-    atualizarPaginacao(total, paginas) {
-        document.getElementById('total-autorizacoes').textContent = total;
-        document.getElementById('pagina-atual').textContent = this.paginaAtual;
+// Popular dropdown genérico
+function popularDropdown(elementId, items, placeholder) {
+    const select = document.getElementById(elementId);
+    if (!select) return;
+    
+    select.innerHTML = `<option value="">${placeholder}</option>`;
+    
+    items.forEach(item => {
+        const option = document.createElement('option');
+        option.value = item.id;
+        option.textContent = item.nome || item.titulo || `ID: ${item.id}`;
+        if (item.ra) {
+            option.textContent += ` (RA: ${item.ra})`;
+        }
+        if (item.materia) {
+            option.textContent += ` - ${item.materia}`;
+        }
+        select.appendChild(option);
+    });
+}
+
+// Carregar histórico de autorizações
+async function carregarHistorico() {
+    try {
+        showLoadingElement('historico-loading', true);
         
-        const btnAnterior = document.getElementById('pagina-anterior');
-        const btnProxima = document.getElementById('proxima-pagina');
+        const response = await apiRequest(
+            `/api/autorizacoes/historico?page=${sistemaAutorizacao.paginaAtual}&limit=${sistemaAutorizacao.itensPorPagina}`
+        );
         
-        btnAnterior.disabled = this.paginaAtual <= 1;
-        btnProxima.disabled = this.paginaAtual >= paginas;
+        if (response && response.success) {
+            sistemaAutorizacao.autorizacoes = response.autorizacoes || [];
+            exibirHistorico();
+            atualizarPaginacao(response.total, response.paginas);
+            atualizarContadores();
+        }
+    } catch (error) {
+        console.error('❌ Erro ao carregar histórico:', error);
+    } finally {
+        showLoadingElement('historico-loading', false);
     }
+}
 
-    // Mostrar alerta
-    mostrarAlerta(mensagem, tipo = 'success') {
-        // Implementação do sistema de alertas
-        const alertDiv = document.createElement('div');
-        alertDiv.className = `alert alert-${tipo}`;
-        alertDiv.innerHTML = `
-            <span>${mensagem}</span>
-            <button class="alert-close">&times;</button>
+// Exibir histórico na tabela
+function exibirHistorico() {
+    const tbody = document.getElementById('historico-body');
+    if (!tbody) return;
+    
+    tbody.innerHTML = '';
+    
+    if (sistemaAutorizacao.autorizacoes.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="8" style="text-align: center; padding: 30px; color: #888;">
+                    <i class="fas fa-inbox"></i>
+                    <div style="margin-top: 10px;">Nenhuma autorização registrada</div>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    sistemaAutorizacao.autorizacoes.forEach(auth => {
+        const dataCriacao = new Date(auth.criadoEm || auth.data);
+        const dataExpiracao = auth.dataExpiracao ? new Date(auth.dataExpiracao) : null;
+        
+        // Determinar status
+        let statusClasse, statusTexto;
+        if (dataExpiracao && dataExpiracao < new Date()) {
+            statusClasse = 'status-inativo';
+            statusTexto = 'Expirada';
+        } else if (auth.ativo === false) {
+            statusClasse = 'status-inativo';
+            statusTexto = 'Revogada';
+        } else {
+            statusClasse = 'status-ativo';
+            statusTexto = 'Ativa';
+        }
+        
+        // Determinar tipo
+        let tipoTexto, tipoBadge;
+        switch(auth.tipo) {
+            case 'liberar_todas':
+                tipoTexto = 'Todas as Aulas';
+                tipoBadge = 'success';
+                break;
+            case 'liberar_modulo':
+                tipoTexto = 'Módulo Inteiro';
+                tipoBadge = 'primary';
+                break;
+            case 'liberar_aula':
+                tipoTexto = 'Aula Específica';
+                tipoBadge = 'warning';
+                break;
+            case 'pular_progresso':
+                tipoTexto = 'Pular Progresso';
+                tipoBadge = 'info';
+                break;
+            case 'resetar':
+                tipoTexto = 'Resetar Progresso';
+                tipoBadge = 'danger';
+                break;
+            default:
+                tipoTexto = auth.tipo;
+                tipoBadge = 'secondary';
+        }
+        
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>
+                <div>${dataCriacao.toLocaleDateString('pt-BR')}</div>
+                <div style="color: #888; font-size: 0.8rem;">${dataCriacao.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}</div>
+            </td>
+            <td>
+                <strong>${auth.usuario?.nome || `Aluno ${auth.usuarioId}`}</strong>
+                <div style="color: #888; font-size: 0.8rem;">RA: ${auth.usuario?.ra || 'N/A'}</div>
+            </td>
+            <td>
+                ${auth.curso?.titulo || `Curso ${auth.cursoId}`}
+                ${auth.curso?.materia ? `<div style="color: #888; font-size: 0.8rem;">${auth.curso.materia}</div>` : ''}
+            </td>
+            <td>
+                <span class="badge ${tipoBadge}" style="font-size: 0.75rem;">
+                    ${tipoTexto}
+                </span>
+                ${auth.aulaId ? `<div style="font-size: 0.8rem; color: #aaa; margin-top: 3px;">Aula ID: ${auth.aulaId}</div>` : ''}
+                ${auth.moduloId ? `<div style="font-size: 0.8rem; color: #aaa; margin-top: 3px;">Módulo ID: ${auth.moduloId}</div>` : ''}
+            </td>
+            <td>
+                ${dataExpiracao ? dataExpiracao.toLocaleDateString('pt-BR') : '<span style="color: #4caf50;">Permanente</span>'}
+                ${dataExpiracao && dataExpiracao < new Date() ? 
+                    '<div style="color: #f00; font-size: 0.8rem;">(Expirada)</div>' : ''}
+            </td>
+            <td>
+                <span class="status-badge ${statusClasse}">
+                    ${statusTexto}
+                </span>
+            </td>
+            <td>
+                ${auth.admin?.nome || 'Admin'}
+            </td>
+            <td>
+                <div class="actions" style="display: flex; gap: 5px;">
+                    ${auth.ativo !== false ? `
+                        <button class="btn btn-sm btn-danger" onclick="revogarAutorizacao(${auth.id})" title="Revogar">
+                            <i class="fas fa-ban"></i>
+                        </button>
+                    ` : ''}
+                    <button class="btn btn-sm btn-secondary" onclick="verDetalhesAutorizacao(${auth.id})" title="Detalhes">
+                        <i class="fas fa-info-circle"></i>
+                    </button>
+                    <button class="btn btn-sm btn-primary" onclick="copiarAutorizacao(${auth.id})" title="Copiar para outro aluno">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                </div>
+            </td>
         `;
         
-        const container = document.getElementById('alert-container');
-        container.appendChild(alertDiv);
+        tbody.appendChild(row);
+    });
+}
+
+// Revogar autorização
+async function revogarAutorizacao(authId) {
+    if (!confirm('Tem certeza que deseja revogar esta autorização? O aluno perderá acesso às aulas liberadas.')) {
+        return;
+    }
+    
+    try {
+        showGlobalLoading(true);
         
-        setTimeout(() => alertDiv.remove(), 5000);
+        const response = await apiRequest(`/api/autorizacoes/${authId}/revogar`, {
+            method: 'PUT',
+            body: { adminId: 1 } // ID do admin atual
+        });
+        
+        if (response && response.success) {
+            showAlert('✅ Autorização revogada com sucesso!', 'success');
+            await carregarHistorico();
+        } else {
+            showAlert('❌ Erro ao revogar autorização', 'error');
+        }
+    } catch (error) {
+        console.error('❌ Erro ao revogar autorização:', error);
+        showAlert('❌ Erro ao revogar autorização', 'error');
+    } finally {
+        showGlobalLoading(false);
     }
 }
 
-// Inicialização quando a aba for aberta
-function inicializarSistemaAutorizacao() {
-    window.sistemaAutorizacao = new SistemaAutorizacao();
-    
-    // Carregar dados
-    sistemaAutorizacao.carregarCursos();
-    sistemaAutorizacao.carregarUsuarios();
-    sistemaAutorizacao.carregarHistorico();
-    
-    // Configurar event listeners
-    configurarEventListeners();
+// Carregar alunos bloqueados
+async function carregarBloqueados() {
+    try {
+        showLoadingElement('bloqueados-loading', true);
+        
+        // Esta seria uma API específica para alunos bloqueados
+        // Por enquanto, vamos simular
+        const alunosAtivos = sistemaAutorizacao.usuarios.filter(u => u.status === 'ativo');
+        const container = document.getElementById('bloqueados-content');
+        
+        if (container) {
+            container.innerHTML = `
+                <div style="text-align: center; padding: 20px;">
+                    <div style="font-size: 4rem; color: #ffcf00; margin-bottom: 20px;">
+                        <i class="fas fa-user-lock"></i>
+                    </div>
+                    <h3 style="color: #ffcf00; margin-bottom: 10px;">Sistema de Bloqueio Ativo</h3>
+                    <p style="color: #aaa; margin-bottom: 20px;">
+                        Todos os ${alunosAtivos.length} alunos ativos requerem autorização para avançar.
+                    </p>
+                    <div style="display: flex; gap: 10px; justify-content: center;">
+                        <button class="btn btn-primary" onclick="liberarTodosPrimeirasAulas()">
+                            <i class="fas fa-play-circle"></i> Liberar Primeiras Aulas para Todos
+                        </button>
+                        <button class="btn btn-warning" onclick="verRelatorioBloqueios()">
+                            <i class="fas fa-chart-bar"></i> Ver Relatório Detalhado
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        document.getElementById('total-bloqueados').textContent = alunosAtivos.length;
+        
+    } catch (error) {
+        console.error('❌ Erro ao carregar bloqueados:', error);
+    } finally {
+        showLoadingElement('bloqueados-loading', false);
+    }
 }
 
-function configurarEventListeners() {
-    // Contador de usuários
-    document.getElementById('autorizacao-usuarios').addEventListener('change', () => {
-        sistemaAutorizacao.atualizarContadorUsuarios();
+// Configurar eventos
+function configurarEventosAutorizacao() {
+    // Selecionar todos os alunos
+    document.getElementById('selecionar-todos')?.addEventListener('click', () => {
+        const checkboxes = document.querySelectorAll('#lista-alunos-checkbox input[type="checkbox"]');
+        checkboxes.forEach(cb => {
+            cb.checked = true;
+            sistemaAutorizacao.alunosSelecionados.add(parseInt(cb.value));
+        });
+        atualizarContadorAlunos();
     });
     
-    // Tipo de autorização
-    document.getElementById('autorizacao-tipo').addEventListener('change', (e) => {
-        const tipo = e.target.value;
+    // Selecionar apenas ativos
+    document.getElementById('selecionar-ativos')?.addEventListener('click', () => {
+        const checkboxes = document.querySelectorAll('#lista-alunos-checkbox input[type="checkbox"]');
+        checkboxes.forEach(cb => {
+            cb.checked = true; // Todos estão ativos na lista filtrada
+            sistemaAutorizacao.alunosSelecionados.add(parseInt(cb.value));
+        });
+        atualizarContadorAlunos();
+    });
+    
+    // Botão de autorização rápida
+    document.getElementById('liberar-rapido')?.addEventListener('click', async () => {
+        const alunoId = document.getElementById('rapido-aluno').value;
+        const cursoId = document.getElementById('rapido-curso').value;
+        const aulaId = document.getElementById('rapido-aula').value;
+        const motivo = document.getElementById('rapido-motivo').value;
+        const expira = document.getElementById('rapido-expira').value;
         
-        // Mostrar/ocultar containers
-        document.getElementById('modulo-container').style.display = 
-            tipo === 'liberar_modulo' ? 'flex' : 'none';
+        if (!alunoId || !cursoId || !aulaId) {
+            showAlert('❌ Preencha todos os campos obrigatórios!', 'error');
+            return;
+        }
         
-        document.getElementById('aula-container').style.display = 
-            (tipo === 'liberar_aula' || tipo === 'pular_aula') ? 'flex' : 'none';
-        
-        // Carregar módulos/aulas se necessário
-        if (tipo === 'liberar_modulo') {
-            sistemaAutorizacao.carregarModulos();
-        } else if (tipo === 'liberar_aula' || tipo === 'pular_aula') {
-            sistemaAutorizacao.carregarAulas();
+        try {
+            showGlobalLoading(true);
+            
+            const response = await apiRequest('/api/autorizacoes', {
+                method: 'POST',
+                body: {
+                    tipo: 'liberar_aula',
+                    usuarioId: parseInt(alunoId),
+                    cursoId: parseInt(cursoId),
+                    aulaId: parseInt(aulaId),
+                    motivo: motivo,
+                    dataExpiracao: expira || null,
+                    adminId: 1,
+                    notificarUsuario: true
+                }
+            });
+            
+            if (response && response.success) {
+                showAlert('✅ Aula liberada com sucesso! O aluno já pode acessar.', 'success');
+                // Limpar formulário
+                document.getElementById('rapido-motivo').value = '';
+                document.getElementById('rapido-expira').value = '';
+                await carregarHistorico();
+            } else {
+                showAlert('❌ Erro ao liberar aula', 'error');
+            }
+        } catch (error) {
+            console.error('❌ Erro na autorização rápida:', error);
+            showAlert('❌ Erro ao liberar aula', 'error');
+        } finally {
+            showGlobalLoading(false);
         }
     });
     
-    // Botões de seleção
-    document.getElementById('selecionar-todos').addEventListener('click', () => {
-        const select = document.getElementById('autorizacao-usuarios');
-        Array.from(select.options).forEach(option => {
-            option.selected = true;
-        });
-        sistemaAutorizacao.atualizarContadorUsuarios();
-    });
-    
-    document.getElementById('limpar-selecao').addEventListener('click', () => {
-        const select = document.getElementById('autorizacao-usuarios');
-        Array.from(select.options).forEach(option => {
-            option.selected = false;
-        });
-        sistemaAutorizacao.atualizarContadorUsuarios();
-    });
-    
-    // Botão de execução
-    document.getElementById('executar-autorizacao').addEventListener('click', () => {
-        sistemaAutorizacao.executarAutorizacaoMassa();
-    });
-    
-    // Botão de salvar configuração
-    document.getElementById('salvar-config').addEventListener('click', () => {
-        sistemaAutorizacao.salvarConfiguracao();
+    // Botão de autorização em massa
+    document.getElementById('executar-massa')?.addEventListener('click', async () => {
+        if (sistemaAutorizacao.alunosSelecionados.size === 0) {
+            showAlert('❌ Selecione pelo menos um aluno!', 'error');
+            return;
+        }
+        
+        const tipo = document.getElementById('massa-tipo').value;
+        const cursoId = document.getElementById('massa-curso').value;
+        const observacao = document.getElementById('massa-observacao').value;
+        
+        if (!cursoId) {
+            showAlert('❌ Selecione um curso!', 'error');
+            return;
+        }
+        
+        if (!confirm(`Deseja liberar acesso para ${sistemaAutorizacao.alunosSelecionados.size} aluno(s)?`)) {
+            return;
+        }
+        
+        try {
+            showGlobalLoading(true);
+            
+            // Coletar dados adicionais baseados no tipo
+            const dadosAdicionais = {};
+            if (tipo === 'liberar_modulo') {
+                const moduloSelect = document.getElementById('massa-modulo');
+                if (moduloSelect) dadosAdicionais.moduloId = moduloSelect.value;
+            } else if (tipo === 'liberar_aula') {
+                const aulaSelect = document.getElementById('massa-aula');
+                if (aulaSelect) dadosAdicionais.aulaId = aulaSelect.value;
+            }
+            
+            const response = await apiRequest('/api/autorizacoes/massa', {
+                method: 'POST',
+                body: {
+                    tipo: tipo,
+                    cursoId: parseInt(cursoId),
+                    usuarioIds: Array.from(sistemaAutorizacao.alunosSelecionados),
+                    observacao: observacao,
+                    adminId: 1,
+                    notificarUsuarios: true,
+                    ...dadosAdicionais
+                }
+            });
+            
+            if (response && response.success) {
+                showAlert(`✅ Autorização em massa executada! ${response.processados} aluno(s) afetado(s).`, 'success');
+                // Limpar seleção
+                sistemaAutorizacao.alunosSelecionados.clear();
+                const checkboxes = document.querySelectorAll('#lista-alunos-checkbox input[type="checkbox"]');
+                checkboxes.forEach(cb => cb.checked = false);
+                atualizarContadorAlunos();
+                document.getElementById('massa-observacao').value = '';
+                await carregarHistorico();
+            } else {
+                showAlert('❌ Erro na autorização em massa', 'error');
+            }
+        } catch (error) {
+            console.error('❌ Erro na autorização em massa:', error);
+            showAlert('❌ Erro na autorização em massa', 'error');
+        } finally {
+            showGlobalLoading(false);
+        }
     });
     
     // Paginação
-    document.getElementById('pagina-anterior').addEventListener('click', () => {
+    document.getElementById('pagina-anterior')?.addEventListener('click', () => {
         if (sistemaAutorizacao.paginaAtual > 1) {
             sistemaAutorizacao.paginaAtual--;
-            sistemaAutorizacao.carregarHistorico();
+            carregarHistorico();
         }
     });
     
-    document.getElementById('proxima-pagina').addEventListener('click', () => {
+    document.getElementById('proxima-pagina')?.addEventListener('click', () => {
         sistemaAutorizacao.paginaAtual++;
-        sistemaAutorizacao.carregarHistorico();
+        carregarHistorico();
+    });
+    
+    // Filtros
+    document.querySelectorAll('.filtro-ativo').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.filtro-ativo').forEach(b => {
+                b.classList.remove('btn-primary');
+                b.classList.add('btn-secondary');
+            });
+            this.classList.remove('btn-secondary');
+            this.classList.add('btn-primary');
+            
+            const filtro = this.getAttribute('data-filtro');
+            aplicarFiltroHistorico(filtro);
+        });
+    });
+    
+    // Busca
+    document.getElementById('busca-autorizacoes')?.addEventListener('input', (e) => {
+        buscarAutorizacoes(e.target.value);
     });
 }
 
+// Aplicar filtro ao histórico
+function aplicarFiltroHistorico(filtro) {
+    // Implementar lógica de filtragem
+    console.log('Aplicando filtro:', filtro);
+    // Você precisaria implementar a lógica de filtragem no backend
+    // ou filtrar localmente os dados já carregados
+}
+
+// Buscar autorizações
+function buscarAutorizacoes(termo) {
+    if (!termo.trim()) {
+        exibirHistorico();
+        return;
+    }
+    
+    const termoLower = termo.toLowerCase();
+    const autorizacoesFiltradas = sistemaAutorizacao.autorizacoes.filter(auth => {
+        return (
+            (auth.usuario?.nome?.toLowerCase().includes(termoLower)) ||
+            (auth.usuario?.ra?.toLowerCase().includes(termoLower)) ||
+            (auth.curso?.titulo?.toLowerCase().includes(termoLower)) ||
+            (auth.curso?.materia?.toLowerCase().includes(termoLower)) ||
+            (auth.tipo?.toLowerCase().includes(termoLower)) ||
+            (auth.motivo?.toLowerCase().includes(termoLower))
+        );
+    });
+    
+    const tbody = document.getElementById('historico-body');
+    if (!tbody) return;
+    
+    if (autorizacoesFiltradas.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="8" style="text-align: center; padding: 30px; color: #888;">
+                    <i class="fas fa-search"></i>
+                    <div style="margin-top: 10px;">Nenhuma autorização encontrada para "${termo}"</div>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    // Reutilizar a função exibirHistorico com os dados filtrados
+    const temp = sistemaAutorizacao.autorizacoes;
+    sistemaAutorizacao.autorizacoes = autorizacoesFiltradas;
+    exibirHistorico();
+    sistemaAutorizacao.autorizacoes = temp;
+}
+
+// Atualizar contadores
+function atualizarContadores() {
+    const total = sistemaAutorizacao.autorizacoes.length;
+    const ativas = sistemaAutorizacao.autorizacoes.filter(a => 
+        a.ativo !== false && 
+        (!a.dataExpiracao || new Date(a.dataExpiracao) > new Date())
+    ).length;
+    const expiradas = sistemaAutorizacao.autorizacoes.filter(a => 
+        a.dataExpiracao && new Date(a.dataExpiracao) < new Date()
+    ).length;
+    
+    document.getElementById('total-autorizacoes').textContent = total;
+    document.getElementById('autorizacoes-ativas').textContent = ativas;
+    document.getElementById('autorizacoes-expiradas').textContent = expiradas;
+}
+
+// Atualizar paginação
+function atualizarPaginacao(total, paginas) {
+    document.getElementById('total-paginas').textContent = paginas || 1;
+    document.getElementById('pagina-atual').textContent = sistemaAutorizacao.paginaAtual;
+    
+    const btnAnterior = document.getElementById('pagina-anterior');
+    const btnProxima = document.getElementById('proxima-pagina');
+    
+    if (btnAnterior) btnAnterior.disabled = sistemaAutorizacao.paginaAtual <= 1;
+    if (btnProxima) btnProxima.disabled = sistemaAutorizacao.paginaAtual >= (paginas || 1);
+}
+
+// Inicializar quando a aba for aberta
+document.addEventListener('DOMContentLoaded', function() {
+    const tabAutorizacao = document.querySelector('[data-tab="autorizacao"]');
+    if (tabAutorizacao) {
+        tabAutorizacao.addEventListener('click', function() {
+            if (!window.sistemaAutorizacaoInicializado) {
+                inicializarSistemaAutorizacao();
+                window.sistemaAutorizacaoInicializado = true;
+            }
+        });
+    }
+});
+
+// Funções auxiliares
+function showLoadingElement(elementId, show) {
+    const element = document.getElementById(elementId);
+    if (element) {
+        element.style.display = show ? 'flex' : 'none';
+    }
+}
+
+// Expor funções para o HTML
+window.revogarAutorizacao = revogarAutorizacao;
+window.verDetalhesAutorizacao = async function(authId) {
+    // Implementar modal de detalhes
+    showAlert('ℹ️ Funcionalidade de detalhes em desenvolvimento', 'info');
+};
+
+window.copiarAutorizacao = async function(authId) {
+    // Implementar cópia de autorização
+    showAlert('ℹ️ Funcionalidade de cópia em desenvolvimento', 'info');
+};
+
+window.liberarTodosPrimeirasAulas = async function() {
+    if (!confirm('Deseja liberar a primeira aula de todos os cursos para todos os alunos ativos?')) {
+        return;
+    }
+    
+    try {
+        showGlobalLoading(true);
+        // Implementar lógica
+        showAlert('✅ Primeiras aulas liberadas para todos os alunos!', 'success');
+    } catch (error) {
+        console.error('❌ Erro:', error);
+        showAlert('❌ Erro ao liberar aulas', 'error');
+    } finally {
+        showGlobalLoading(false);
+    }
+};
+
+window.verRelatorioBloqueios = function() {
+    showAlert('ℹ️ Relatório de bloqueios em desenvolvimento', 'info');
+};
 // Inicializar quando a aba for aberta
 document.addEventListener('DOMContentLoaded', function() {
     const tabAutorizacao = document.querySelector('[data-tab="autorizacao"]');
