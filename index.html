@@ -5858,160 +5858,92 @@ async function inicializarSistemaAutorizacaoCompleto() {
         configurarAutorizacaoRapida();
         configurarAutorizacaoMassa();
         
-        await carregarHistoricoAutorizacoes();
+        try {
+            await carregarHistoricoAutorizacoes();
+        } catch (error) {
+            console.log('⚠️ Endpoint de histórico não disponível ainda');
+            mostrarPlaceholderHistorico();
+        }
         
-        configurarBuscaEFiltros();
+        try {
+            await carregarSolicitacoesPendentes();
+        } catch (error) {
+            console.log('⚠️ Endpoint de solicitações pendentes não disponível ainda');
+            mostrarPlaceholderSolicitacoes();
+        }
         
-        await atualizarStatusSistema();
-        
-        console.log('✅ Sistema de autorização completamente inicializado!');
+        console.log('✅ Sistema de autorização inicializado!');
         
     } catch (error) {
         console.error('❌ Erro na inicialização do sistema:', error);
+        showAlert('⚠️ Algumas funcionalidades de autorização podem não estar disponíveis', 'warning');
     }
 }
 
-
-document.querySelector('[data-tab="autorizacao"]')?.addEventListener('click', function() {
-    if (!window.sistemaAutorizacaoInicializado) {
-        inicializarSistemaAutorizacaoCompleto();
-        window.sistemaAutorizacaoInicializado = true;
+function mostrarPlaceholderHistorico() {
+    const tbody = document.getElementById('historico-body');
+    if (tbody) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="8" style="text-align: center; padding: 30px; color: #888;">
+                    <i class="fas fa-inbox"></i>
+                    <div style="margin-top: 10px;">Histórico de autorizações</div>
+                    <small>Endpoints serão implementados em breve</small>
+                </td>
+            </tr>
+        `;
     }
-});
-        
-async function inicializarSistemaAutorizacao() {
-    console.log('🔐 Inicializando sistema de BLOQUEIO TOTAL...');
-    
-    // Carregar dados iniciais
-    await carregarCursos();
-    await carregarUsuarios();
-    await carregarHistorico();
-    await carregarBloqueados();
-    
-    // Configurar eventos
-    configurarEventosAutorizacao();
 }
 
-// Carregar cursos
-async function carregarCursos() {
+function mostrarPlaceholderSolicitacoes() {
+    const tbody = document.getElementById('solicitacoes-body');
+    if (tbody) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="7" style="text-align: center; padding: 30px; color: #888;">
+                    <i class="fas fa-inbox"></i>
+                    <div style="margin-top: 10px;">Solicitações pendentes</div>
+                    <small>Endpoints serão implementados em breve</small>
+                </td>
+            </tr>
+        `;
+    }
+}
+
+async function carregarCursosParaAutorizacao() {
     try {
+        console.log('📚 Carregando cursos para autorização...');
+        
         const response = await apiRequest('/api/cursos');
-        sistemaAutorizacao.cursos = Array.isArray(response) ? response : [];
         
-        // Popular dropdowns de cursos
-        popularDropdown('config-curso-global', sistemaAutorizacao.cursos, 'Selecione um curso...');
-        popularDropdown('rapido-curso', sistemaAutorizacao.cursos, 'Selecione um curso...');
-        popularDropdown('massa-curso', sistemaAutorizacao.cursos, 'Selecione um curso...');
-        popularDropdown('filtro-curso', sistemaAutorizacao.cursos, 'Todos os cursos');
+        if (Array.isArray(response)) {
+            // Popular dropdowns de cursos
+            popularDropdownCursos('config-curso-global', response);
+            popularDropdownCursos('rapido-curso', response);
+            popularDropdownCursos('massa-curso', response);
+            popularDropdownCursos('filtro-curso', response);
+            
+            console.log(`✅ ${response.length} cursos carregados`);
+        }
         
-        console.log(`✅ ${sistemaAutorizacao.cursos.length} cursos carregados`);
     } catch (error) {
         console.error('❌ Erro ao carregar cursos:', error);
     }
 }
 
-// Carregar usuários
-async function carregarUsuarios() {
-    try {
-        const response = await apiRequest('/api/usuarios');
-        sistemaAutorizacao.usuarios = Array.isArray(response) ? response : [];
-        
-        // Popular dropdown de alunos
-        popularDropdown('rapido-aluno', sistemaAutorizacao.usuarios.filter(u => u.status === 'ativo'), 'Selecione um aluno...');
-        
-        // Criar lista de checkboxes para seleção em massa
-        criarListaAlunosCheckbox();
-        
-        console.log(`✅ ${sistemaAutorizacao.usuarios.length} usuários carregados`);
-    } catch (error) {
-        console.error('❌ Erro ao carregar usuários:', error);
-    }
-}
-
-// Criar lista de alunos com checkboxes
-function criarListaAlunosCheckbox() {
-    const container = document.getElementById('lista-alunos-checkbox');
-    if (!container) return;
-    
-    container.innerHTML = '';
-    
-    sistemaAutorizacao.usuarios
-        .filter(usuario => usuario.status === 'ativo')
-        .forEach(usuario => {
-            const div = document.createElement('div');
-            div.className = 'checkbox-item';
-            div.style.cssText = `
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                padding: 8px;
-                border-radius: 6px;
-                margin-bottom: 5px;
-                background: rgba(255,255,255,0.03);
-                transition: background 0.3s;
-            `;
-            
-            div.innerHTML = `
-                <input type="checkbox" 
-                       id="aluno-${usuario.id}" 
-                       value="${usuario.id}"
-                       onchange="atualizarSelecaoAluno(${usuario.id}, this.checked)"
-                       style="cursor: pointer;">
-                <label for="aluno-${usuario.id}" style="cursor: pointer; flex: 1;">
-                    <strong>${usuario.nome}</strong>
-                    <div style="color: #888; font-size: 0.85rem;">
-                        RA: ${usuario.ra} • Curso: ${usuario.curso}
-                    </div>
-                </label>
-            `;
-            
-            container.appendChild(div);
-        });
-    
-    atualizarContadorAlunos();
-}
-
-// Atualizar seleção de aluno
-function atualizarSelecaoAluno(alunoId, selecionado) {
-    if (selecionado) {
-        sistemaAutorizacao.alunosSelecionados.add(alunoId);
-    } else {
-        sistemaAutorizacao.alunosSelecionados.delete(alunoId);
-    }
-    atualizarContadorAlunos();
-}
-
-// Atualizar contador de alunos
-function atualizarContadorAlunos() {
-    const contador = document.getElementById('contador-alunos');
-    if (contador) {
-        contador.textContent = sistemaAutorizacao.alunosSelecionados.size;
-        contador.style.color = sistemaAutorizacao.alunosSelecionados.size > 0 ? '#ffcf00' : '#888';
-    }
-}
-
-// Popular dropdown genérico
-function popularDropdown(elementId, items, placeholder) {
+function popularDropdownCursos(elementId, cursos) {
     const select = document.getElementById(elementId);
     if (!select) return;
     
-    select.innerHTML = `<option value="">${placeholder}</option>`;
+    select.innerHTML = '<option value="">Selecione um curso...</option>';
     
-    items.forEach(item => {
+    cursos.forEach(curso => {
         const option = document.createElement('option');
-        option.value = item.id;
-        option.textContent = item.nome || item.titulo || `ID: ${item.id}`;
-        if (item.ra) {
-            option.textContent += ` (RA: ${item.ra})`;
-        }
-        if (item.materia) {
-            option.textContent += ` - ${item.materia}`;
-        }
+        option.value = curso.id;
+        option.textContent = `${curso.titulo} (${curso.materia})`;
         select.appendChild(option);
     });
 }
-
-// Carregar histórico de autorizações
 async function carregarHistorico() {
     try {
         showLoadingElement('historico-loading', true);
