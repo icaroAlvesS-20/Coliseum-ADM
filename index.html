@@ -5242,17 +5242,7 @@ function filterDesafiosByStatus(status) {
 // ✅ SISTEMA DE AUTORIZAÇÃO - INICIALIZAÇÃO COMPLETA
 function inicializarSistemaAutorizacao() {
     console.log('🔐 Inicializando sistema de autorização...');
-    
-    // Verificar se usuário está logado como admin
-    const isAdmin = localStorage.getItem('isAdmin') === 'true';
-    
-    if (!isAdmin) {
-        console.log('⚠️ Usuário não é administrador - sistema de autorização não inicializado');
-        return;
-    }
-    
-    console.log('✅ Administrador logado - inicializando sistema de autorização completo');
-    
+        
     // Inicializar componentes do sistema de autorização
     inicializarSistemaAutorizacaoCompleto();
     
