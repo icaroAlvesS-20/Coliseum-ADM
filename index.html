@@ -5676,6 +5676,541 @@ function mostrarPlaceholderSolicitacoes() {
     }
 }
 
+// ✅ FUNÇÃO DE AUTORIZAÇÃO RÁPIDA
+async function executarAutorizacaoRapida(tipo) {
+    try {
+        console.log(`⚡ Executando autorização rápida do tipo: ${tipo}`);
+        
+        // Obter valores dos campos
+        const alunoId = document.getElementById('rapido-aluno').value;
+        const cursoId = document.getElementById('rapido-curso').value;
+        const aulaId = document.getElementById('rapido-aula').value;
+        const motivo = document.getElementById('rapido-motivo').value.trim();
+        const expira = document.getElementById('rapido-expira').value;
+        
+        // Validação básica
+        if (!alunoId || !cursoId || !aulaId) {
+            showAlert('❌ Preencha todos os campos obrigatórios!', 'error');
+            return;
+        }
+        
+        if (!motivo) {
+            showAlert('❌ Digite um motivo para a autorização!', 'error');
+            return;
+        }
+        
+        showGlobalLoading(true);
+        
+        // Preparar dados da autorização
+        const autorizacaoData = {
+            usuarioId: alunoId,
+            cursoId: cursoId,
+            aulaId: aulaId,
+            motivo: motivo,
+            tipo: tipo,
+            expiraEm: expira || null,
+            criadoPor: 'admin' // ID do administrador
+        };
+        
+        console.log('📤 Enviando autorização rápida:', autorizacaoData);
+        
+        // Enviar para a API
+        const response = await apiRequest('/api/autorizacoes', {
+            method: 'POST',
+            body: autorizacaoData
+        });
+        
+        if (response && response.success) {
+            showAlert(`✅ Autorização do tipo "${tipo}" realizada com sucesso!`, 'success');
+            
+            // Limpar formulário
+            document.getElementById('rapido-aluno').value = '';
+            document.getElementById('rapido-curso').value = '';
+            document.getElementById('rapido-aula').value = '';
+            document.getElementById('rapido-motivo').value = '';
+            document.getElementById('rapido-expira').value = '';
+            
+            // Atualizar histórico
+            await carregarHistoricoAutorizacoes();
+        } else {
+            throw new Error(response?.error || 'Erro desconhecido');
+        }
+        
+    } catch (error) {
+        console.error('❌ Erro na autorização rápida:', error);
+        showAlert(`❌ Erro ao executar autorização: ${error.message}`, 'error');
+    } finally {
+        showGlobalLoading(false);
+    }
+}
+
+// ✅ FUNÇÃO PARA CARREGAR CURSOS PARA AUTORIZAÇÃO
+async function carregarCursosParaAutorizacao() {
+    try {
+        console.log('📚 Carregando cursos para autorização...');
+        
+        const response = await apiRequest('/api/cursos?isAdmin=true');
+        
+        if (response && Array.isArray(response)) {
+            cursosAutorizacaoMassa = response;
+            
+            // Preencher dropdowns
+            const dropdowns = [
+                'config-curso-global',
+                'rapido-curso', 
+                'massa-curso',
+                'filtro-curso'
+            ];
+            
+            dropdowns.forEach(dropdownId => {
+                const select = document.getElementById(dropdownId);
+                if (select) {
+                    select.innerHTML = '<option value="">Selecione um curso...</option>';
+                    
+                    response.forEach(curso => {
+                        const option = document.createElement('option');
+                        option.value = curso.id;
+                        option.textContent = `${curso.titulo} (${getMateriaNome(curso.materia)})`;
+                        select.appendChild(option);
+                    });
+                }
+            });
+            
+            console.log(`✅ ${response.length} cursos carregados para autorização`);
+        }
+        
+    } catch (error) {
+        console.error('❌ Erro ao carregar cursos para autorização:', error);
+    }
+}
+
+// ✅ FUNÇÃO PARA CARREGAR AULAS PARA UM CURSO ESPECÍFICO
+async function carregarAulasParaCurso(cursoId, selectId) {
+    try {
+        if (!cursoId) return;
+        
+        console.log(`📖 Carregando aulas para o curso ID: ${cursoId}`);
+        
+        const response = await apiRequest(`/api/cursos/${cursoId}?isAdmin=true`);
+        
+        if (response && response.curso && response.curso.modulos) {
+            const select = document.getElementById(selectId);
+            if (select) {
+                select.innerHTML = '<option value="">Selecione uma aula...</option>';
+                
+                let aulaCount = 0;
+                response.curso.modulos.forEach((modulo, moduloIndex) => {
+                    if (modulo.aulas && modulo.aulas.length > 0) {
+                        modulo.aulas.forEach((aula, aulaIndex) => {
+                            const option = document.createElement('option');
+                            option.value = aula.id;
+                            option.textContent = `M${moduloIndex + 1}.A${aulaIndex + 1}: ${aula.titulo}`;
+                            select.appendChild(option);
+                            aulaCount++;
+                        });
+                    }
+                });
+                
+                console.log(`✅ ${aulaCount} aulas carregadas`);
+            }
+        }
+        
+    } catch (error) {
+        console.error('❌ Erro ao carregar aulas:', error);
+    }
+}
+
+// ✅ FUNÇÃO DE AUTORIZAÇÃO EM MASSA
+async function executarAutorizacaoMassa() {
+    try {
+        console.log('👥 Iniciando autorização em massa...');
+        
+        // Obter dados do formulário
+        const tipo = document.getElementById('massa-tipo').value;
+        const cursoId = document.getElementById('massa-curso').value;
+        const observacao = document.getElementById('massa-observacao').value.trim();
+        
+        // Obter usuários selecionados
+        const checkboxes = document.querySelectorAll('.user-checkbox:checked');
+        const usuarioIds = Array.from(checkboxes).map(cb => cb.value);
+        
+        // Validações
+        if (!tipo) {
+            showAlert('❌ Selecione o tipo de autorização!', 'error');
+            return;
+        }
+        
+        if (!cursoId) {
+            showAlert('❌ Selecione um curso!', 'error');
+            return;
+        }
+        
+        if (usuarioIds.length === 0) {
+            showAlert('❌ Selecione pelo menos um aluno!', 'error');
+            return;
+        }
+        
+        showGlobalLoading(true);
+        
+        // Preparar dados com base no tipo
+        const autorizacaoData = {
+            tipo: tipo,
+            cursoId: cursoId,
+            usuarioIds: usuarioIds,
+            observacao: observacao || 'Autorização em massa realizada pelo administrador',
+            criadoPor: 'admin'
+        };
+        
+        // Adicionar dados específicos baseados no tipo
+        if (tipo === 'liberar_aula') {
+            const aulaId = document.getElementById('massa-aula-id').value;
+            if (!aulaId) {
+                throw new Error('Selecione uma aula para liberação específica');
+            }
+            autorizacaoData.aulaId = aulaId;
+        } else if (tipo === 'liberar_modulo') {
+            const moduloId = document.getElementById('massa-modulo-id').value;
+            if (!moduloId) {
+                throw new Error('Selecione um módulo para liberação');
+            }
+            autorizacaoData.moduloId = moduloId;
+        } else if (tipo === 'pular_progresso') {
+            const ponto = document.getElementById('massa-ponto').value;
+            if (!ponto) {
+                throw new Error('Defina um ponto específico para pular');
+            }
+            autorizacaoData.ponto = ponto;
+        }
+        
+        console.log('📤 Enviando autorização em massa:', autorizacaoData);
+        
+        // Enviar para a API
+        const response = await apiRequest('/api/autorizacoes/massa', {
+            method: 'POST',
+            body: autorizacaoData
+        });
+        
+        if (response && response.success) {
+            showAlert(`✅ Autorização em massa realizada com sucesso! ${usuarioIds.length} alunos afetados.`, 'success');
+            
+            // Limpar seleção
+            checkboxes.forEach(cb => cb.checked = false);
+            atualizarContadorSelecionados();
+            document.getElementById('massa-observacao').value = '';
+            
+            // Atualizar histórico
+            await carregarHistoricoAutorizacoes();
+        } else {
+            throw new Error(response?.error || 'Erro desconhecido');
+        }
+        
+    } catch (error) {
+        console.error('❌ Erro na autorização em massa:', error);
+        showAlert(`❌ Erro ao executar autorização em massa: ${error.message}`, 'error');
+    } finally {
+        showGlobalLoading(false);
+    }
+}
+
+// ✅ FUNÇÃO PARA ATUALIZAR DETALHES DA AUTORIZAÇÃO EM MASSA
+function atualizarDetalhesAutorizacaoMassa(tipo, container) {
+    if (!container) return;
+    
+    let html = '';
+    
+    switch(tipo) {
+        case 'liberar_aula':
+            html = `
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="massa-aula-id">Aula Específica *</label>
+                        <select id="massa-aula-id" class="form-control" required>
+                            <option value="">Selecione uma aula...</option>
+                            ${cursoSelecionadoMassa ? '<!-- Aulas serão carregadas dinamicamente -->' : '<option value="" disabled>Selecione um curso primeiro</option>'}
+                        </select>
+                    </div>
+                </div>
+            `;
+            break;
+            
+        case 'liberar_modulo':
+            html = `
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="massa-modulo-id">Módulo *</label>
+                        <select id="massa-modulo-id" class="form-control" required>
+                            <option value="">Selecione um módulo...</option>
+                            ${cursoSelecionadoMassa ? '<!-- Módulos serão carregadas dinamicamente -->' : '<option value="" disabled>Selecione um curso primeiro</option>'}
+                        </select>
+                    </div>
+                </div>
+            `;
+            break;
+            
+        case 'pular_progresso':
+            html = `
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="massa-ponto">Ponto Específico *</label>
+                        <input type="number" id="massa-ponto" class="form-control" 
+                               placeholder="Ex: 50 (para liberar até a aula 50)" 
+                               min="1" required>
+                        <small style="color: #888; font-size: 12px;">
+                            Número da aula até onde liberar
+                        </small>
+                    </div>
+                </div>
+            `;
+            break;
+            
+        default:
+            html = '<p style="color: #aaa; padding: 10px; text-align: center;">Preencha os dados acima para continuar</p>';
+    }
+    
+    container.innerHTML = html;
+    
+    // Configurar listeners se necessário
+    if (tipo === 'liberar_aula' && cursoSelecionadoMassa) {
+        carregarAulasParaCurso(cursoSelecionadoMassa, 'massa-aula-id');
+    }
+}
+
+// ✅ FUNÇÃO PARA CARREGAR HISTÓRICO DE AUTORIZAÇÕES
+async function carregarHistoricoAutorizacoes() {
+    try {
+        console.log('📜 Carregando histórico de autorizações...');
+        
+        const response = await apiRequest('/api/autorizacoes/historico');
+        
+        if (response && response.success) {
+            autorizacoesHistorico = response.autorizacoes || [];
+            exibirHistoricoAutorizacoes(autorizacoesHistorico);
+            
+            console.log(`✅ ${autorizacoesHistorico.length} autorizações no histórico`);
+        }
+        
+    } catch (error) {
+        console.error('❌ Erro ao carregar histórico:', error);
+    }
+}
+
+// ✅ FUNÇÃO PARA EXIBIR HISTÓRICO
+function exibirHistoricoAutorizacoes(autorizacoes) {
+    const tbody = document.getElementById('historico-body');
+    if (!tbody) return;
+    
+    tbody.innerHTML = '';
+    
+    if (!autorizacoes || autorizacoes.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="8" style="text-align: center; padding: 30px; color: #888;">
+                    <i class="fas fa-history"></i>
+                    <div style="margin-top: 10px;">Nenhuma autorização registrada</div>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    autorizacoes.forEach(auth => {
+        const dataCriacao = new Date(auth.criadoEm);
+        const expiraEm = auth.expiraEm ? new Date(auth.expiraEm) : null;
+        const hoje = new Date();
+        
+        let status = 'Ativa';
+        let statusClass = 'status-ativo';
+        
+        if (expiraEm && expiraEm < hoje) {
+            status = 'Expirada';
+            statusClass = 'status-inativo';
+        } else if (auth.status === 'revogada') {
+            status = 'Revogada';
+            statusClass = 'status-danger';
+        }
+        
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>
+                <div>${dataCriacao.toLocaleDateString('pt-BR')}</div>
+                <div style="color: #888; font-size: 0.8rem;">
+                    ${dataCriacao.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}
+                </div>
+            </td>
+            <td>
+                <strong>${auth.usuario?.nome || 'N/A'}</strong>
+                <div style="color: #888; font-size: 0.8rem;">
+                    RA: ${auth.usuario?.ra || 'N/A'}
+                </div>
+            </td>
+            <td>
+                ${auth.curso?.titulo || 'N/A'}
+                <div style="color: #888; font-size: 0.8rem;">
+                    ${auth.modulo?.titulo ? `Módulo: ${auth.modulo.titulo}` : ''}
+                </div>
+            </td>
+            <td>
+                <div style="max-width: 150px;">
+                    ${auth.aula?.titulo || `Aula ID: ${auth.aulaId}`}
+                </div>
+                <div style="color: #888; font-size: 0.8rem;">
+                    ${auth.tipo ? `Tipo: ${auth.tipo}` : ''}
+                </div>
+            </td>
+            <td>
+                ${expiraEm ? expiraEm.toLocaleDateString('pt-BR') : 'Permanente'}
+            </td>
+            <td>
+                <span class="status-badge ${statusClass}">
+                    ${status}
+                </span>
+            </td>
+            <td>
+                ${auth.criadoPor || 'Sistema'}
+            </td>
+            <td>
+                <div class="actions" style="display: flex; gap: 5px;">
+                    ${status === 'Ativa' ? `
+                        <button class="btn btn-sm btn-danger" onclick="revogarAutorizacao(${auth.id})" title="Revogar">
+                            <i class="fas fa-ban"></i>
+                        </button>
+                    ` : ''}
+                    <button class="btn btn-sm btn-primary" onclick="verDetalhesAutorizacao(${auth.id})" title="Detalhes">
+                        <i class="fas fa-info-circle"></i>
+                    </button>
+                </div>
+            </td>
+        `;
+        
+        tbody.appendChild(row);
+    });
+}
+
+// ✅ FUNÇÃO PARA REVOGAR AUTORIZAÇÃO
+async function revogarAutorizacao(autorizacaoId) {
+    try {
+        const confirmacao = confirm('Tem certeza que deseja revogar esta autorização?');
+        if (!confirmacao) return;
+        
+        showGlobalLoading(true);
+        
+        const response = await apiRequest(`/api/autorizacoes/${autorizacaoId}/revogar`, {
+            method: 'PUT',
+            body: {
+                motivo: 'Revogado pelo administrador'
+            }
+        });
+        
+        if (response && response.success) {
+            showAlert('✅ Autorização revogada com sucesso!', 'success');
+            await carregarHistoricoAutorizacoes();
+        } else {
+            throw new Error(response?.error || 'Erro desconhecido');
+        }
+        
+    } catch (error) {
+        console.error('❌ Erro ao revogar autorização:', error);
+        showAlert('❌ Erro ao revogar autorização', 'error');
+    } finally {
+        showGlobalLoading(false);
+    }
+}
+
+// ✅ FUNÇÃO PARA VER DETALHES DA AUTORIZAÇÃO
+function verDetalhesAutorizacao(autorizacaoId) {
+    const autorizacao = autorizacoesHistorico.find(a => a.id === autorizacaoId);
+    if (!autorizacao) {
+        showAlert('❌ Autorização não encontrada', 'error');
+        return;
+    }
+    
+    const modalHTML = `
+        <div class="modal" id="detalhes-autorizacao-modal">
+            <div class="modal-content" style="max-width: 600px;">
+                <div class="modal-header">
+                    <h3>Detalhes da Autorização</h3>
+                    <button class="modal-close" onclick="closeModal('detalhes-autorizacao-modal')">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div style="margin-bottom: 20px;">
+                        <h4 style="color: #ffcf00; margin-bottom: 10px;">Informações Gerais</h4>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <div>
+                                <strong>Data de Criação:</strong><br>
+                                ${new Date(autorizacao.criadoEm).toLocaleString('pt-BR')}
+                            </div>
+                            <div>
+                                <strong>Tipo:</strong><br>
+                                ${autorizacao.tipo || 'N/A'}
+                            </div>
+                            <div>
+                                <strong>Status:</strong><br>
+                                <span class="status-badge ${autorizacao.expiraEm && new Date(autorizacao.expiraEm) < new Date() ? 'status-inativo' : 'status-ativo'}">
+                                    ${autorizacao.expiraEm && new Date(autorizacao.expiraEm) < new Date() ? 'Expirada' : 'Ativa'}
+                                </span>
+                            </div>
+                            <div>
+                                <strong>Criado por:</strong><br>
+                                ${autorizacao.criadoPor || 'Sistema'}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <h4 style="color: #ffcf00; margin-bottom: 10px;">Usuário</h4>
+                        <div style="background: rgba(255,207,0,0.1); padding: 15px; border-radius: 8px;">
+                            <strong>${autorizacao.usuario?.nome || 'N/A'}</strong><br>
+                            RA: ${autorizacao.usuario?.ra || 'N/A'}<br>
+                            Curso: ${autorizacao.usuario?.curso || 'N/A'}
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <h4 style="color: #ffcf00; margin-bottom: 10px;">Conteúdo</h4>
+                        <div style="background: rgba(67,97,238,0.1); padding: 15px; border-radius: 8px;">
+                            <strong>Curso:</strong> ${autorizacao.curso?.titulo || 'N/A'}<br>
+                            ${autorizacao.modulo?.titulo ? `<strong>Módulo:</strong> ${autorizacao.modulo.titulo}<br>` : ''}
+                            ${autorizacao.aula?.titulo ? `<strong>Aula:</strong> ${autorizacao.aula.titulo}` : ''}
+                        </div>
+                    </div>
+                    
+                    ${autorizacao.motivo ? `
+                        <div>
+                            <h4 style="color: #ffcf00; margin-bottom: 10px;">Motivo</h4>
+                            <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px;">
+                                ${autorizacao.motivo}
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    ${autorizacao.expiraEm ? `
+                        <div style="margin-top: 20px;">
+                            <h4 style="color: #ffcf00; margin-bottom: 10px;">Expiração</h4>
+                            <div style="color: ${new Date(autorizacao.expiraEm) < new Date() ? '#f44336' : '#4CAF50'}">
+                                ${new Date(autorizacao.expiraEm).toLocaleString('pt-BR')}
+                                ${new Date(autorizacao.expiraEm) < new Date() ? ' (Expirada)' : ' (Ativa)'}
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" onclick="closeModal('detalhes-autorizacao-modal')">Fechar</button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Remover modal existente se houver
+    const existingModal = document.getElementById('detalhes-autorizacao-modal');
+    if (existingModal) existingModal.remove();
+    
+    // Adicionar novo modal
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
+    // Mostrar modal
+    document.getElementById('detalhes-autorizacao-modal').style.display = 'flex';
+}
+
 // ✅ FUNÇÃO DE BUSCA
 function buscarSolicitacoes(termo) {
     if (!termo.trim()) {
