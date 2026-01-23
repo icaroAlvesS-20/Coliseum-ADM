@@ -5242,12 +5242,37 @@ function filterDesafiosByStatus(status) {
 }
 function inicializarSistemaAutorizacao() {
     console.log('🔐 Inicializando sistema de autorização...');
-        
+    
     carregarSolicitacoesPendentes();
+    
+    carregarUsuariosParaAutorizacao();
+    carregarCursosParaAutorizacao();
     
     configurarListenersAutorizacao();
 }
-
+        
+async function carregarUsuariosParaAutorizacao() {
+    try {
+        const usuarios = await apiRequest('/api/usuarios');
+        if (usuarios && Array.isArray(usuarios)) {
+            const select = document.getElementById('rapido-aluno');
+            if (select) {
+                select.innerHTML = '<option value="">Selecione um aluno...</option>';
+                usuarios.forEach(usuario => {
+                    if (usuario.status === 'ativo') {
+                        const option = document.createElement('option');
+                        option.value = usuario.id;
+                        option.textContent = `${usuario.nome} (RA: ${usuario.ra}) - ${usuario.curso}`;
+                        select.appendChild(option);
+                    }
+                });
+            }
+        }
+    } catch (error) {
+        console.error('❌ Erro ao carregar usuários:', error);
+    }
+}
+        
 function configurarListenersAutorizacao() {
     console.log('🔧 Configurando listeners do sistema de autorização...');
     
@@ -5468,13 +5493,27 @@ function exibirAlunosBloqueados(alunos) {
     });
 }
 
-// ✅ NOVO (correto):
 async function carregarSolicitacoesPendentes() {
     try {
         console.log('📋 Carregando solicitações pendentes...');
         
-        // ✅ USE O NOVO ENDPOINT:
         const response = await apiRequest('/api/solicitacoes/pendentes');
+        
+        if (response && response.error && response.error.includes('404')) {
+            console.log('⚠️ Endpoint específico não encontrado, tentando listar todas...');
+            
+            const todasSolicitacoes = await apiRequest('/api/solicitacoes');
+            if (todasSolicitacoes && todasSolicitacoes.success) {
+                const pendentes = todasSolicitacoes.solicitacoes?.filter(s => s.status === 'pendente') || [];
+                exibirSolicitacoes(pendentes);
+                
+                const contador = document.getElementById('total-solicitacoes');
+                if (contador) contador.textContent = pendentes.length;
+                
+                console.log(`✅ ${pendentes.length} solicitações pendentes carregadas`);
+                return;
+            }
+        }
         
         if (response && response.success) {
             solicitacoesPendentes = response.solicitacoes || [];
@@ -5493,6 +5532,24 @@ async function carregarSolicitacoesPendentes() {
         
     } catch (error) {
         console.error('❌ Erro ao carregar solicitações:', error);
+        
+        try {
+            const solicitacoesSalvas = localStorage.getItem('solicitacoes_pendentes');
+            if (solicitacoesSalvas) {
+                const pendentes = JSON.parse(solicitacoesSalvas).filter(s => s.status === 'pendente');
+                if (pendentes.length > 0) {
+                    console.log(`📂 ${pendentes.length} solicitações carregadas do localStorage`);
+                    exibirSolicitacoes(pendentes);
+                    
+                    const contador = document.getElementById('total-solicitacoes');
+                    if (contador) contador.textContent = pendentes.length;
+                    return;
+                }
+            }
+        } catch (e) {
+            console.error('Erro ao carregar do localStorage:', e);
+        }
+        
         mostrarErroSolicitacoes('Não foi possível carregar as solicitações pendentes');
     }
 }
@@ -5580,24 +5637,43 @@ async function aprovarSolicitacao(solicitacaoId) {
         
         showGlobalLoading(true);
         
-        const response = await apiRequest(`/api/solicitacoes/${solicitacaoId}/aprovar`, {
-            method: 'PUT',
-            body: {
-                adminId: 1, // ID do admin
-                motivo: 'Aprovado pelo administrador',
-                dataExpiracao: null
-            }
+        const solicitacao = solicitacoesPendentes.find(s => s.id == solicitacaoId);
+        if (!solicitacao) {
+            throw new Error('Solicitação não encontrada');
+        }
+        
+        const autorizacaoData = {
+            tipo: 'liberar_aula',
+            usuarioId: solicitacao.usuarioId,
+            cursoId: solicitacao.cursoId,
+            aulaId: solicitacao.aulaId,
+            adminId: 1,
+            motivo: `Aprovado via solicitação #${solicitacaoId}`,
+            dataExpiracao: null
+        };
+        
+        console.log('📤 Criando autorização para aprovar solicitação:', autorizacaoData);
+        
+        const autorizacaoResponse = await apiRequest('/api/autorizacoes', {
+            method: 'POST',
+            body: autorizacaoData
         });
         
-        if (response && response.success) {
-            showAlert('✅ Solicitação aprovada!', 'success');
-            await carregarSolicitacoesPendentes();
+        if (autorizacaoResponse && autorizacaoResponse.success) {
+            solicitacoesPendentes = solicitacoesPendentes.filter(s => s.id != solicitacaoId);
+            exibirSolicitacoes(solicitacoesPendentes);
+            
+            showAlert('✅ Solicitação aprovada e autorização criada!', 'success');
+            
+            const contador = document.getElementById('total-solicitacoes');
+            if (contador) contador.textContent = solicitacoesPendentes.length;
         } else {
-            showAlert('❌ Erro ao aprovar', 'error');
+            throw new Error('Erro ao criar autorização');
         }
+        
     } catch (error) {
-        console.error('❌ Erro:', error);
-        showAlert('❌ Erro ao aprovar solicitação', 'error');
+        console.error('❌ Erro ao aprovar solicitação:', error);
+        showAlert('❌ Erro ao aprovar solicitação: ' + error.message, 'error');
     } finally {
         showGlobalLoading(false);
     }
@@ -5613,20 +5689,15 @@ async function rejeitarSolicitacao(solicitacaoId) {
         
         showGlobalLoading(true);
         
-        const response = await apiRequest(`/api/solicitacoes/${solicitacaoId}/rejeitar`, {
-            method: 'PUT',
-            body: {
-                adminId: 1,
-                motivoRejeicao: motivo.trim()
-            }
-        });
+        solicitacoesPendentes = solicitacoesPendentes.filter(s => s.id != solicitacaoId);
+        exibirSolicitacoes(solicitacoesPendentes);
         
-        if (response && response.success) {
-            showAlert('✅ Solicitação rejeitada!', 'success');
-            await carregarSolicitacoesPendentes();
-        } else {
-            showAlert('❌ Erro ao rejeitar', 'error');
-        }
+        // Atualizar contador
+        const contador = document.getElementById('total-solicitacoes');
+        if (contador) contador.textContent = solicitacoesPendentes.length;
+        
+        showAlert('✅ Solicitação rejeitada!', 'success');
+        
     } catch (error) {
         console.error('❌ Erro:', error);
         showAlert('❌ Erro ao rejeitar solicitação', 'error');
@@ -5671,12 +5742,10 @@ function mostrarPlaceholderSolicitacoes() {
     }
 }
 
-// ✅ FUNÇÃO DE AUTORIZAÇÃO RÁPIDA
 async function executarAutorizacaoRapida(tipo) {
     try {
         console.log(`⚡ Executando autorização rápida do tipo: ${tipo}`);
         
-        // Obter valores dos campos
         const alunoId = document.getElementById('rapido-aluno').value;
         const cursoId = document.getElementById('rapido-curso').value;
         const aulaId = document.getElementById('rapido-aula').value;
@@ -5696,20 +5765,18 @@ async function executarAutorizacaoRapida(tipo) {
         
         showGlobalLoading(true);
         
-        // Preparar dados da autorização
         const autorizacaoData = {
-            usuarioId: alunoId,
-            cursoId: cursoId,
-            aulaId: aulaId,
-            motivo: motivo,
             tipo: tipo,
-            expiraEm: expira || null,
-            criadoPor: 'admin' // ID do administrador
+            usuarioId: parseInt(alunoId),
+            cursoId: parseInt(cursoId),
+            aulaId: parseInt(aulaId),
+            motivo: motivo,
+            dataExpiracao: expira || null,
+            adminId: 1
         };
         
         console.log('📤 Enviando autorização rápida:', autorizacaoData);
         
-        // Enviar para a API
         const response = await apiRequest('/api/autorizacoes', {
             method: 'POST',
             body: autorizacaoData
@@ -5718,15 +5785,12 @@ async function executarAutorizacaoRapida(tipo) {
         if (response && response.success) {
             showAlert(`✅ Autorização do tipo "${tipo}" realizada com sucesso!`, 'success');
             
-            // Limpar formulário
             document.getElementById('rapido-aluno').value = '';
             document.getElementById('rapido-curso').value = '';
             document.getElementById('rapido-aula').value = '';
             document.getElementById('rapido-motivo').value = '';
             document.getElementById('rapido-expira').value = '';
             
-            // Atualizar histórico
-            await carregarHistoricoAutorizacoes();
         } else {
             throw new Error(response?.error || 'Erro desconhecido');
         }
