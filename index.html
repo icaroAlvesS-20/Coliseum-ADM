@@ -5499,21 +5499,28 @@ async function carregarSolicitacoesPendentes() {
         
         const response = await apiRequest('/api/solicitacoes/pendentes');
         
-        if (response && response.error && response.error.includes('404')) {
-            console.log('⚠️ Endpoint específico não encontrado, tentando listar todas...');
+        if (response && response.success) {
+            solicitacoesPendentes = response.solicitacoes || [];
+            exibirSolicitacoes(solicitacoesPendentes);
             
-            const todasSolicitacoes = await apiRequest('/api/solicitacoes');
-            if (todasSolicitacoes && todasSolicitacoes.success) {
-                const pendentes = todasSolicitacoes.solicitacoes?.filter(s => s.status === 'pendente') || [];
-                exibirSolicitacoes(pendentes);
-                
-                const contador = document.getElementById('total-solicitacoes');
-                if (contador) contador.textContent = pendentes.length;
-                
-                console.log(`✅ ${pendentes.length} solicitações pendentes carregadas`);
-                return;
+            // Atualizar contador
+            const contador = document.getElementById('total-solicitacoes');
+            if (contador) {
+                contador.textContent = solicitacoesPendentes.length;
             }
+            
+            console.log(`✅ ${solicitacoesPendentes.length} solicitações pendentes carregadas`);
+        } else {
+            console.log('⚠️ Nenhuma solicitação pendente encontrada');
+            exibirSolicitacoes([]);
         }
+        
+    } catch (error) {
+        console.error('❌ Erro ao carregar solicitações:', error);
+        exibirSolicitacoes([]);
+        mostrarErroSolicitacoes('Não foi possível carregar as solicitações pendentes');
+    }
+}
         
         if (response && response.success) {
             solicitacoesPendentes = response.solicitacoes || [];
