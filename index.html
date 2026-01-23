@@ -5521,44 +5521,6 @@ async function carregarSolicitacoesPendentes() {
         mostrarErroSolicitacoes('Não foi possível carregar as solicitações pendentes');
     }
 }
-        
-        if (response && response.success) {
-            solicitacoesPendentes = response.solicitacoes || [];
-            exibirSolicitacoes(solicitacoesPendentes);
-            
-            const contador = document.getElementById('total-solicitacoes');
-            if (contador) {
-                contador.textContent = solicitacoesPendentes.length;
-            }
-            
-            console.log(`✅ ${solicitacoesPendentes.length} solicitações pendentes carregadas`);
-        } else {
-            console.warn('⚠️ Nenhuma solicitação pendente encontrada');
-            mostrarPlaceholderSolicitacoes();
-        }
-        
-    } catch (error) {
-        console.error('❌ Erro ao carregar solicitações:', error);
-        
-        try {
-            const solicitacoesSalvas = localStorage.getItem('solicitacoes_pendentes');
-            if (solicitacoesSalvas) {
-                const pendentes = JSON.parse(solicitacoesSalvas).filter(s => s.status === 'pendente');
-                if (pendentes.length > 0) {
-                    console.log(`📂 ${pendentes.length} solicitações carregadas do localStorage`);
-                    exibirSolicitacoes(pendentes);
-                    
-                    const contador = document.getElementById('total-solicitacoes');
-                    if (contador) contador.textContent = pendentes.length;
-                    return;
-                }
-            }
-        } catch (e) {
-            console.error('Erro ao carregar do localStorage:', e);
-        }
-        
-        mostrarErroSolicitacoes('Não foi possível carregar as solicitações pendentes');
-    }
 
 function exibirSolicitacoes(solicitacoes) {
     const tbody = document.getElementById('solicitacoes-body');
