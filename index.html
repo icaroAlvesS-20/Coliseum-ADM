@@ -5984,13 +5984,14 @@ async function carregarSolicitacoesPendentes() {
     try {
         console.log('📋 Carregando solicitações pendentes...');
         
+        showLoadingSolicitacoes(true); 
+        
         const response = await apiRequest('/api/solicitacoes/pendentes');
         
         if (response && response.success) {
             solicitacoesPendentes = response.solicitacoes || [];
             exibirSolicitacoes(solicitacoesPendentes);
             
-            // Atualizar contador
             const contador = document.getElementById('total-solicitacoes');
             if (contador) {
                 contador.textContent = solicitacoesPendentes.length;
@@ -5999,13 +6000,24 @@ async function carregarSolicitacoesPendentes() {
             console.log(`✅ ${solicitacoesPendentes.length} solicitações pendentes carregadas`);
         } else {
             console.log('⚠️ Nenhuma solicitação pendente encontrada');
+            solicitacoesPendentes = [];
             exibirSolicitacoes([]);
         }
         
     } catch (error) {
         console.error('❌ Erro ao carregar solicitações:', error);
+        solicitacoesPendentes = [];
         exibirSolicitacoes([]);
         mostrarErroSolicitacoes('Não foi possível carregar as solicitações pendentes');
+    } finally {
+        showLoadingSolicitacoes(false);
+    }
+}
+
+function showLoadingSolicitacoes(show) {
+    const loadingElement = document.getElementById('solicitacoes-loading');
+    if (loadingElement) {
+        loadingElement.style.display = show ? 'flex' : 'none';
     }
 }
 
@@ -6453,10 +6465,11 @@ function atualizarDetalhesAutorizacaoMassa(tipo, container) {
     }
 }
 
-// ✅ FUNÇÃO PARA CARREGAR HISTÓRICO DE AUTORIZAÇÕES
 async function carregarHistoricoAutorizacoes() {
     try {
         console.log('📜 Carregando histórico de autorizações...');
+        
+        showLoadingHistorico(true); 
         
         const response = await apiRequest('/api/autorizacoes/historico');
         
@@ -6464,11 +6477,45 @@ async function carregarHistoricoAutorizacoes() {
             autorizacoesHistorico = response.autorizacoes || [];
             exibirHistoricoAutorizacoes(autorizacoesHistorico);
             
+            const total = document.getElementById('total-autorizacoes');
+            const ativas = document.getElementById('autorizacoes-ativas');
+            const expiradas = document.getElementById('autorizacoes-expiradas');
+            
+            if (total) total.textContent = autorizacoesHistorico.length;
+            if (ativas) {
+                const ativasCount = autorizacoesHistorico.filter(a => 
+                    a.status === 'ativa' || 
+                    (!a.expiraEm || new Date(a.expiraEm) > new Date())
+                ).length;
+                ativas.textContent = ativasCount;
+            }
+            if (expiradas) {
+                const expiradasCount = autorizacoesHistorico.filter(a => 
+                    a.expiraEm && new Date(a.expiraEm) <= new Date()
+                ).length;
+                expiradas.textContent = expiradasCount;
+            }
+            
             console.log(`✅ ${autorizacoesHistorico.length} autorizações no histórico`);
+        } else {
+            autorizacoesHistorico = [];
+            exibirHistoricoAutorizacoes([]);
         }
         
     } catch (error) {
         console.error('❌ Erro ao carregar histórico:', error);
+        autorizacoesHistorico = [];
+        exibirHistoricoAutorizacoes([]);
+    } finally {
+        showLoadingHistorico(false);
+    }
+}
+
+// ADICIONAR: Função para mostrar/ocultar loading do histórico
+function showLoadingHistorico(show) {
+    const loadingElement = document.getElementById('historico-loading');
+    if (loadingElement) {
+        loadingElement.style.display = show ? 'flex' : 'none';
     }
 }
 
