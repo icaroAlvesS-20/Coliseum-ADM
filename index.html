@@ -1093,7 +1093,494 @@
     gap: 8px;
     margin-top: 10px;
 }
+/* ESTILOS MELHORADOS PARA SOLICITAÇÕES DE AUTORIZAÇÃO */
 
+/* Tabela de solicitações */
+#solicitacoes-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0;
+}
+
+#solicitacoes-table thead {
+    background: linear-gradient(135deg, #ffcf00, #e6ba00);
+}
+
+#solicitacoes-table th {
+    padding: 16px 12px;
+    text-align: left;
+    color: #000;
+    font-weight: 700;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid rgba(0,0,0,0.2);
+}
+
+#solicitacoes-table tbody tr {
+    background: rgba(255, 255, 255, 0.03);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+#solicitacoes-table tbody tr:hover {
+    background: rgba(255, 207, 0, 0.1);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    border-left: 3px solid #ffcf00;
+}
+
+#solicitacoes-table td {
+    padding: 18px 12px;
+    color: #ddd;
+    font-size: 14px;
+    vertical-align: top;
+}
+
+/* Células específicas */
+#solicitacoes-table td:nth-child(1) {
+    color: #ffcf00;
+    font-weight: 600;
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+#solicitacoes-table td:nth-child(2) {
+    min-width: 180px;
+}
+
+#solicitacoes-table td:nth-child(3),
+#solicitacoes-table td:nth-child(4) {
+    min-width: 150px;
+}
+
+#solicitacoes-table td:nth-child(5) {
+    max-width: 200px;
+    word-wrap: break-word;
+    color: #aaa;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+/* Badges de status */
+.status-badge {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 90px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
+}
+
+.status-pendente {
+    background: linear-gradient(135deg, #ff9800, #f57c00);
+    color: white;
+    animation: pulse 2s infinite;
+}
+
+.status-aprovada {
+    background: linear-gradient(135deg, #4CAF50, #388E3C);
+    color: white;
+}
+
+.status-rejeitada {
+    background: linear-gradient(135deg, #f44336, #d32f2f);
+    color: white;
+}
+
+/* Animação para status pendente */
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(255, 152, 0, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 6px rgba(255, 152, 0, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(255, 152, 0, 0);
+    }
+}
+
+/* Botões de ação */
+#solicitacoes-table .actions {
+    display: flex;
+    gap: 8px;
+    min-width: 140px;
+}
+
+#solicitacoes-table .actions button {
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 70px;
+    justify-content: center;
+}
+
+#solicitacoes-table .actions .btn-success {
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    color: white;
+}
+
+#solicitacoes-table .actions .btn-danger {
+    background: linear-gradient(135deg, #f44336, #d32f2f);
+    color: white;
+}
+
+#solicitacoes-table .actions .btn-primary {
+    background: linear-gradient(135deg, #2196F3, #1976D2);
+    color: white;
+}
+
+#solicitacoes-table .actions button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+#solicitacoes-table .actions button:active {
+    transform: translateY(0);
+}
+
+/* Informações do aluno */
+.aluno-info {
+    background: rgba(255, 207, 0, 0.05);
+    padding: 12px;
+    border-radius: 8px;
+    border-left: 3px solid #ffcf00;
+    margin: 8px 0;
+}
+
+.aluno-info strong {
+    color: #ffcf00;
+    display: block;
+    margin-bottom: 4px;
+    font-size: 14px;
+}
+
+.aluno-meta {
+    color: #aaa;
+    font-size: 12px;
+    display: flex;
+    gap: 12px;
+}
+
+.aluno-meta span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Informações do curso */
+.curso-info {
+    background: rgba(67, 97, 238, 0.05);
+    padding: 12px;
+    border-radius: 8px;
+    border-left: 3px solid #4361ee;
+    margin: 8px 0;
+}
+
+.curso-info div {
+    color: #4361ee;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.curso-materia {
+    color: #888;
+    font-size: 12px;
+    font-style: italic;
+}
+
+/* Informações da aula */
+.aula-info {
+    background: rgba(76, 201, 240, 0.05);
+    padding: 12px;
+    border-radius: 8px;
+    border-left: 3px solid #4cc9f0;
+    margin: 8px 0;
+}
+
+.aula-info div {
+    color: #4cc9f0;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+/* Mensagem quando não há solicitações */
+#solicitacoes-table tbody tr:only-child td {
+    text-align: center;
+    padding: 40px 20px;
+    color: #888;
+}
+
+#solicitacoes-table tbody tr:only-child td i {
+    font-size: 48px;
+    margin-bottom: 16px;
+    display: block;
+    color: #555;
+}
+
+#solicitacoes-table tbody tr:only-child td div {
+    font-size: 16px;
+    margin-top: 8px;
+    color: #aaa;
+}
+
+/* Header da tabela com contador */
+.table-header-with-counter {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    background: rgba(255, 207, 0, 0.1);
+    border-bottom: 1px solid #555;
+}
+
+.table-header-with-counter h3 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    color: #ffcf00;
+}
+
+.counter-badge {
+    background: #f72585;
+    color: white;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    animation: bounce 1s infinite alternate;
+}
+
+@keyframes bounce {
+    from {
+        transform: translateY(0);
+    }
+    to {
+        transform: translateY(-3px);
+    }
+}
+
+/* Filtros rápidos para solicitações */
+.solicitacoes-filters {
+    display: flex;
+    gap: 8px;
+    padding: 12px 20px;
+    background: rgba(0, 0, 0, 0.2);
+    border-bottom: 1px solid #555;
+    flex-wrap: wrap;
+}
+
+.solicitacoes-filters .filter-btn {
+    padding: 6px 16px;
+    border: 1px solid #555;
+    background: rgba(255, 255, 255, 0.05);
+    color: #aaa;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.solicitacoes-filters .filter-btn:hover {
+    background: rgba(255, 207, 0, 0.1);
+    color: #ffcf00;
+    border-color: #ffcf00;
+}
+
+.solicitacoes-filters .filter-btn.active {
+    background: linear-gradient(135deg, #ffcf00, #e6ba00);
+    color: #000;
+    border-color: #ffcf00;
+}
+
+/* Status da solicitação em destaque */
+.solicitacao-highlight {
+    position: relative;
+    overflow: hidden;
+}
+
+.solicitacao-highlight::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(to bottom, #ffcf00, #ff9800);
+}
+
+.solicitacao-highlight.nova::before {
+    background: linear-gradient(to bottom, #4CAF50, #8BC34A);
+}
+
+.solicitacao-highlight.urgente::before {
+    background: linear-gradient(to bottom, #f44336, #FF5722);
+    animation: urgent-pulse 1.5s infinite;
+}
+
+@keyframes urgent-pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/* Modal de detalhes da solicitação */
+#detalhes-solicitacao-modal .modal-content {
+    max-width: 700px;
+}
+
+.detalhes-solicitacao {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.detalhe-card {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.detalhe-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.detalhe-card h4 {
+    color: #ffcf00;
+    margin-bottom: 15px;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.detalhe-card .detalhe-item {
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.detalhe-card .detalhe-item:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.detalhe-card .detalhe-label {
+    color: #aaa;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+
+.detalhe-card .detalhe-value {
+    color: #fff;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* Resposta do administrador */
+.resposta-admin {
+    background: rgba(255, 207, 0, 0.1);
+    border-left: 4px solid #ffcf00;
+    padding: 16px;
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+.resposta-admin textarea {
+    width: 100%;
+    min-height: 100px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid #555;
+    border-radius: 8px;
+    padding: 12px;
+    color: #fff;
+    font-size: 14px;
+    resize: vertical;
+    margin-top: 8px;
+}
+
+.resposta-admin textarea:focus {
+    outline: none;
+    border-color: #ffcf00;
+    box-shadow: 0 0 0 2px rgba(255, 207, 0, 0.2);
+}
+
+/* Responsividade */
+@media (max-width: 1024px) {
+    #solicitacoes-table {
+        display: block;
+        overflow-x: auto;
+    }
+    
+    #solicitacoes-table th,
+    #solicitacoes-table td {
+        min-width: 120px;
+    }
+}
+
+@media (max-width: 768px) {
+    #solicitacoes-table .actions {
+        flex-direction: column;
+        gap: 6px;
+    }
+    
+    #solicitacoes-table .actions button {
+        width: 100%;
+    }
+    
+    .table-header-with-counter {
+        flex-direction: column;
+        gap: 15px;
+        align-items: flex-start;
+    }
+    
+    .solicitacoes-filters {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    #solicitacoes-table td {
+        padding: 12px 8px;
+        font-size: 13px;
+    }
+    
+    #solicitacoes-table th {
+        padding: 12px 8px;
+        font-size: 12px;
+    }
+    
+    .status-badge {
+        padding: 4px 10px;
+        font-size: 11px;
+        min-width: 80px;
+    }
+}
 .usuario-badge {
     background: rgba(255, 207, 0, 0.1);
     border: 1px solid #ffcf00;
