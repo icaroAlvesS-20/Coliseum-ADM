@@ -1852,6 +1852,359 @@
             padding: 20px;
         }
     }
+     .table-scroll-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 0 -15px;
+    padding: 0 15px;
+    width: calc(100% + 30px);
+}
+
+#solicitacoes-table {
+    min-width: 800px; /* Forçar scroll em telas menores */
+}
+
+/* Ajustes gerais para mobile */
+@media (max-width: 768px) {
+    /* Header da tabela em coluna */
+    #autorizacao .table-header {
+        flex-direction: column;
+        gap: 12px;
+        align-items: stretch;
+        padding: 15px;
+    }
+
+    #autorizacao .table-header h3 {
+        font-size: 18px;
+        margin-bottom: 0;
+        width: 100%;
+        text-align: center;
+    }
+
+    /* Container de botões e busca */
+    #autorizacao .table-header > div {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    /* Search box ocupa largura total */
+    #autorizacao .search-box {
+        width: 100%;
+        margin: 0;
+    }
+
+    #autorizacao .search-box input {
+        width: 100%;
+        font-size: 14px;
+    }
+
+    /* Botões em linha com wrap */
+    #autorizacao .table-header .btn {
+        font-size: 12px;
+        padding: 8px 12px;
+        min-width: auto;
+        flex: 1;
+    }
+
+    #autorizacao .table-header .btn i {
+        font-size: 12px;
+        margin-right: 4px;
+    }
+
+    /* Botões específicos */
+    #aprovar-todas-btn {
+        order: -1; /* Coloca primeiro */
+        background: linear-gradient(135deg, #4CAF50, #45a049);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 10px 15px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    #aprovar-todas-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+    }
+
+    #refresh-solicitacoes {
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* Ajustes na tabela para mobile */
+    #solicitacoes-table th,
+    #solicitacoes-table td {
+        padding: 12px 8px;
+        font-size: 13px;
+    }
+
+    /* Ocultar colunas menos importantes */
+    #solicitacoes-table th:nth-child(5),
+    #solicitacoes-table td:nth-child(5) {
+        display: none; /* Motivo */
+    }
+
+    #solicitacoes-table th:nth-child(6),
+    #solicitacoes-table td:nth-child(6) {
+        display: none; /* Status - já visual pelo badge */
+    }
+
+    /* Coluna Data fixa à esquerda */
+    #solicitacoes-table th:nth-child(1),
+    #solicitacoes-table td:nth-child(1) {
+        position: sticky;
+        left: 0;
+        background: linear-gradient(145deg, #383838, #282828);
+        z-index: 2;
+        min-width: 90px;
+        box-shadow: 2px 0 5px rgba(0,0,0,0.3);
+    }
+
+    /* Coluna Ações fixa à direita */
+    #solicitacoes-table th:nth-child(7),
+    #solicitacoes-table td:nth-child(7) {
+        position: sticky;
+        right: 0;
+        background: linear-gradient(145deg, #383838, #282828);
+        z-index: 2;
+        min-width: 110px;
+        box-shadow: -2px 0 5px rgba(0,0,0,0.3);
+    }
+
+    /* Larguras mínimas para outras colunas */
+    #solicitacoes-table th:nth-child(2),
+    #solicitacoes-table td:nth-child(2) {
+        min-width: 140px; /* Aluno */
+    }
+
+    #solicitacoes-table th:nth-child(3),
+    #solicitacoes-table td:nth-child(3) {
+        min-width: 120px; /* Curso */
+    }
+
+    #solicitacoes-table th:nth-child(4),
+    #solicitacoes-table td:nth-child(4) {
+        min-width: 100px; /* Aula */
+    }
+
+    /* Ações em coluna para melhor touch */
+    #solicitacoes-table .actions {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        min-width: 100px;
+    }
+
+    #solicitacoes-table .actions .btn {
+        padding: 6px 10px;
+        font-size: 11px;
+        width: 100%;
+        justify-content: center;
+        min-height: 32px;
+    }
+
+    #solicitacoes-table .actions .btn i {
+        font-size: 10px;
+    }
+
+    /* Info do aluno mais compacta */
+    .aluno-info {
+        padding: 8px;
+        font-size: 12px;
+    }
+
+    .aluno-info strong {
+        font-size: 13px;
+        display: block;
+        margin-bottom: 3px;
+    }
+
+    .aluno-meta {
+        flex-direction: column;
+        gap: 4px;
+        font-size: 11px;
+    }
+
+    /* Status badges mais compactos */
+    #solicitacoes-table .status-badge {
+        padding: 4px 8px;
+        font-size: 11px;
+        min-width: 70px;
+        text-align: center;
+    }
+
+    /* Contador de solicitações */
+    #autorizacao .table-container > div:last-child {
+        padding: 12px;
+        font-size: 13px;
+    }
+}
+
+/* Ajustes para telas muito pequenas */
+@media (max-width: 480px) {
+    #solicitacoes-table {
+        min-width: 700px;
+    }
+
+    #solicitacoes-table th,
+    #solicitacoes-table td {
+        padding: 10px 6px;
+        font-size: 12px;
+    }
+
+    /* Ocultar mais colunas */
+    #solicitacoes-table th:nth-child(3),
+    #solicitacoes-table td:nth-child(3) {
+        min-width: 100px; /* Curso */
+    }
+
+    #solicitacoes-table th:nth-child(4),
+    #solicitacoes-table td:nth-child(4) {
+        min-width: 80px; /* Aula */
+    }
+
+    /* Ações mais compactas */
+    #solicitacoes-table .actions {
+        min-width: 90px;
+    }
+
+    #solicitacoes-table .actions .btn {
+        padding: 5px 8px;
+        font-size: 10px;
+        min-height: 28px;
+    }
+
+    /* Header mais compacto */
+    #autorizacao .table-header {
+        padding: 12px;
+    }
+
+    #autorizacao .table-header h3 {
+        font-size: 16px;
+    }
+
+    /* Search box menor */
+    #autorizacao .search-box {
+        padding: 6px 12px;
+    }
+
+    #autorizacao .search-box input {
+        font-size: 13px;
+    }
+
+    /* Botões mais compactos */
+    #autorizacao .table-header .btn {
+        padding: 8px 10px;
+        font-size: 11px;
+    }
+
+    #aprovar-todas-btn {
+        padding: 10px;
+        font-size: 12px;
+    }
+}
+
+/* Scrollbar personalizada para a tabela */
+.table-scroll-container::-webkit-scrollbar {
+    height: 6px;
+}
+
+.table-scroll-container::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+}
+
+.table-scroll-container::-webkit-scrollbar-thumb {
+    background: #ffcf00;
+    border-radius: 3px;
+}
+
+.table-scroll-container::-webkit-scrollbar-thumb:hover {
+    background: #e6ba00;
+}
+
+/* Indicador visual de scroll para mobile */
+.scroll-hint-solicitacoes {
+    display: none;
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 207, 0, 0.9);
+    color: #000;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: bold;
+    animation: scrollHint 2s infinite;
+    pointer-events: none;
+    z-index: 10;
+}
+
+@keyframes scrollHint {
+    0%, 100% {
+        opacity: 0.7;
+        transform: translateY(-50%) translateX(0);
+    }
+    50% {
+        opacity: 1;
+        transform: translateY(-50%) translateX(-5px);
+    }
+}
+
+@media (max-width: 768px) {
+    .scroll-hint-solicitacoes {
+        display: block;
+    }
+    
+    #solicitacoes-table-container {
+        position: relative;
+    }
+}
+
+/* Estilo do botão Aprovar Todas */
+#aprovar-todas-btn {
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+#aprovar-todas-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+#aprovar-todas-btn:active {
+    transform: translateY(0);
+}
+
+#aprovar-todas-btn:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
 </style>
 </head>
 <body>
@@ -2467,6 +2820,9 @@
                 <i class="fas fa-search"></i>
                 <input type="text" id="busca-solicitacoes" placeholder="Buscar solicitações...">
             </div>
+            <button class="btn btn-success btn-sm" id="aprovar-todas-btn" title="Aprovar todas as solicitações pendentes">
+                <i class="fas fa-check-double"></i> Aprovar Todas
+            </button>
             <button class="btn btn-sm btn-primary" id="refresh-solicitacoes">
                 <i class="fas fa-sync-alt"></i> Atualizar
             </button>
@@ -5887,7 +6243,10 @@ function configurarListenersAutorizacao() {
             buscarSolicitacoes(e.target.value);
         });
     }
-    
+const btnAprovarTodas = document.getElementById('aprovar-todas-btn');
+if (btnAprovarTodas) {
+    btnAprovarTodas.addEventListener('click', aprovarTodasSolicitacoes);
+}
     // Botões de filtro rápido
     document.querySelectorAll('#autorizacao-rapida .btn-rapido').forEach(btn => {
         btn.addEventListener('click', function() {
@@ -6377,6 +6736,7 @@ async function carregarSolicitacoesPendentes() {
             console.log('⚠️ Nenhuma solicitação pendente encontrada');
             solicitacoesPendentes = [];
             exibirSolicitacoes([]);
+            atualizarBotaoAprovarTodas(); 
         }
         
     } catch (error) {
@@ -6416,62 +6776,184 @@ function exibirSolicitacoes(solicitacoes) {
     
     solicitacoes.forEach(solicitacao => {
         const dataCriacao = new Date(solicitacao.criadoEm);
+        const isMobile = window.innerWidth <= 768;
         
         const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>
-                <div>${dataCriacao.toLocaleDateString('pt-BR')}</div>
-                <div style="color: #888; font-size: 0.8rem;">
-                    ${dataCriacao.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}
-                </div>
-            </td>
-            <td>
-                <strong>${solicitacao.usuario.nome}</strong>
-                <div style="color: #888; font-size: 0.8rem;">
-                    RA: ${solicitacao.usuario.ra} • ${solicitacao.usuario.curso}
-                </div>
-            </td>
-            <td>
-                ${solicitacao.curso.titulo}
-                <div style="color: #888; font-size: 0.8rem;">
-                    ${solicitacao.curso.materia}
-                </div>
-            </td>
-            <td>
-                ${solicitacao.aula?.titulo || 'Aula ID: ' + solicitacao.aulaId}
-                ${solicitacao.moduloId ? `<div style="color: #888; font-size: 0.8rem;">Módulo: ${solicitacao.modulo?.titulo || solicitacao.moduloId}</div>` : ''}
-            </td>
-            <td>
-                <div style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;">
-                    ${solicitacao.motivo || 'Sem motivo especificado'}
-                </div>
-            </td>
-            <td>
-                <span class="status-badge status-pendente">
-                    Pendente
-                </span>
-            </td>
-            <td>
-                <div class="actions" style="display: flex; gap: 5px;">
-                    <td>
+        
+        if (isMobile) {
+            // Layout otimizado para mobile
+            row.innerHTML = `
+                <td>
+                    <div style="font-size: 12px; font-weight: bold; color: #ffcf00;">
+                        ${dataCriacao.toLocaleDateString('pt-BR')}
+                    </div>
+                    <div style="color: #888; font-size: 10px;">
+                        ${dataCriacao.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}
+                    </div>
+                </td>
+                <td>
+                    <strong style="font-size: 13px; display: block; margin-bottom: 3px;">${solicitacao.usuario.nome}</strong>
+                    <div style="color: #888; font-size: 11px;">
+                        RA: ${solicitacao.usuario.ra}
+                    </div>
+                </td>
+                <td>
+                    <div style="max-width: 120px; overflow: hidden; text-overflow: ellipsis;">
+                        ${solicitacao.curso.titulo}
+                    </div>
+                    <div style="color: #888; font-size: 10px;">
+                        ${solicitacao.curso.materia}
+                    </div>
+                </td>
+                <td>
+                    <div style="max-width: 100px; overflow: hidden; text-overflow: ellipsis;">
+                        ${solicitacao.aula?.titulo || 'Aula ID: ' + solicitacao.aulaId}
+                    </div>
+                </td>
+                <td class="actions">
+                    <div style="display: flex; flex-direction: column; gap: 5px;">
+                        <button class="btn btn-sm btn-success" onclick="aprovarSolicitacao(${solicitacao.id})" 
+                                style="padding: 6px; font-size: 11px;">
+                            <i class="fas fa-check"></i> Aprovar
+                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="rejeitarSolicitacao(${solicitacao.id})"
+                                style="padding: 6px; font-size: 11px;">
+                            <i class="fas fa-times"></i> Rejeitar
+                        </button>
+                    </div>
+                </td>
+            `;
+        } else {
+            // Layout desktop completo
+            row.innerHTML = `
+                <td>
+                    <div>${dataCriacao.toLocaleDateString('pt-BR')}</div>
+                    <div style="color: #888; font-size: 0.8rem;">
+                        ${dataCriacao.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}
+                    </div>
+                </td>
+                <td>
+                    <strong>${solicitacao.usuario.nome}</strong>
+                    <div style="color: #888; font-size: 0.8rem;">
+                        RA: ${solicitacao.usuario.ra} • ${solicitacao.usuario.curso}
+                    </div>
+                </td>
+                <td>
+                    ${solicitacao.curso.titulo}
+                    <div style="color: #888; font-size: 0.8rem;">
+                        ${solicitacao.curso.materia}
+                    </div>
+                </td>
+                <td>
+                    ${solicitacao.aula?.titulo || 'Aula ID: ' + solicitacao.aulaId}
+                    ${solicitacao.moduloId ? `<div style="color: #888; font-size: 0.8rem;">Módulo: ${solicitacao.modulo?.titulo || solicitacao.moduloId}</div>` : ''}
+                </td>
+                <td>
+                    <div style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;">
+                        ${solicitacao.motivo || 'Sem motivo especificado'}
+                    </div>
+                </td>
+                <td>
+                    <span class="status-badge status-pendente">
+                        Pendente
+                    </span>
+                </td>
+                <td>
+                    <div class="actions" style="display: flex; gap: 5px;">
                         <button class="btn btn-sm btn-success" onclick="aprovarSolicitacao(${solicitacao.id})">
                             <i class="fas fa-check"></i> Aprovar
                         </button>
                         <button class="btn btn-sm btn-danger" onclick="rejeitarSolicitacao(${solicitacao.id})">
                             <i class="fas fa-times"></i> Rejeitar
                         </button>
-                    </td>
-                    <button class="btn btn-sm btn-primary" onclick="verDetalhesSolicitacao(${solicitacao.id})" title="Ver detalhes">
-                        <i class="fas fa-eye"></i>
-                    </button>
-                </div>
-            </td>
-        `;
+                    </div>
+                </td>
+            `;
+        }
         
         tbody.appendChild(row);
     });
 }
-
+async function aprovarTodasSolicitacoes() {
+    try {
+        if (!solicitacoesPendentes || solicitacoesPendentes.length === 0) {
+            showAlert('ℹ️ Não há solicitações pendentes para aprovar', 'info');
+            return;
+        }
+        
+        const confirmacao = confirm(`Deseja aprovar TODAS as ${solicitacoesPendentes.length} solicitações pendentes?`);
+        if (!confirmacao) return;
+        
+        showGlobalLoading(true);
+        
+        const btnAprovarTodas = document.getElementById('aprovar-todas-btn');
+        if (btnAprovarTodas) {
+            btnAprovarTodas.disabled = true;
+            btnAprovarTodas.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...';
+        }
+        
+        let aprovadasComSucesso = 0;
+        let erros = [];
+        
+        for (const solicitacao of solicitacoesPendentes) {
+            try {
+                await aprovarSolicitacao(solicitacao.id);
+                aprovadasComSucesso++;
+                
+                // Pequena pausa para não sobrecarregar a API
+                await new Promise(resolve => setTimeout(resolve, 100));
+                
+            } catch (error) {
+                erros.push(`Solicitação ${solicitacao.id}: ${error.message}`);
+            }
+        }
+        
+        if (btnAprovarTodas) {
+            btnAprovarTodas.disabled = false;
+            btnAprovarTodas.innerHTML = '<i class="fas fa-check-double"></i> Aprovar Todas';
+        }
+        
+        showGlobalLoading(false);
+        
+        if (aprovadasComSucesso === solicitacoesPendentes.length) {
+            showAlert(`✅ Todas as ${aprovadasComSucesso} solicitações foram aprovadas com sucesso!`, 'success');
+        } else if (aprovadasComSucesso > 0) {
+            showAlert(`✅ ${aprovadasComSucesso} de ${solicitacoesPendentes.length} solicitações aprovadas. ${erros.length} falhas.`, 'warning');
+            console.error('Erros encontrados:', erros);
+        } else {
+            showAlert('❌ Nenhuma solicitação pôde ser aprovada. Verifique o console para detalhes.', 'error');
+            console.error('Todos os erros:', erros);
+        }
+        
+        await carregarSolicitacoesPendentes();
+        
+    } catch (error) {
+        console.error('❌ Erro ao aprovar todas as solicitações:', error);
+        showAlert('❌ Erro ao processar aprovação em massa', 'error');
+        
+        const btnAprovarTodas = document.getElementById('aprovar-todas-btn');
+        if (btnAprovarTodas) {
+            btnAprovarTodas.disabled = false;
+            btnAprovarTodas.innerHTML = '<i class="fas fa-check-double"></i> Aprovar Todas';
+        }
+        
+        showGlobalLoading(false);
+    }
+}
+function atualizarBotaoAprovarTodas() {
+    const btnAprovarTodas = document.getElementById('aprovar-todas-btn');
+    const totalSolicitacoes = solicitacoesPendentes ? solicitacoesPendentes.length : 0;
+    
+    if (btnAprovarTodas) {
+        if (totalSolicitacoes === 0) {
+            btnAprovarTodas.disabled = true;
+            btnAprovarTodas.innerHTML = '<i class="fas fa-check-double"></i> Nenhuma Pendente';
+        } else {
+            btnAprovarTodas.disabled = false;
+            btnAprovarTodas.innerHTML = `<i class="fas fa-check-double"></i> Aprovar Todas (${totalSolicitacoes})`;
+        }
+    }
+}
 async function aprovarSolicitacao(solicitacaoId) {
   const response = await fetch(`https://coliseum-api.onrender.com/api/solicitacoes/${solicitacaoId}/aprovar`, {
     method: 'PUT',
