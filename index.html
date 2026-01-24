@@ -5598,50 +5598,21 @@ function exibirSolicitacoes(solicitacoes) {
     });
 }
 
-// No frontend ADMIN, onde chama a aprovação:
 async function aprovarSolicitacao(solicitacaoId) {
-  // BUSCAR PRIMEIRO O ID DE UM ADMIN VÁLIDO
-  const adminValido = await buscarAdminIdValido();
-  
-  const data = {
-    adminId: adminValido, // ← USAR ADMIN VÁLIDO!
-    motivo: 'Aprovado pelo sistema',
-    dataExpiracao: null
-  };
-  
-  const response = await fetch(`/api/solicitacoes/${solicitacaoId}/aprovar`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data)
-  });
-  
-  return await response.json();
+    const data = {
+        motivo: 'Aprovado pelo administrador',
+        dataExpiracao: null
+    };
+    
+    const response = await fetch(`https://coliseum-api.onrender.com/api/solicitacoes/${solicitacaoId}/aprovar`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    });
+    
+    return await response.json();
 }
-
-async function buscarAdminIdValido() {
-  try {
-    const response = await fetch('/api/usuarios/admins');
-    const data = await response.json();
-    
-    if (data.success && data.admins.length > 0) {
-      return data.admins[0].id; 
-    }
-    
-    const usuariosRes = await fetch('/api/usuarios');
-    const usuarios = await usuariosRes.json();
-    
-    if (usuarios.length > 0) {
-      return usuarios[0].id;
-    }
-    
-    return 1; 
-    
-  } catch (error) {
-    console.warn('⚠️ Não foi possível buscar admin, usando ID 1');
-    return 1;
-  }
-}
-
+        
 async function rejeitarSolicitacao(solicitacaoId) {
     try {
         const motivo = prompt('Digite o motivo da rejeição:');
