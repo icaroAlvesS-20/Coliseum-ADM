@@ -5599,18 +5599,16 @@ function exibirSolicitacoes(solicitacoes) {
 }
 
 async function aprovarSolicitacao(solicitacaoId) {
-    const data = {
-        motivo: 'Aprovado pelo administrador',
-        dataExpiracao: null
-    };
-    
-    const response = await fetch(`https://coliseum-api.onrender.com/api/solicitacoes/${solicitacaoId}/aprovar`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-    });
-    
-    return await response.json();
+  const response = await fetch(`https://coliseum-api.onrender.com/api/solicitacoes/${solicitacaoId}/aprovar`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      motivo: 'Aprovado pelo administrador',
+      dataExpiracao: null
+    })
+  });
+  
+  return await response.json();
 }
         
 async function rejeitarSolicitacao(solicitacaoId) {
