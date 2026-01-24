@@ -1093,9 +1093,6 @@
     gap: 8px;
     margin-top: 10px;
 }
-/* ESTILOS MELHORADOS PARA SOLICITAÇÕES DE AUTORIZAÇÃO */
-
-/* Tabela de solicitações */
 #solicitacoes-table {
     width: 100%;
     border-collapse: collapse;
@@ -1252,7 +1249,103 @@
 #solicitacoes-table .actions button:active {
     transform: translateY(0);
 }
+/* Estilos para alunos bloqueados */
+.aluno-bloqueado-card {
+    background: linear-gradient(145deg, #383838, #282828);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 15px;
+    border: 1px solid #f44336;
+    border-left: 4px solid #f44336;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s ease;
+}
 
+.aluno-bloqueado-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(244, 67, 54, 0.2);
+}
+
+.aluno-info {
+    flex: 1;
+}
+
+.aluno-nome {
+    font-weight: bold;
+    color: #fff;
+    font-size: 16px;
+    margin-bottom: 8px;
+}
+
+.aluno-detalhes {
+    display: flex;
+    gap: 15px;
+    color: #aaa;
+    font-size: 13px;
+}
+
+.aluno-detalhes span {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.aluno-acoes {
+    display: flex;
+    gap: 10px;
+}
+
+/* Estatísticas */
+.bloqueados-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.stat-card {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+    padding: 15px;
+    text-align: center;
+}
+
+.stat-value {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    color: #aaa;
+    font-size: 12px;
+    text-transform: uppercase;
+}
+
+/* Status badges para bloqueio */
+.status-bloqueado {
+    background: rgba(244, 67, 54, 0.2);
+    color: #f44336;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.status-liberado {
+    background: rgba(76, 175, 80, 0.2);
+    color: #4CAF50;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
 /* Informações do aluno */
 .aluno-info {
     background: rgba(255, 207, 0, 0.05);
@@ -5936,23 +6029,20 @@ function configurarTiposAutorizacaoMassa() {
             atualizarDetalhesAutorizacaoMassa(this.value, detalhesContainer);
         });
         
-        // Inicializar com o valor padrão
         atualizarDetalhesAutorizacaoMassa(tipoSelect.value, detalhesContainer);
     }
 }
-
-// ✅ FUNÇÕES DE EXIBIÇÃO PARA AUTORIZAÇÃO
 function exibirAlunosBloqueados(alunos) {
     const container = document.getElementById('bloqueados-content');
     if (!container) return;
     
     container.innerHTML = '';
     
-    if (alunos.length === 0) {
+    if (!alunos || alunos.length === 0) {
         container.innerHTML = `
-            <div class="empty-state">
-                <i class="fas fa-check-circle"></i>
-                <h3>Nenhum aluno bloqueado</h3>
+            <div class="empty-state" style="text-align: center; padding: 40px; color: #888;">
+                <i class="fas fa-check-circle" style="font-size: 48px; margin-bottom: 16px; color: #4CAF50;"></i>
+                <h3 style="color: #4CAF50; margin-bottom: 8px;">Nenhum aluno bloqueado</h3>
                 <p>Todos os alunos têm acesso às aulas</p>
             </div>
         `;
@@ -5960,26 +6050,296 @@ function exibirAlunosBloqueados(alunos) {
     }
     
     alunos.forEach(aluno => {
-        const div = document.createElement('div');
-        div.className = 'aluno-bloqueado-card';
-        div.innerHTML = `
-            <div class="aluno-info">
-                <div class="aluno-nome">${aluno.nome}</div>
-                <div class="aluno-detalhes">
-                    <span>RA: ${aluno.ra}</span>
-                    <span>Curso: ${aluno.curso}</span>
+        const alunoCard = document.createElement('div');
+        alunoCard.className = 'aluno-bloqueado-card';
+        alunoCard.style.cssText = `
+            background: linear-gradient(145deg, #383838, #282828);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 1px solid #f44336;
+            border-left: 4px solid #f44336;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        `;
+        
+        alunoCard.innerHTML = `
+            <div class="aluno-info" style="flex: 1;">
+                <div class="aluno-nome" style="font-weight: bold; color: #fff; font-size: 16px; margin-bottom: 8px;">
+                    ${aluno.nome || 'Aluno sem nome'}
+                </div>
+                <div class="aluno-detalhes" style="display: flex; gap: 15px; color: #aaa; font-size: 13px;">
+                    <span style="display: flex; align-items: center; gap: 5px;">
+                        <i class="fas fa-id-card"></i>
+                        RA: ${aluno.ra || 'N/A'}
+                    </span>
+                    <span style="display: flex; align-items: center; gap: 5px;">
+                        <i class="fas fa-graduation-cap"></i>
+                        Curso: ${aluno.curso || 'N/A'}
+                    </span>
+                    <span style="display: flex; align-items: center; gap: 5px;">
+                        <i class="fas fa-calendar"></i>
+                        Série: ${aluno.serie || 'N/A'}
+                    </span>
+                </div>
+                <div class="aluno-status" style="margin-top: 10px;">
+                    <span class="status-badge" style="background: rgba(244, 67, 54, 0.2); color: #f44336; padding: 4px 10px; border-radius: 12px; font-size: 12px;">
+                        <i class="fas fa-lock"></i> BLOQUEADO
+                    </span>
+                    ${aluno.ultimaTentativa ? `
+                        <span style="color: #888; font-size: 12px; margin-left: 10px;">
+                            Última tentativa: ${new Date(aluno.ultimaTentativa).toLocaleDateString('pt-BR')}
+                        </span>
+                    ` : ''}
                 </div>
             </div>
-            <div class="aluno-acoes">
-                <button class="btn btn-sm btn-success" onclick="liberarAlunoBloqueado(${aluno.id})">
-                    <i class="fas fa-unlock"></i> Liberar
+            <div class="aluno-acoes" style="display: flex; gap: 10px;">
+                <button class="btn btn-sm btn-success" onclick="liberarAlunoBloqueado(${aluno.id})" style="padding: 8px 16px;">
+                    <i class="fas fa-unlock"></i> Liberar Acesso
+                </button>
+                <button class="btn btn-sm btn-primary" onclick="verDetalhesBloqueio(${aluno.id})" style="padding: 8px 16px;">
+                    <i class="fas fa-info-circle"></i> Detalhes
                 </button>
             </div>
         `;
-        container.appendChild(div);
+        
+        alunoCard.addEventListener('mouseenter', () => {
+            alunoCard.style.transform = 'translateY(-3px)';
+            alunoCard.style.boxShadow = '0 8px 25px rgba(244, 67, 54, 0.2)';
+        });
+        
+        alunoCard.addEventListener('mouseleave', () => {
+            alunoCard.style.transform = 'translateY(0)';
+            alunoCard.style.boxShadow = 'none';
+        });
+        
+        container.appendChild(alunoCard);
     });
+    
+    const statsDiv = document.createElement('div');
+    statsDiv.style.cssText = `
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 10px;
+        padding: 15px;
+        margin-top: 20px;
+        display: flex;
+        justify-content: space-around;
+        text-align: center;
+    `;
+    
+    statsDiv.innerHTML = `
+        <div>
+            <div style="font-size: 24px; font-weight: bold; color: #f44336;">${alunos.length}</div>
+            <div style="color: #aaa; font-size: 12px;">TOTAL BLOQUEADOS</div>
+        </div>
+        <div>
+            <div style="font-size: 24px; font-weight: bold; color: #ff9800;">${alunos.filter(a => a.cursosBloqueados && a.cursosBloqueados.length > 1).length}</div>
+            <div style="color: #aaa; font-size: 12px;">+ DE 1 CURSO</div>
+        </div>
+        <div>
+            <div style="font-size: 24px; font-weight: bold; color: #4caf50;">${alunos.filter(a => a.diasBloqueado && a.diasBloqueado > 7).length}</div>
+            <div style="color: #aaa; font-size: 12px;">+ 7 DIAS</div>
+        </div>
+    `;
+    
+    container.appendChild(statsDiv);
 }
 
+async function liberarAlunoBloqueado(alunoId) {
+    try {
+        showConfirmation(
+            'Tem certeza que deseja liberar o acesso deste aluno?',
+            async () => {
+                showGlobalLoading(true);
+                
+                const response = await apiRequest(`/api/usuarios/${alunoId}/liberar`, {
+                    method: 'PUT',
+                    body: {
+                        motivo: 'Liberado pelo administrador',
+                        dataLiberacao: new Date().toISOString()
+                    }
+                });
+                
+                if (response && response.success) {
+                    showAlert('✅ Aluno liberado com sucesso!', 'success');
+                    
+                    await carregarAlunosBloqueados();
+                } else {
+                    throw new Error(response?.error || 'Erro ao liberar aluno');
+                }
+                
+                showGlobalLoading(false);
+            }
+        );
+    } catch (error) {
+        console.error('❌ Erro ao liberar aluno:', error);
+        showAlert('❌ Erro ao liberar aluno', 'error');
+        showGlobalLoading(false);
+    }
+}
+
+function verDetalhesBloqueio(alunoId) {
+    const aluno = alunosBloqueados?.find(a => a.id === alunoId);
+    
+    if (!aluno) {
+        showAlert('❌ Aluno não encontrado', 'error');
+        return;
+    }
+    
+    const modalHTML = `
+        <div class="modal" id="detalhes-bloqueio-modal">
+            <div class="modal-content" style="max-width: 600px;">
+                <div class="modal-header">
+                    <h3><i class="fas fa-user-lock"></i> Detalhes do Bloqueio</h3>
+                    <button class="modal-close" onclick="closeModal('detalhes-bloqueio-modal')">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div style="margin-bottom: 20px;">
+                        <h4 style="color: #ffcf00; margin-bottom: 10px;">
+                            <i class="fas fa-user"></i> Informações do Aluno
+                        </h4>
+                        <div style="background: rgba(255,207,0,0.1); padding: 15px; border-radius: 8px;">
+                            <strong style="color: #fff; font-size: 16px;">${aluno.nome || 'N/A'}</strong><br>
+                            <div style="display: flex; gap: 15px; margin-top: 8px;">
+                                <span style="color: #aaa;"><i class="fas fa-id-card"></i> RA: ${aluno.ra || 'N/A'}</span>
+                                <span style="color: #aaa;"><i class="fas fa-graduation-cap"></i> Curso: ${aluno.curso || 'N/A'}</span>
+                                <span style="color: #aaa;"><i class="fas fa-calendar"></i> Série: ${aluno.serie || 'N/A'}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <h4 style="color: #f44336; margin-bottom: 10px;">
+                            <i class="fas fa-exclamation-triangle"></i> Motivo do Bloqueio
+                        </h4>
+                        <div style="background: rgba(244,67,54,0.1); padding: 15px; border-radius: 8px; color: #ff6b6b;">
+                            ${aluno.motivoBloqueio || 'Sem motivo específico registrado'}
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                        <div>
+                            <h4 style="color: #4cc9f0; margin-bottom: 10px;">
+                                <i class="fas fa-calendar-times"></i> Data do Bloqueio
+                            </h4>
+                            <div style="background: rgba(76,201,240,0.1); padding: 15px; border-radius: 8px; text-align: center;">
+                                <div style="font-size: 18px; font-weight: bold; color: #4cc9f0;">
+                                    ${aluno.dataBloqueio ? new Date(aluno.dataBloqueio).toLocaleDateString('pt-BR') : 'N/A'}
+                                </div>
+                                <div style="color: #aaa; font-size: 12px; margin-top: 5px;">
+                                    ${aluno.dataBloqueio ? new Date(aluno.dataBloqueio).toLocaleTimeString('pt-BR') : ''}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h4 style="color: #ff9800; margin-bottom: 10px;">
+                                <i class="fas fa-clock"></i> Duração
+                            </h4>
+                            <div style="background: rgba(255,152,0,0.1); padding: 15px; border-radius: 8px; text-align: center;">
+                                <div style="font-size: 18px; font-weight: bold; color: #ff9800;">
+                                    ${aluno.diasBloqueado || 0} dias
+                                </div>
+                                <div style="color: #aaa; font-size: 12px; margin-top: 5px;">
+                                    desde o bloqueio
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    ${aluno.cursosBloqueados && aluno.cursosBloqueados.length > 0 ? `
+                        <div>
+                            <h4 style="color: #9c27b0; margin-bottom: 10px;">
+                                <i class="fas fa-book"></i> Cursos Bloqueados
+                            </h4>
+                            <div style="background: rgba(156,39,176,0.1); padding: 15px; border-radius: 8px;">
+                                ${aluno.cursosBloqueados.map(curso => `
+                                    <div style="padding: 8px; margin-bottom: 5px; background: rgba(255,255,255,0.05); border-radius: 6px;">
+                                        <i class="fas fa-book-open" style="color: #9c27b0; margin-right: 8px;"></i>
+                                        ${curso}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    <div style="margin-top: 20px;">
+                        <h4 style="color: #4CAF50; margin-bottom: 10px;">
+                            <i class="fas fa-history"></i> Histórico de Tentativas
+                        </h4>
+                        <div style="max-height: 200px; overflow-y: auto;">
+                            ${aluno.tentativas && aluno.tentativas.length > 0 ? 
+                                aluno.tentativas.map((t, i) => `
+                                    <div style="padding: 10px; margin-bottom: 5px; background: rgba(76,175,80,0.1); border-radius: 6px; font-size: 13px;">
+                                        <div style="color: #4CAF50; font-weight: bold;">
+                                            Tentativa ${i + 1} - ${new Date(t.data).toLocaleString('pt-BR')}
+                                        </div>
+                                        <div style="color: #aaa; margin-top: 3px;">
+                                            Aula: ${t.aula || 'N/A'} | Módulo: ${t.modulo || 'N/A'}
+                                        </div>
+                                    </div>
+                                `).join('') :
+                                '<div style="color: #888; text-align: center; padding: 20px;">Nenhuma tentativa registrada</div>'
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-warning" onclick="closeModal('detalhes-bloqueio-modal')">
+                        <i class="fas fa-times"></i> Fechar
+                    </button>
+                    <button class="btn btn-success" onclick="liberarAlunoBloqueado(${alunoId})">
+                        <i class="fas fa-unlock"></i> Liberar Aluno
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    const existingModal = document.getElementById('detalhes-bloqueio-modal');
+    if (existingModal) existingModal.remove();
+    
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
+    document.getElementById('detalhes-bloqueio-modal').style.display = 'flex';
+}
+
+let alunosBloqueados = [];
+
+async function carregarAlunosBloqueados() {
+    try {
+        console.log('🔒 Carregando alunos bloqueados...');
+        
+        showLoadingBloqueados(true);
+        
+        const response = await apiRequest('/api/usuarios/bloqueados');
+        
+        if (response && response.success) {
+            alunosBloqueados = response.alunos || [];
+            exibirAlunosBloqueados(alunosBloqueados);
+            
+            const contador = document.getElementById('total-bloqueados');
+            if (contador) {
+                contador.textContent = alunosBloqueados.length;
+            }
+            
+            console.log(`✅ ${alunosBloqueados.length} alunos bloqueados carregados`);
+        } else {
+            alunosBloqueados = [];
+            exibirAlunosBloqueados([]);
+        }
+        
+    } catch (error) {
+        console.error('❌ Erro ao carregar alunos bloqueados:', error);
+        alunosBloqueados = [];
+        exibirAlunosBloqueados([]);
+    } finally {
+        showLoadingBloqueados(false);
+    }
+}
+        
 async function carregarSolicitacoesPendentes() {
     try {
         console.log('📋 Carregando solicitações pendentes...');
