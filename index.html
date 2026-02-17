@@ -6215,9 +6215,26 @@ function filterDesafiosByStatus(status) {
     }
 }
 
+// ✅ FUNÇÃO PARA COPIAR CREDENCIAIS DO USUÁRIO (BUSCANDO SENHA)
 async function copyUserCredentials(userId) {
     try {
-        const user = users.find(u => u.id == userId);
+        showGlobalLoading(true);
+        
+        // Primeiro tenta encontrar no array local
+        let user = users.find(u => u.id == userId);
+        
+        // Se não tiver senha, busca o usuário completo da API
+        if (!user || !user.senha) {
+            try {
+                const response = await apiRequest(`/api/usuarios/${userId}`);
+                if (response && response.usuario) {
+                    user = response.usuario;
+                }
+            } catch (error) {
+                console.log('Erro ao buscar usuário individual, usando dados da listagem');
+            }
+        }
+        
         if (!user) {
             showAlert('❌ Usuário não encontrado!', 'error');
             return;
@@ -6226,13 +6243,18 @@ async function copyUserCredentials(userId) {
         // URL fixa do site de login
         const loginUrl = 'https://coliseum-ebon.vercel.app/login';
         
-        // Montar a string com RA, senha e link
-        const credentials = `👤 NOME: ${user.nome}\n📋 RA: ${user.ra}\n🔑 SENHA: ${user.senha || 'N/A'}\n🔗 ACESSO: ${loginUrl}`;
+        // Se ainda não tem senha, mostra mensagem
+        if (!user.senha) {
+            showAlert('⚠️ Senha não disponível. Verifique se o usuário tem senha cadastrada.', 'warning');
+            const credentials = `👤 NOME: ${user.nome}\n📋 RA: ${user.ra}\n🔑 SENHA: [NÃO DISPONÍVEL]\n🔗 ACESSO: ${loginUrl}`;
+            await navigator.clipboard.writeText(credentials);
+        } else {
+            // Montar a string com RA, senha e link
+            const credentials = `👤 NOME: ${user.nome}\n📋 RA: ${user.ra}\n🔑 SENHA: ${user.senha}\n🔗 ACESSO: ${loginUrl}`;
+            await navigator.clipboard.writeText(credentials);
+        }
         
-        // Copiar para a área de transferência
-        await navigator.clipboard.writeText(credentials);
-        
-        showAlert('✅ RA, senha e link de acesso copiados!', 'success');
+        showAlert('✅ Credenciais copiadas!', 'success');
         
         // Feedback visual no botão
         const btn = document.querySelector(`.copy-credentials[data-id="${userId}"]`);
@@ -6250,6 +6272,8 @@ async function copyUserCredentials(userId) {
     } catch (error) {
         console.error('❌ Erro ao copiar credenciais:', error);
         showAlert('❌ Erro ao copiar credenciais', 'error');
+    } finally {
+        showGlobalLoading(false);
     }
 }
 
