@@ -6215,50 +6215,44 @@ function filterDesafiosByStatus(status) {
     }
 }
 
-// ✅ FUNÇÃO PARA COPIAR CREDENCIAIS DO USUÁRIO (BUSCA SENHA INDIVIDUALMENTE)
+// ✅ FUNÇÃO PARA COPIAR CREDENCIAIS DO USUÁRIO (BUSCANDO DO BANCO)
 async function copyUserCredentials(userId) {
     try {
         showGlobalLoading(true);
         
-        // Primeiro pega os dados básicos do usuário da listagem
-        const userBasic = users.find(u => u.id == userId);
-        if (!userBasic) {
+        // Busca o usuário COMPLETO (com senha) da API
+        console.log(`🔍 Buscando usuário ID ${userId} da API...`);
+        const response = await apiRequest(`/api/usuarios/${userId}`);
+        
+        // A API pode retornar em formatos diferentes
+        let user;
+        if (response && response.usuario) {
+            user = response.usuario;  // Formato: { usuario: { ... } }
+        } else if (response && response.id) {
+            user = response;          // Formato direto: { id: ..., senha: ... }
+        } else {
+            console.error('❌ Formato de resposta inesperado:', response);
+            throw new Error('Resposta da API em formato inválido');
+        }
+        
+        if (!user) {
             showAlert('❌ Usuário não encontrado!', 'error');
             return;
         }
         
-        // AGORA FAZ UMA REQUISIÇÃO ESPECÍFICA PARA BUSCAR OS DADOS COMPLETOS (INCLUINDO SENHA)
-        let userComplete;
-        try {
-            console.log(`🔍 Buscando dados completos do usuário ID: ${userId}...`);
-            const response = await apiRequest(`/api/usuarios/${userId}`);
-            
-            // Verificar formato da resposta
-            if (response && response.usuario) {
-                userComplete = response.usuario;
-                console.log('✅ Usuário completo encontrado:', userComplete);
-            } else if (response && response.id) {
-                userComplete = response;
-                console.log('✅ Usuário encontrado (formato direto):', userComplete);
-            } else {
-                console.log('⚠️ Resposta da API em formato inesperado:', response);
-                userComplete = userBasic; // Fallback para dados básicos
-            }
-        } catch (error) {
-            console.error('❌ Erro ao buscar usuário individual:', error);
-            userComplete = userBasic; // Fallback para dados básicos
-        }
+        console.log('✅ Usuário encontrado:', user);
+        console.log('🔑 Senha recuperada:', user.senha ? '****' : 'N/A');
         
         // URL fixa do site de login
         const loginUrl = 'https://coliseum-ebon.vercel.app/login';
         
         // Verificar se temos a senha
-        const senha = userComplete.senha || userComplete.password || 'N/A';
+        const senha = user.senha || 'N/A';
         
-        // Montar a string com RA, senha e link (formato melhorado)
+        // Montar a string com RA, senha e link
         const credentials = `━━━━━━ ACESSO COLISEUM ━━━━━━
-👤 NOME: ${userComplete.nome || userBasic.nome}
-📋 RA: ${userComplete.ra || userBasic.ra}
+👤 NOME: ${user.nome}
+📋 RA: ${user.ra}
 🔑 SENHA: ${senha}
 🔗 LINK: ${loginUrl}
 ━━━━━━━━━━━━━━━━━━━━━━━━━`;
@@ -6266,9 +6260,9 @@ async function copyUserCredentials(userId) {
         // Copiar para a área de transferência
         await navigator.clipboard.writeText(credentials);
         
-        // Mostrar feedback com a senha (se disponível)
+        // Mostrar feedback
         if (senha !== 'N/A') {
-            showAlert(`✅ Credenciais copiadas! RA: ${userComplete.ra || userBasic.ra} | Senha: ${senha}`, 'success');
+            showAlert(`✅ Credenciais de ${user.nome} copiadas!`, 'success');
         } else {
             showAlert('⚠️ RA copiado, mas senha não disponível', 'warning');
         }
@@ -6290,7 +6284,7 @@ async function copyUserCredentials(userId) {
         
     } catch (error) {
         console.error('❌ Erro ao copiar credenciais:', error);
-        showAlert('❌ Erro ao copiar credenciais', 'error');
+        showAlert(`❌ Erro ao copiar: ${error.message}`, 'error');
     } finally {
         showGlobalLoading(false);
     }
