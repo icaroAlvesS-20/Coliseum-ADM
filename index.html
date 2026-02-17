@@ -6215,57 +6215,76 @@ function filterDesafiosByStatus(status) {
     }
 }
 
-// ✅ FUNÇÃO PARA COPIAR CREDENCIAIS DO USUÁRIO (BUSCANDO SENHA)
+// ✅ FUNÇÃO PARA COPIAR CREDENCIAIS DO USUÁRIO (BUSCA SENHA INDIVIDUALMENTE)
 async function copyUserCredentials(userId) {
     try {
         showGlobalLoading(true);
         
-        // Primeiro tenta encontrar no array local
-        let user = users.find(u => u.id == userId);
-        
-        // Se não tiver senha, busca o usuário completo da API
-        if (!user || !user.senha) {
-            try {
-                const response = await apiRequest(`/api/usuarios/${userId}`);
-                if (response && response.usuario) {
-                    user = response.usuario;
-                }
-            } catch (error) {
-                console.log('Erro ao buscar usuário individual, usando dados da listagem');
-            }
-        }
-        
-        if (!user) {
+        // Primeiro pega os dados básicos do usuário da listagem
+        const userBasic = users.find(u => u.id == userId);
+        if (!userBasic) {
             showAlert('❌ Usuário não encontrado!', 'error');
             return;
+        }
+        
+        // AGORA FAZ UMA REQUISIÇÃO ESPECÍFICA PARA BUSCAR OS DADOS COMPLETOS (INCLUINDO SENHA)
+        let userComplete;
+        try {
+            console.log(`🔍 Buscando dados completos do usuário ID: ${userId}...`);
+            const response = await apiRequest(`/api/usuarios/${userId}`);
+            
+            // Verificar formato da resposta
+            if (response && response.usuario) {
+                userComplete = response.usuario;
+                console.log('✅ Usuário completo encontrado:', userComplete);
+            } else if (response && response.id) {
+                userComplete = response;
+                console.log('✅ Usuário encontrado (formato direto):', userComplete);
+            } else {
+                console.log('⚠️ Resposta da API em formato inesperado:', response);
+                userComplete = userBasic; // Fallback para dados básicos
+            }
+        } catch (error) {
+            console.error('❌ Erro ao buscar usuário individual:', error);
+            userComplete = userBasic; // Fallback para dados básicos
         }
         
         // URL fixa do site de login
         const loginUrl = 'https://coliseum-ebon.vercel.app/login';
         
-        // Se ainda não tem senha, mostra mensagem
-        if (!user.senha) {
-            showAlert('⚠️ Senha não disponível. Verifique se o usuário tem senha cadastrada.', 'warning');
-            const credentials = `👤 NOME: ${user.nome}\n📋 RA: ${user.ra}\n🔑 SENHA: [NÃO DISPONÍVEL]\n🔗 ACESSO: ${loginUrl}`;
-            await navigator.clipboard.writeText(credentials);
-        } else {
-            // Montar a string com RA, senha e link
-            const credentials = `👤 NOME: ${user.nome}\n📋 RA: ${user.ra}\n🔑 SENHA: ${user.senha}\n🔗 ACESSO: ${loginUrl}`;
-            await navigator.clipboard.writeText(credentials);
-        }
+        // Verificar se temos a senha
+        const senha = userComplete.senha || userComplete.password || 'N/A';
         
-        showAlert('✅ Credenciais copiadas!', 'success');
+        // Montar a string com RA, senha e link (formato melhorado)
+        const credentials = `━━━━━━ ACESSO COLISEUM ━━━━━━
+👤 NOME: ${userComplete.nome || userBasic.nome}
+📋 RA: ${userComplete.ra || userBasic.ra}
+🔑 SENHA: ${senha}
+🔗 LINK: ${loginUrl}
+━━━━━━━━━━━━━━━━━━━━━━━━━`;
+        
+        // Copiar para a área de transferência
+        await navigator.clipboard.writeText(credentials);
+        
+        // Mostrar feedback com a senha (se disponível)
+        if (senha !== 'N/A') {
+            showAlert(`✅ Credenciais copiadas! RA: ${userComplete.ra || userBasic.ra} | Senha: ${senha}`, 'success');
+        } else {
+            showAlert('⚠️ RA copiado, mas senha não disponível', 'warning');
+        }
         
         // Feedback visual no botão
         const btn = document.querySelector(`.copy-credentials[data-id="${userId}"]`);
         if (btn) {
             const originalHtml = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-check"></i>';
+            const originalBg = btn.style.background;
+            
+            btn.innerHTML = '<i class="fas fa-check"></i> Copiado!';
             btn.style.background = 'linear-gradient(135deg, #28a745, #218838)';
             
             setTimeout(() => {
                 btn.innerHTML = originalHtml;
-                btn.style.background = 'linear-gradient(135deg, #17a2b8, #138496)';
+                btn.style.background = originalBg;
             }, 2000);
         }
         
@@ -6276,6 +6295,7 @@ async function copyUserCredentials(userId) {
         showGlobalLoading(false);
     }
 }
+        
 
 function inicializarSistemaAutorizacao() {
     console.log('🔐 Inicializando sistema de autorização...');
