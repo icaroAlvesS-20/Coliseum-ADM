@@ -312,6 +312,11 @@
         color: white;
     }
 
+    .btn-info {
+        background: linear-gradient(135deg, #17a2b8, #138496);
+        color: white;
+    }
+
     .btn:hover {
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
@@ -2363,6 +2368,7 @@
                             <th>ID</th>
                             <th>Nome</th>
                             <th>RA</th>
+                            <th>Senha</th>
                             <th>Série</th>
                             <th>Pontuação</th>
                             <th>Desafios</th>
@@ -3001,6 +3007,10 @@
                         </small>
                     </div>
                     <div class="form-group">
+                        <label for="edit-user-senha">Senha</label>
+                        <input type="text" id="edit-user-senha" class="form-control" required>
+                    </div>
+                    <div class="form-group">
                         <label for="edit-user-serie">Série *</label>
                         <input type="text" id="edit-user-serie" class="form-control" required>
                     </div>
@@ -3298,6 +3308,10 @@
                         </small>
                     </div>
                     <div class="form-group">
+                        <label for="new-user-senha">Senha *</label>
+                        <input type="text" id="new-user-senha" class="form-control" placeholder="Ex: 123456" required>
+                    </div>
+                    <div class="form-group">
                         <label for="new-user-serie">Série *</label>
                         <select id="new-user-serie" class="form-control" required>
                             <option value="">Selecione a série</option>
@@ -3314,10 +3328,6 @@
                             <option value="2º EM">2º Ensino Médio</option>
                             <option value="3º EM">3º Ensino Médio</option>
                         </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="new-user-senha">Senha *</label>
-                        <input type="text" id="new-user-senha" class="form-control" placeholder="Ex: 123456" required>
                     </div>
                     <div class="form-group">
                         <label for="new-user-curso">Curso *</label>
@@ -4231,6 +4241,12 @@ function setupDynamicEventListeners() {
             editUser(userId);
         }
         
+        // Copiar credenciais do usuário
+        if (e.target.closest('.copy-credentials')) {
+            const userId = e.target.closest('.copy-credentials').getAttribute('data-id');
+            copyUserCredentials(userId);
+        }
+        
         // Excluir usuário
         if (e.target.closest('.delete-user')) {
             const userId = e.target.closest('.delete-user').getAttribute('data-id');
@@ -4586,7 +4602,7 @@ function displayUsers(users) {
     if (!users || users.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="9" style="text-align: center; color: #888; padding: 20px;">
+                <td colspan="10" style="text-align: center; color: #888; padding: 20px;">
                     <i class="fas fa-users"></i>
                     Nenhum usuário encontrado
                 </td>
@@ -4607,6 +4623,7 @@ function displayUsers(users) {
                 ${user.status === 'inativo' ? '<span class="status-badge status-inativo" style="margin-left: 8px;">INATIVO</span>' : ''}
             </td>
             <td><code>${user.ra}</code></td>
+            <td><code>${user.senha || '******'}</code></td>
             <td>${user.serie}</td>
             <td>${user.pontuacao}</td>
             <td>${user.desafiosCompletados}</td>
@@ -4617,14 +4634,17 @@ function displayUsers(users) {
                 </span>
             </td>
             <td class="actions">
-                <button class="btn btn-primary btn-sm edit-user" data-id="${user.id}">
+                <button class="btn btn-primary btn-sm edit-user" data-id="${user.id}" title="Editar usuário">
                     <i class="fas fa-edit"></i>
                 </button>
-                <button class="btn btn-danger btn-sm delete-user" data-id="${user.id}">
+                <button class="btn btn-info btn-sm copy-credentials" data-id="${user.id}" title="Copiar RA e senha">
+                    <i class="fas fa-copy"></i>
+                </button>
+                <button class="btn btn-danger btn-sm delete-user" data-id="${user.id}" title="Excluir usuário">
                     <i class="fas fa-trash"></i>
                 </button>
                 <div class="select">
-                    <select class="btn-select user-status" data-user-id="${user.id}">
+                    <select class="btn-select user-status" data-user-id="${user.id}" title="Alterar status">
                         <option value="ativo" ${user.status === 'ativo' ? 'selected' : ''}>Ativo</option>
                         <option value="inativo" ${user.status === 'inativo' ? 'selected' : ''}>Inativo</option>
                     </select>
@@ -5026,6 +5046,7 @@ function editUser(userId) {
     document.getElementById('edit-user-id').value = user.id;
     document.getElementById('edit-user-name').value = user.nome;
     document.getElementById('edit-user-ra').value = user.ra;
+    document.getElementById('edit-user-senha').value = user.senha || '';
     document.getElementById('edit-user-serie').value = user.serie || '';
     document.getElementById('edit-user-curso').value = user.curso || '';
     document.getElementById('edit-user-pontuacao').value = user.pontuacao || 0;
@@ -5059,6 +5080,7 @@ async function saveUser() {
     const userData = {
         nome: document.getElementById('edit-user-name').value,
         ra: document.getElementById('edit-user-ra').value,
+        senha: document.getElementById('edit-user-senha').value,
         serie: document.getElementById('edit-user-serie').value,
         curso: document.getElementById('edit-user-curso').value,
         pontuacao: parseInt(document.getElementById('edit-user-pontuacao').value),
@@ -6191,6 +6213,34 @@ function filterDesafiosByStatus(status) {
         displayDesafios(filteredDesafios);
     }
 }
+
+// ✅ NOVA FUNÇÃO: Copiar credenciais do usuário
+async function copyUserCredentials(userId) {
+    try {
+        const user = users.find(u => u.id == userId);
+        if (!user) {
+            showAlert('❌ Usuário não encontrado!', 'error');
+            return;
+        }
+        
+        // Obter o link principal do site (removendo '/admin' do path se existir)
+        const siteUrl = window.location.origin;
+        const loginUrl = siteUrl.includes('/admin') ? siteUrl.replace('/admin', '') : siteUrl;
+        
+        // Montar a string com RA, senha e link
+        const credentials = `RA: ${user.ra}\nSenha: ${user.senha || '******'}\nAcesse: ${loginUrl}`;
+        
+        // Copiar para a área de transferência
+        await navigator.clipboard.writeText(credentials);
+        
+        showAlert('✅ RA, senha e link copiados para a área de transferência!', 'success');
+        
+    } catch (error) {
+        console.error('❌ Erro ao copiar credenciais:', error);
+        showAlert('❌ Erro ao copiar credenciais', 'error');
+    }
+}
+
 function inicializarSistemaAutorizacao() {
     console.log('🔐 Inicializando sistema de autorização...');
     
@@ -7663,6 +7713,7 @@ window.liberarAlunoBloqueado = liberarAlunoBloqueado;
 window.executarAutorizacaoRapida = executarAutorizacaoRapida;
 window.executarAutorizacaoMassa = executarAutorizacaoMassa;
 window.initializeAutorizacaoMassa = initializeAutorizacaoMassa;
+window.copyUserCredentials = copyUserCredentials;
 
 console.log('✅ Sistema de autorização configurado e pronto para uso!');
 
