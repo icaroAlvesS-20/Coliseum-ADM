@@ -4623,7 +4623,7 @@ function displayUsers(users) {
                 ${user.status === 'inativo' ? '<span class="status-badge status-inativo" style="margin-left: 8px;">INATIVO</span>' : ''}
             </td>
             <td><code>${user.ra}</code></td>
-            <td><code>${user.senha || '******'}</code></td>
+            <td><code>${user.senha || 'N/A'}</code></td>
             <td>${user.serie}</td>
             <td>${user.pontuacao}</td>
             <td>${user.desafiosCompletados}</td>
@@ -4637,7 +4637,7 @@ function displayUsers(users) {
                 <button class="btn btn-primary btn-sm edit-user" data-id="${user.id}" title="Editar usuário">
                     <i class="fas fa-edit"></i>
                 </button>
-                <button class="btn btn-info btn-sm copy-credentials" data-id="${user.id}" title="Copiar RA e senha">
+                <button class="btn btn-info btn-sm copy-credentials" data-id="${user.id}" title="Copiar RA, senha e link de acesso">
                     <i class="fas fa-copy"></i>
                 </button>
                 <button class="btn btn-danger btn-sm delete-user" data-id="${user.id}" title="Excluir usuário">
@@ -6214,7 +6214,6 @@ function filterDesafiosByStatus(status) {
     }
 }
 
-// ✅ NOVA FUNÇÃO: Copiar credenciais do usuário
 async function copyUserCredentials(userId) {
     try {
         const user = users.find(u => u.id == userId);
@@ -6223,17 +6222,29 @@ async function copyUserCredentials(userId) {
             return;
         }
         
-        // Obter o link principal do site (removendo '/admin' do path se existir)
-        const siteUrl = window.location.origin;
-        const loginUrl = siteUrl.includes('/admin') ? siteUrl.replace('/admin', '') : siteUrl;
+        // URL fixa do site de login
+        const loginUrl = 'https://coliseum-ebon.vercel.app/login';
         
         // Montar a string com RA, senha e link
-        const credentials = `RA: ${user.ra}\nSenha: ${user.senha || '******'}\nAcesse: ${loginUrl}`;
+        const credentials = `👤 NOME: ${user.nome}\n📋 RA: ${user.ra}\n🔑 SENHA: ${user.senha || 'N/A'}\n🔗 ACESSO: ${loginUrl}`;
         
         // Copiar para a área de transferência
         await navigator.clipboard.writeText(credentials);
         
-        showAlert('✅ RA, senha e link copiados para a área de transferência!', 'success');
+        showAlert('✅ RA, senha e link de acesso copiados!', 'success');
+        
+        // Feedback visual no botão
+        const btn = document.querySelector(`.copy-credentials[data-id="${userId}"]`);
+        if (btn) {
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-check"></i>';
+            btn.style.background = 'linear-gradient(135deg, #28a745, #218838)';
+            
+            setTimeout(() => {
+                btn.innerHTML = originalHtml;
+                btn.style.background = 'linear-gradient(135deg, #17a2b8, #138496)';
+            }, 2000);
+        }
         
     } catch (error) {
         console.error('❌ Erro ao copiar credenciais:', error);
