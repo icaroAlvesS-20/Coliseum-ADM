@@ -2981,73 +2981,74 @@
     </div>
 
     <!-- Edit User Modal -->
-    <div class="modal" id="edit-user-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Editar Usuário</h3>
-                <button class="modal-close">&times;</button>
-            </div>
-            <div class="modal-body">
-                <form id="edit-user-form">
-                    <input type="hidden" id="edit-user-id">
-                    <div class="form-group">
-                        <label for="edit-user-name">Nome *</label>
-                        <input type="text" id="edit-user-name" class="form-control" required>
+   <!-- Edit User Modal -->
+<div class="modal" id="edit-user-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Editar Usuário</h3>
+            <button class="modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="edit-user-form">
+                <input type="hidden" id="edit-user-id">
+                <div class="form-group">
+                    <label for="edit-user-name">Nome *</label>
+                    <input type="text" id="edit-user-name" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-user-ra">RA *</label>
+                    <div class="ra-input-group">
+                        <input type="text" id="edit-user-ra" class="form-control" required maxlength="4" pattern="[0-9]{4}" title="Digite um RA de 4 dígitos">
+                        <button type="button" class="generate-ra-btn" onclick="generateRandomRA('edit-user-ra')">
+                            <i class="fas fa-dice"></i> Gerar RA
+                        </button>
                     </div>
-                    <div class="form-group">
-                        <label for="edit-user-ra">RA *</label>
-                        <div class="ra-input-group">
-                            <input type="text" id="edit-user-ra" class="form-control" required maxlength="4" pattern="[0-9]{4}" title="Digite um RA de 4 dígitos">
-                            <button type="button" class="generate-ra-btn" onclick="generateRandomRA('edit-user-ra')">
-                                <i class="fas fa-dice"></i> Gerar RA
-                            </button>
-                        </div>
-                        <small style="color: #888; font-size: 12px; margin-top: 5px;">
-                            RA deve conter exatamente 4 dígitos
-                        </small>
-                    </div>
-                    <div class="form-group">
-                        <label for="edit-user-senha">Senha</label>
-                        <input type="text" id="edit-user-senha" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="edit-user-serie">Série *</label>
-                        <input type="text" id="edit-user-serie" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="edit-user-curso">Curso *</label>
-                        <select id="edit-user-curso" class="form-control" required>
-                            <option value="programacao">Programação</option>
-                            <option value="robotica">Robótica</option>
-                            <option value="games">Games</option>
-                            <option value="preparatorio">Preparatório</option>
-                            <option value="reforco">Reforço</option>
-                            <option value="informatica">Informática</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="edit-user-pontuacao">Pontuação *</label>
-                        <input type="number" id="edit-user-pontuacao" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="edit-user-desafios">Desafios Completos *</label>
-                        <input type="number" id="edit-user-desafios" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="edit-user-status">Status do Usuário *</label>
-                        <select id="edit-user-status" class="form-control" required>
-                            <option value="ativo">Ativo</option>
-                            <option value="inativo">Inativo</option>
-                        </select>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-warning" id="cancel-edit">Cancelar</button>
-                <button class="btn btn-primary" id="save-user">Salvar</button>
-            </div>
+                    <small style="color: #888; font-size: 12px; margin-top: 5px;">
+                        RA deve conter exatamente 4 dígitos
+                    </small>
+                </div>
+                <div class="form-group">
+                    <label for="edit-user-senha">Senha *</label>
+                    <input type="text" id="edit-user-senha" class="form-control" placeholder="Digite a senha" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-user-serie">Série *</label>
+                    <input type="text" id="edit-user-serie" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-user-curso">Curso *</label>
+                    <select id="edit-user-curso" class="form-control" required>
+                        <option value="programacao">Programação</option>
+                        <option value="robotica">Robótica</option>
+                        <option value="games">Games</option>
+                        <option value="preparatorio">Preparatório</option>
+                        <option value="reforco">Reforço</option>
+                        <option value="informatica">Informática</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="edit-user-pontuacao">Pontuação *</label>
+                    <input type="number" id="edit-user-pontuacao" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-user-desafios">Desafios Completos *</label>
+                    <input type="number" id="edit-user-desafios" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-user-status">Status do Usuário *</label>
+                    <select id="edit-user-status" class="form-control" required>
+                        <option value="ativo">Ativo</option>
+                        <option value="inativo">Inativo</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-warning" id="cancel-edit">Cancelar</button>
+            <button class="btn btn-primary" id="save-user">Salvar</button>
         </div>
     </div>
+</div>
 
     <!-- Video Modal -->
     <div class="modal" id="video-modal">
@@ -5114,7 +5115,7 @@ async function saveUser() {
         showGlobalLoading(false);
     }
 }
-
+        
 async function updateUserStatus(userId, status) {
     try {
         showGlobalLoading(true);
