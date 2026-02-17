@@ -6215,14 +6215,14 @@ function filterDesafiosByStatus(status) {
     }
 }
 
-// ✅ FUNÇÃO PARA COPIAR CREDENCIAIS DO USUÁRIO (BUSCANDO DO BANCO)
+// ✅ FUNÇÃO PARA COPIAR CREDENCIAIS DO USUÁRIO
 async function copyUserCredentials(userId) {
     try {
         showGlobalLoading(true);
         
-        // Busca o usuário COMPLETO (com senha) da API
+        // Busca o usuário COMPLETO (com senha) da API - AGORA COM ?admin=true
         console.log(`🔍 Buscando usuário ID ${userId} da API...`);
-        const response = await apiRequest(`/api/usuarios/${userId}`);
+        const response = await apiRequest(`/api/usuarios/${userId}?admin=true`);
         
         // A API pode retornar em formatos diferentes
         let user;
@@ -6290,7 +6290,6 @@ async function copyUserCredentials(userId) {
     }
 }
         
-
 function inicializarSistemaAutorizacao() {
     console.log('🔐 Inicializando sistema de autorização...');
     
