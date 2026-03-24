@@ -1409,455 +1409,8 @@
     /* =========================================== */
 
     /* Container da tabela com scroll horizontal */
-    #users-table-container {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        margin: 0 -15px;
-        padding: 0 15px;
-        width: calc(100% + 30px);
-    }
-
-    #users-table {
-        min-width: 1000px; /* Forçar scroll em telas menores */
-    }
-
-    /* Ajustes gerais para mobile */
-    @media (max-width: 768px) {
-        /* Header da tabela em coluna */
-        #users .table-header {
-            flex-direction: column;
-            gap: 12px;
-            align-items: stretch;
-            padding: 15px;
-        }
-
-        #users .table-header h3 {
-            font-size: 18px;
-            margin-bottom: 0;
-            width: 100%;
-        }
-
-        /* Search box ocupa largura total */
-        #users .search-box {
-            width: 100%;
-            margin: 0;
-        }
-
-        #users .search-box input {
-            width: 100%;
-            font-size: 14px;
-        }
-
-        /* Filtros em linha com wrap */
-        #users .filter-buttons {
-            display: flex;
-            gap: 6px;
-            justify-content: flex-start;
-            flex-wrap: wrap;
-            width: 100%;
-            margin: 10px 0;
-        }
-
-        #users .filter-buttons .btn-sm {
-            flex: 1;
-            min-width: 60px;
-            font-size: 11px;
-            padding: 6px 8px;
-            text-align: center;
-        }
-
-        /* Botão adicionar usuário ocupa largura total */
-        #add-user-btn {
-            width: 100%;
-            justify-content: center;
-            margin-top: 5px;
-        }
-
-        /* Ajustes na tabela para mobile */
-        #users-table th,
-        #users-table td {
-            padding: 10px 8px;
-            font-size: 12px;
-        }
-
-        /* Ocultar colunas menos importantes */
-        #users-table th:nth-child(1),
-        #users-table td:nth-child(1) {
-            display: none; /* ID */
-        }
-
-        #users-table th:nth-child(6),
-        #users-table td:nth-child(6) {
-            display: none; /* Desafios Completos */
-        }
-
-        /* Coluna Nome fixa à esquerda */
-        #users-table th:nth-child(2),
-        #users-table td:nth-child(2) {
-            position: sticky;
-            left: 0;
-            background: linear-gradient(145deg, #383838, #282828);
-            z-index: 2;
-            min-width: 120px;
-            box-shadow: 2px 0 5px rgba(0,0,0,0.3);
-        }
-
-        /* Coluna Ações fixa à direita */
-        #users-table th:nth-child(9),
-        #users-table td:nth-child(9) {
-            position: sticky;
-            right: 0;
-            background: linear-gradient(145deg, #383838, #282828);
-            z-index: 2;
-            min-width: 100px;
-            box-shadow: -2px 0 5px rgba(0,0,0,0.3);
-        }
-
-        /* Larguras mínimas para outras colunas */
-        #users-table th:nth-child(3),
-        #users-table td:nth-child(3) {
-            min-width: 60px; /* RA */
-        }
-
-        #users-table th:nth-child(4),
-        #users-table td:nth-child(4) {
-            min-width: 70px; /* Série */
-        }
-
-        #users-table th:nth-child(5),
-        #users-table td:nth-child(5) {
-            min-width: 80px; /* Pontuação */
-        }
-
-        #users-table th:nth-child(7),
-        #users-table td:nth-child(7) {
-            min-width: 100px; /* Curso */
-        }
-
-        #users-table th:nth-child(8),
-        #users-table td:nth-child(8) {
-            min-width: 80px; /* Status */
-        }
-
-        /* Ações em coluna para melhor touch */
-        #users-table .actions {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-            min-width: 90px;
-        }
-
-        #users-table .actions .btn {
-            padding: 5px 8px;
-            font-size: 11px;
-            width: 100%;
-            justify-content: center;
-        }
-
-        #users-table .actions .btn i {
-            font-size: 10px;
-        }
-
-        /* Select de status menor */
-        #users-table .btn-select {
-            padding: 3px 18px 3px 8px;
-            font-size: 10px;
-            min-width: 65px;
-            height: 22px;
-        }
-
-        /* Status badges mais compactos */
-        #users-table .status-badge {
-            padding: 3px 6px;
-            font-size: 10px;
-            min-width: 55px;
-        }
-    }
-
-    /* Ajustes para telas muito pequenas */
-    @media (max-width: 480px) {
-        #users-table {
-            min-width: 800px;
-        }
-
-        #users-table th,
-        #users-table td {
-            padding: 8px 6px;
-            font-size: 11px;
-        }
-
-        /* Ocultar mais colunas */
-        #users-table th:nth-child(5),
-        #users-table td:nth-child(5) {
-            display: none; /* Pontuação */
-        }
-
-        #users-table th:nth-child(7),
-        #users-table td:nth-child(7) {
-            display: none; /* Curso */
-        }
-
-        /* Colunas restantes mais compactas */
-        #users-table th:nth-child(3),
-        #users-table td:nth-child(3) {
-            min-width: 50px; /* RA */
-        }
-
-        #users-table th:nth-child(4),
-        #users-table td:nth-child(4) {
-            min-width: 60px; /* Série */
-        }
-
-        #users-table th:nth-child(8),
-        #users-table td:nth-child(8) {
-            min-width: 70px; /* Status */
-        }
-
-        /* Ações mais compactas */
-        #users-table .actions {
-            min-width: 80px;
-        }
-
-        #users-table .actions .btn {
-            padding: 4px 6px;
-            font-size: 10px;
-        }
-
-        /* Header mais compacto */
-        #users .table-header {
-            padding: 12px;
-        }
-
-        #users .table-header h3 {
-            font-size: 16px;
-        }
-
-        /* Search box menor */
-        #users .search-box {
-            padding: 6px 12px;
-        }
-
-        #users .search-box input {
-            font-size: 13px;
-        }
-
-        /* Filtros mais compactos */
-        #users .filter-buttons .btn-sm {
-            font-size: 10px;
-            padding: 5px 6px;
-            min-width: 50px;
-        }
-    }
-
-    /* Scrollbar personalizada para a tabela */
-    #users-table-container::-webkit-scrollbar {
-        height: 6px;
-    }
-
-    #users-table-container::-webkit-scrollbar-track {
-        background: rgba(0, 0, 0, 0.2);
-        border-radius: 3px;
-    }
-
-    #users-table-container::-webkit-scrollbar-thumb {
-        background: #ffcf00;
-        border-radius: 3px;
-    }
-
-    #users-table-container::-webkit-scrollbar-thumb:hover {
-        background: #e6ba00;
-    }
-
-    /* Indicador visual de scroll para mobile */
-    .scroll-hint {
-        display: none;
-        position: absolute;
-        right: 15px;
-        top: 50%;
-        transform: translateY(-50%);
-        background: rgba(255, 207, 0, 0.9);
-        color: #000;
-        padding: 4px 8px;
-        border-radius: 12px;
-        font-size: 10px;
-        font-weight: bold;
-        animation: scrollHint 2s infinite;
-        pointer-events: none;
-        z-index: 10;
-    }
-
-    @keyframes scrollHint {
-        0%, 100% {
-            opacity: 0.7;
-            transform: translateY(-50%) translateX(0);
-        }
-        50% {
-            opacity: 1;
-            transform: translateY(-50%) translateX(-5px);
-        }
-    }
-
-    @media (max-width: 768px) {
-        .scroll-hint {
-            display: block;
-        }
-    }
-
-    /* Responsividade geral (mantida do original) */
-    @media (max-width: 768px) {
-        body {
-            padding: 15px;
-        }
-
-        .container {
-            padding: 25px 20px;
-            max-width: 100%;
-        }
-
-        .logo-container {
-            width: 90px;
-            height: 90px;
-        }
-
-        .logo-emoji {
-            font-size: 50px;
-            width: 80px;
-            height: 80px;
-        }
-
-        h1 {
-            font-size: 28px;
-        }
-
-        .tabs {
-            flex-direction: column;
-        }
-
-        .tab {
-            padding: 12px 15px;
-            text-align: center;
-        }
-
-        .cards-container {
-            grid-template-columns: 1fr;
-        }
-
-        .table-header {
-            flex-direction: column;
-            gap: 15px;
-            align-items: flex-start;
-        }
-
-        .search-box {
-            width: 100%;
-        }
-
-        .search-box input {
-            width: 100%;
-        }
-
-        .form-row {
-            flex-direction: column;
-            gap: 0;
-        }
-
-        .modal-content {
-            width: 95%;
-        }
-
-        th, td {
-            padding: 10px 8px;
-            font-size: 0.85rem;
-        }
-
-        .curso-header {
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .curso-meta {
-            justify-content: space-between;
-            width: 100%;
-        }
-
-        .actions {
-            flex-wrap: wrap;
-        }
-
-        .filter-buttons {
-            order: -1;
-            width: 100%;
-            justify-content: center;
-            margin-bottom: 10px;
-        }
-
-        .ra-input-group {
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .generate-ra-btn {
-            width: 100%;
-        }
-
-        .chat-header {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 10px;
-        }
-
-        .chat-timestamp {
-            align-self: flex-start;
-        }
-
-        .chat-actions {
-            opacity: 1;
-            justify-content: flex-start;
-        }
-
-        .form-row {
-            flex-direction: column;
-        }
-    }
-
-    @media (max-width: 480px) {
-        .container {
-            padding: 20px 15px;
-        }
-
-        .logo-container {
-            width: 80px;
-            height: 80px;
-        }
-
-        .logo-emoji {
-            font-size: 40px;
-            width: 70px;
-            height: 70px;
-        }
-
-        h1 {
-            font-size: 24px;
-        }
-
-        .card {
-            padding: 20px;
-        }
-
-        .table-header h3 {
-            font-size: 1.1rem;
-        }
-
-        .btn {
-            padding: 6px 10px;
-            font-size: 0.75rem;
-        }
-
-        .modal-body {
-            padding: 20px;
-        }
-    }
-     .table-scroll-container {
+  
+     #users-table-container {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     margin: 0 -15px;
@@ -1865,350 +1418,620 @@
     width: calc(100% + 30px);
 }
 
-#solicitacoes-table {
-    min-width: 800px; /* Forçar scroll em telas menores */
+#users-table {
+    min-width: 1000px;
 }
 
-/* Ajustes gerais para mobile */
+/* Ajustes para header da tabela de usuários em mobile */
 @media (max-width: 768px) {
-    /* Header da tabela em coluna */
-    #autorizacao .table-header {
+    #users .table-header {
         flex-direction: column;
         gap: 12px;
         align-items: stretch;
         padding: 15px;
     }
 
-    #autorizacao .table-header h3 {
+    #users .table-header h3 {
         font-size: 18px;
-        margin-bottom: 0;
         width: 100%;
-        text-align: center;
     }
 
-    /* Container de botões e busca */
-    #autorizacao .table-header > div {
+    #users .search-box {
         width: 100%;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
     }
 
-    /* Search box ocupa largura total */
-    #autorizacao .search-box {
-        width: 100%;
-        margin: 0;
-    }
-
-    #autorizacao .search-box input {
+    #users .search-box input {
         width: 100%;
         font-size: 14px;
     }
 
-    /* Botões em linha com wrap */
-    #autorizacao .table-header .btn {
-        font-size: 12px;
-        padding: 8px 12px;
-        min-width: auto;
-        flex: 1;
-    }
-
-    #autorizacao .table-header .btn i {
-        font-size: 12px;
-        margin-right: 4px;
-    }
-
-    /* Botões específicos */
-    #aprovar-todas-btn {
-        order: -1; /* Coloca primeiro */
-        background: linear-gradient(135deg, #4CAF50, #45a049);
-        color: white;
-        border: none;
-        border-radius: 8px;
-        padding: 10px 15px;
-        font-weight: 600;
+    #users .filter-buttons {
         display: flex;
-        align-items: center;
-        justify-content: center;
         gap: 6px;
-        cursor: pointer;
-        transition: all 0.3s ease;
+        flex-wrap: wrap;
         width: 100%;
-        margin-bottom: 10px;
     }
 
-    #aprovar-todas-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+    #users .filter-buttons .btn-sm {
+        flex: 1;
+        min-width: 60px;
+        font-size: 11px;
+        padding: 6px 8px;
     }
 
-    #refresh-solicitacoes {
+    #add-user-btn {
         width: 100%;
         justify-content: center;
     }
 
-    /* Ajustes na tabela para mobile */
-    #solicitacoes-table th,
-    #solicitacoes-table td {
-        padding: 12px 8px;
-        font-size: 13px;
+    #users-table th,
+    #users-table td {
+        padding: 10px 8px;
+        font-size: 12px;
     }
 
     /* Ocultar colunas menos importantes */
-    #solicitacoes-table th:nth-child(5),
-    #solicitacoes-table td:nth-child(5) {
-        display: none; /* Motivo */
+    #users-table th:nth-child(1),
+    #users-table td:nth-child(1) {
+        display: none;
     }
 
-    #solicitacoes-table th:nth-child(6),
-    #solicitacoes-table td:nth-child(6) {
-        display: none; /* Status - já visual pelo badge */
+    #users-table th:nth-child(6),
+    #users-table td:nth-child(6) {
+        display: none;
     }
 
-    /* Coluna Data fixa à esquerda */
-    #solicitacoes-table th:nth-child(1),
-    #solicitacoes-table td:nth-child(1) {
+    /* Coluna Nome fixa à esquerda */
+    #users-table th:nth-child(2),
+    #users-table td:nth-child(2) {
         position: sticky;
         left: 0;
         background: linear-gradient(145deg, #383838, #282828);
         z-index: 2;
-        min-width: 90px;
+        min-width: 120px;
         box-shadow: 2px 0 5px rgba(0,0,0,0.3);
     }
 
     /* Coluna Ações fixa à direita */
-    #solicitacoes-table th:nth-child(7),
-    #solicitacoes-table td:nth-child(7) {
+    #users-table th:nth-child(9),
+    #users-table td:nth-child(9) {
         position: sticky;
         right: 0;
         background: linear-gradient(145deg, #383838, #282828);
         z-index: 2;
-        min-width: 110px;
+        min-width: 100px;
         box-shadow: -2px 0 5px rgba(0,0,0,0.3);
     }
 
-    /* Larguras mínimas para outras colunas */
-    #solicitacoes-table th:nth-child(2),
-    #solicitacoes-table td:nth-child(2) {
-        min-width: 140px; /* Aluno */
-    }
-
-    #solicitacoes-table th:nth-child(3),
-    #solicitacoes-table td:nth-child(3) {
-        min-width: 120px; /* Curso */
-    }
-
-    #solicitacoes-table th:nth-child(4),
-    #solicitacoes-table td:nth-child(4) {
-        min-width: 100px; /* Aula */
-    }
-
-    /* Ações em coluna para melhor touch */
-    #solicitacoes-table .actions {
+    #users-table .actions {
         display: flex;
         flex-direction: column;
-        gap: 6px;
-        min-width: 100px;
-    }
-
-    #solicitacoes-table .actions .btn {
-        padding: 6px 10px;
-        font-size: 11px;
-        width: 100%;
-        justify-content: center;
-        min-height: 32px;
-    }
-
-    #solicitacoes-table .actions .btn i {
-        font-size: 10px;
-    }
-
-    /* Info do aluno mais compacta */
-    .aluno-info {
-        padding: 8px;
-        font-size: 12px;
-    }
-
-    .aluno-info strong {
-        font-size: 13px;
-        display: block;
-        margin-bottom: 3px;
-    }
-
-    .aluno-meta {
-        flex-direction: column;
-        gap: 4px;
-        font-size: 11px;
-    }
-
-    /* Status badges mais compactos */
-    #solicitacoes-table .status-badge {
-        padding: 4px 8px;
-        font-size: 11px;
-        min-width: 70px;
-        text-align: center;
-    }
-
-    /* Contador de solicitações */
-    #autorizacao .table-container > div:last-child {
-        padding: 12px;
-        font-size: 13px;
-    }
-}
-
-/* Ajustes para telas muito pequenas */
-@media (max-width: 480px) {
-    #solicitacoes-table {
-        min-width: 700px;
-    }
-
-    #solicitacoes-table th,
-    #solicitacoes-table td {
-        padding: 10px 6px;
-        font-size: 12px;
-    }
-
-    /* Ocultar mais colunas */
-    #solicitacoes-table th:nth-child(3),
-    #solicitacoes-table td:nth-child(3) {
-        min-width: 100px; /* Curso */
-    }
-
-    #solicitacoes-table th:nth-child(4),
-    #solicitacoes-table td:nth-child(4) {
-        min-width: 80px; /* Aula */
-    }
-
-    /* Ações mais compactas */
-    #solicitacoes-table .actions {
+        gap: 5px;
         min-width: 90px;
     }
 
-    #solicitacoes-table .actions .btn {
+    #users-table .actions .btn {
         padding: 5px 8px;
-        font-size: 10px;
-        min-height: 28px;
+        font-size: 11px;
+        width: 100%;
+        justify-content: center;
     }
 
-    /* Header mais compacto */
-    #autorizacao .table-header {
+    #users-table .btn-select {
+        padding: 3px 18px 3px 8px;
+        font-size: 10px;
+        min-width: 65px;
+        height: 22px;
+    }
+}    
+     @media (max-width: 768px) {
+    .curso-card {
+        padding: 15px;
+    }
+    
+    .curso-header {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .curso-header .actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+    
+    .curso-meta {
+        flex-wrap: wrap;
+        justify-content: space-around;
+    }
+    
+    .curso-stat {
+        min-width: 70px;
+    }
+    
+    .modulo-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .modulo-header {
+        width: 100%;
+        flex-wrap: wrap;
+    }
+    
+    .modulo-header > div {
+        width: 100%;
+    }
+    
+    .aulas-container {
+        padding-left: 8px;
+    }
+    
+    .aula-item {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .aula-item > div {
+        width: 100%;
+    }
+    
+    .aula-item .remove-aula {
+        align-self: flex-end;
+    }
+}
+
+/* Melhorias para modais em mobile */
+@media (max-width: 768px) {
+    .modal-content {
+        width: 95%;
+        max-height: 90vh;
+        margin: 10px;
+    }
+    
+    .modal-header {
+        padding: 15px;
+    }
+    
+    .modal-header h3 {
+        font-size: 1.2rem;
+    }
+    
+    .modal-body {
+        padding: 15px;
+        max-height: 60vh;
+    }
+    
+    .modal-footer {
+        padding: 15px;
+        flex-wrap: wrap;
+    }
+    
+    .modal-footer .btn {
+        flex: 1;
+        justify-content: center;
+    }
+    
+    #curso-modal .form-row,
+    #desafio-modal .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+    
+    #desafio-modal .pergunta-item {
         padding: 12px;
     }
-
-    #autorizacao .table-header h3 {
-        font-size: 16px;
+    
+    #desafio-modal .pergunta-item > div[style*="grid"] {
+        grid-template-columns: 1fr;
+        gap: 8px;
     }
-
-    /* Search box menor */
-    #autorizacao .search-box {
-        padding: 6px 12px;
+}
+     
+@media (max-width: 768px) {
+    html, body {
+        -webkit-tap-highlight-color: transparent;
+        scroll-behavior: smooth;
     }
-
-    #autorizacao .search-box input {
-        font-size: 13px;
+    
+    /* Aumentar área de toque para botões */
+    .btn, .tab, .modal-close, .generate-ra-btn {
+        min-height: 44px;
+        min-width: 44px;
     }
-
-    /* Botões mais compactos */
-    #autorizacao .table-header .btn {
-        padding: 8px 10px;
-        font-size: 11px;
+    
+    .btn-sm {
+        min-height: 36px;
     }
+    
+    /* Melhorias para selects em mobile */
+    select.form-control, .btn-select {
+        font-size: 16px; /* Previne zoom automático no iOS */
+    }
+    
+    /* Melhorias para inputs em mobile */
+    input, textarea, select {
+        font-size: 16px; /* Previne zoom automático no iOS */
+    }
+}
 
-    #aprovar-todas-btn {
-        padding: 10px;
+/* Melhorias para tabela de autorização/histórico */
+@media (max-width: 768px) {
+    #historico-table th:nth-child(5),
+    #historico-table td:nth-child(5) {
+        display: none; /* Expira */
+    }
+    
+    #historico-table th:nth-child(6),
+    #historico-table td:nth-child(6) {
+        display: none; /* Status */
+    }
+    
+    #historico-table th:nth-child(7),
+    #historico-table td:nth-child(7) {
+        display: none; /* Admin */
+    }
+    
+    .historico-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .historico-data, .historico-curso {
         font-size: 12px;
     }
 }
 
-/* Scrollbar personalizada para a tabela */
-.table-scroll-container::-webkit-scrollbar {
-    height: 6px;
-}
-
-.table-scroll-container::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 3px;
-}
-
-.table-scroll-container::-webkit-scrollbar-thumb {
-    background: #ffcf00;
-    border-radius: 3px;
-}
-
-.table-scroll-container::-webkit-scrollbar-thumb:hover {
-    background: #e6ba00;
-}
-
-/* Indicador visual de scroll para mobile */
-.scroll-hint-solicitacoes {
-    display: none;
-    position: absolute;
-    right: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: rgba(255, 207, 0, 0.9);
-    color: #000;
-    padding: 4px 8px;
-    border-radius: 12px;
-    font-size: 10px;
-    font-weight: bold;
-    animation: scrollHint 2s infinite;
-    pointer-events: none;
-    z-index: 10;
-}
-
-@keyframes scrollHint {
-    0%, 100% {
-        opacity: 0.7;
-        transform: translateY(-50%) translateX(0);
-    }
-    50% {
-        opacity: 1;
-        transform: translateY(-50%) translateX(-5px);
-    }
-}
-
+/* Melhorias para cards de aluno bloqueado */
 @media (max-width: 768px) {
-    .scroll-hint-solicitacoes {
-        display: block;
+    .aluno-bloqueado-card {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
     }
     
-    #solicitacoes-table-container {
-        position: relative;
+    .aluno-detalhes {
+        flex-direction: column;
+        gap: 8px;
+        align-items: center;
+    }
+    
+    .aluno-acoes {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .aluno-acoes .btn {
+        flex: 1;
+        justify-content: center;
     }
 }
 
-/* Estilo do botão Aprovar Todas */
-#aprovar-todas-btn {
-    background: linear-gradient(135deg, #4CAF50, #45a049);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    padding: 10px 20px;
-    font-size: 14px;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    cursor: pointer;
-    transition: all 0.3s ease;
+/* Melhorias para cards de estatísticas */
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    
+    .bloqueados-stats {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    
+    .stat-card {
+        padding: 12px;
+    }
+    
+    .stat-value {
+        font-size: 20px;
+    }
 }
 
-#aprovar-todas-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+/* Melhorias para botões de filtro */
+@media (max-width: 768px) {
+    .filter-buttons {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .filter-buttons .btn-sm {
+        flex: 1;
+        text-align: center;
+        justify-content: center;
+    }
+    
+    /* Botões de ação rápida na autorização */
+    #liberar-rapido, #liberar-proximas, #liberar-modulo {
+        width: 100%;
+        justify-content: center;
+        margin-bottom: 8px;
+    }
+    
+    .form-row .btn {
+        width: 100%;
+        justify-content: center;
+    }
 }
 
-#aprovar-todas-btn:active {
-    transform: translateY(0);
+/* Melhorias para paginação */
+@media (max-width: 768px) {
+    #pagina-anterior, #proxima-pagina {
+        padding: 8px 12px;
+    }
+    
+    #pagina-atual, #total-paginas {
+        font-size: 12px;
+    }
 }
 
-#aprovar-todas-btn:disabled {
-    background: #6c757d;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
+/* Melhorias para alerts */
+@media (max-width: 768px) {
+    .alert {
+        padding: 12px 15px;
+        font-size: 13px;
+        margin-bottom: 15px;
+    }
+    
+    .alert-close {
+        padding: 8px;
+    }
+}
+
+/* Melhorias para loading */
+@media (max-width: 768px) {
+    .spinner, .spinner-large {
+        width: 40px;
+        height: 40px;
+    }
+    
+    #loadingGlobal p {
+        font-size: 14px;
+    }
+}
+
+/* Correção de overflow em telas pequenas */
+@media (max-width: 768px) {
+    .container {
+        overflow-x: hidden;
+    }
+    
+    .table-container {
+        overflow-x: auto;
+    }
+    
+    /* Garantir que modais não causem scroll duplicado */
+    body.modal-open {
+        overflow: hidden;
+    }
+}
+
+/* Melhorias específicas para iPhone SE / telas muito pequenas */
+@media (max-width: 380px) {
+    .container {
+        padding: 15px 12px;
+    }
+    
+    h1 {
+        font-size: 20px;
+    }
+    
+    .logo-container {
+        width: 70px;
+        height: 70px;
+    }
+    
+    .logo-emoji {
+        font-size: 35px;
+        width: 60px;
+        height: 60px;
+    }
+    
+    .tab {
+        padding: 6px 10px;
+        font-size: 11px;
+        min-width: 60px;
+    }
+    
+    .card-value {
+        font-size: 1.2rem;
+    }
+    
+    .btn {
+        padding: 6px 10px;
+        font-size: 11px;
+    }
+    
+    .modal-header h3 {
+        font-size: 1rem;
+    }
+    
+    .modal-body {
+        padding: 12px;
+    }
+}
+     
+/* Melhorias para formulários em mobile */
+@media (max-width: 768px) {
+    .form-container {
+        padding: 20px;
+    }
+    
+    .form-container h3 {
+        font-size: 1.1rem;
+        margin-bottom: 15px;
+    }
+    
+    .form-control {
+        padding: 12px 15px;
+        font-size: 14px;
+    }
+    
+    .form-group label {
+        font-size: 13px;
+    }
+    
+    textarea.form-control {
+        min-height: 80px;
+    }
+}
+
+/* Melhorias para tabelas secundárias em mobile */
+@media (max-width: 768px) {
+    /* Tabela de vídeos */
+    #videos-table th:nth-child(5),
+    #videos-table td:nth-child(5) {
+        display: none;
+    }
+    
+    #videos-table th:nth-child(6),
+    #videos-table td:nth-child(6) {
+        display: none;
+    }
+    
+    /* Tabela de desafios */
+    #desafios-table th:nth-child(5),
+    #desafios-table td:nth-child(5) {
+        display: none;
+    }
+    
+    #desafios-table th:nth-child(7),
+    #desafios-table td:nth-child(7) {
+        display: none;
+    }
+    
+    #desafios-table .actions {
+        flex-direction: column;
+        min-width: 80px;
+    }
+    
+    #desafios-table .actions .btn {
+        width: 100%;
+        padding: 5px 8px;
+        font-size: 10px;
+    }
+    
+    /* Tabela de ranking */
+    #ranking-table th:nth-child(4),
+    #ranking-table td:nth-child(4) {
+        display: none;
+    }
+    
+    #full-ranking-table th:nth-child(4),
+    #full-ranking-table td:nth-child(4) {
+        display: none;
+    }
+}
+
+/* Melhorias para chat em mobile */
+@media (max-width: 768px) {
+    #chat .form-row {
+        flex-direction: column;
+    }
+    
+    #chat .form-group {
+        width: 100%;
+    }
+    
+    #chat-admin-message {
+        font-size: 14px;
+    }
+    
+    .chat-message {
+        padding: 12px;
+    }
+    
+    .chat-user-info {
+        flex-wrap: wrap;
+    }
+    
+    .chat-user-name {
+        font-size: 14px;
+    }
+    
+    .chat-user-ra {
+        font-size: 11px;
+        margin-left: 0;
+        display: block;
+        margin-top: 2px;
+    }
+    
+    .chat-user-course {
+        font-size: 10px;
+        margin-top: 2px;
+    }
+    
+    .chat-content {
+        font-size: 13px;
+    }
+    
+    .chat-timestamp {
+        font-size: 10px;
+    }
+    
+    .chat-actions {
+        opacity: 1;
+        flex-wrap: wrap;
+    }
+    
+    .chat-action-btn {
+        padding: 6px 12px;
+        font-size: 11px;
+    }
+    
+    #chat-controls {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+    }
+    
+    #chat-controls > div:first-child {
+        font-size: 11px;
+    }
+    
+    #chat-controls .btn {
+        padding: 6px 10px;
+        font-size: 11px;
+    }
+}
+
+/* Melhorias para telas muito pequenas (até 480px) */
+@media (max-width: 480px) {
+    .tabs {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+    
+    .tab {
+        padding: 8px 12px;
+        font-size: 12px;
+        flex: 1;
+        text-align: center;
+        min-width: 70px;
+    }
+    
+    .cards-container {
+        gap: 12px;
+    }
+    
+    .card {
+        padding: 15px;
+    }
+    
+    .card-value {
+        font-size: 1.4rem;
+    }
+    
+    .card-label {
+        font-size: 0.75rem;
+    }
+    
+    .card-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1.2rem;
+    }
 }
 </style>
 </head>
